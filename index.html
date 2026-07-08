@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png?v=2" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NexGen Solutions - Premium Laptops & Accessories</title>
+  </head>
+  <body>
+    <noscript>
+      <div style="padding: 40px; text-align: center; font-family: sans-serif; background-color: #1a1a2e; color: white; height: 100vh; display: flex; flex-direction: column; justify-content: center;">
+        <h2>JavaScript is Disabled</h2>
+        <p>We're sorry, but NexGen Solutions requires JavaScript to work properly. Please enable JavaScript in your browser settings to continue shopping.</p>
+      </div>
+    </noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      window.fbAsyncInit = function() {
+        if (window.FB) {
+          window.FB.init({
+            appId      : '%VITE_FACEBOOK_APP_ID%',
+            cookie     : true,
+            xfbml      : true,
+            version    : 'v19.0'
+          });
+          window.FB.AppEvents.logPageView();
+        }
+      };
+    
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "https://connect.facebook.net/en_US/sdk.js";
+         fjs.parentNode.insertBefore(js, fjs);
+       }(document, 'script', 'facebook-jssdk'));
+    </script>
+  </body>
+</html>

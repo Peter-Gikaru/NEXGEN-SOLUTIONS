@@ -1,0 +1,5 @@
+name,description,brand,price,compareAtPrice,stock,categoryName,imageUrls,specs
+"Premium 14-inch Sleeve","High quality leather sleeve","HP",2500,3000,50,"14 inch sleeves","https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=800","{}"
+"Rugged 16-inch Bag","Waterproof laptop bag","Targus",4500,,20,"16 inch bags","https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=800","{}"
+"Basic 14-inch Bag","Lightweight carrying bag","Generic",1500,2000,100,"14 inch bags","https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&q=80&w=800","{}"
+"Sleek 16-inch Sleeve","Minimalist design sleeve","Dell",2800,,35,"16 inch sleeves","https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=800","{}"

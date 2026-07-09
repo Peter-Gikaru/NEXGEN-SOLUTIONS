@@ -13,7 +13,7 @@ export const ShippingDetailsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 font-sans flex flex-col">
       <SEO 
-        title="Shipping & Delivery Details | NexGen Solutions"
+        title="Shipping & Delivery Details | NexGen Gadgets"
         description="Learn about our shipping and delivery timelines in Kenya. Fast, secure, and reliable delivery right to your doorstep."
         url="/shipping"
       />
@@ -77,7 +77,7 @@ export const ShippingDetailsPage: React.FC = () => {
                 We offer <strong>Free Delivery within Nairobi CBD</strong> for all laptop purchases. For accessories or deliveries outside the CBD and countrywide, standard courier rates apply based on the delivery location and the weight of the package.
               </p>
               <p className="mt-2">
-                All high-value items, including laptops, are fully insured during transit. In the rare event that your package is lost or damaged by the courier, NexGen Solutions assumes full responsibility and will dispatch a replacement immediately.
+                All high-value items, including laptops, are fully insured during transit. In the rare event that your package is lost or damaged by the courier, NexGen Gadgets assumes full responsibility and will dispatch a replacement immediately.
               </p>
             </section>
 

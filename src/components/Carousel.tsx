@@ -9,7 +9,7 @@ export const Carousel: React.FC = () => {
     {
       id: 1,
       bgGradient: 'from-[#1e3c72] to-[#2a5298]', 
-      title: 'NEXGEN SOLUTIONS',
+      title: 'NEXGEN GADGETS',
       subtitle: 'Gaming Laptop | ThinkPad | Core i7 | MacBook Pro | Laptop Bag | Wireless Mouse',
       tagline: 'Brand Showcase - Top Performance Gear',
       cta: 'Explore Collection'

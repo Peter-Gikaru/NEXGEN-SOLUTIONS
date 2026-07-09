@@ -1,6 +1,6 @@
-# NEXGEN SOLUTIONS
+# NEXGEN GADGETS
 
-NexGen Solutions is a premium e-commerce platform for high-performance laptops and accessories. It features a modern, responsive user interface built with React and Vite, supported by a secure Node.js backend using Express, Prisma, and SQLite. The application includes advanced authentication flows including Google Login, Facebook Login, and WebAuthn Passkeys.
+NexGen Gadgets is a premium e-commerce platform for high-performance laptops and accessories. It features a modern, responsive user interface built with React and Vite, supported by a secure Node.js backend using Express, Prisma, and SQLite. The application includes advanced authentication flows including Google Login, Facebook Login, and WebAuthn Passkeys.
 
 ## Prerequisites
 

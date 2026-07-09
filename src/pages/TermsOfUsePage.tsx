@@ -13,8 +13,8 @@ export const TermsOfUsePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 font-sans flex flex-col">
       <SEO 
-        title="Terms of Use | NexGen Solutions"
-        description="Read our terms and conditions. Rules, guidelines, and agreements for using the NexGen Solutions platform."
+        title="Terms of Use | NexGen Gadgets"
+        description="Read our terms and conditions. Rules, guidelines, and agreements for using the NexGen Gadgets platform."
         url="/terms"
       />
       <div className="max-w-4xl mx-auto w-full flex-1">
@@ -54,7 +54,7 @@ export const TermsOfUsePage: React.FC = () => {
                 1. Acceptance of Terms
               </h2>
               <p>
-                By accessing or using the NexGen Solutions Platform as a customer, you acknowledge & accept these Terms of Use.
+                By accessing or using the NexGen Gadgets Platform as a customer, you acknowledge & accept these Terms of Use.
               </p>
               <p className="font-bold text-indigo-800 bg-indigo-50 p-4 rounded-lg mt-4 border border-indigo-100">
                 Important: By submitting an order, you confirm all information provided is truthful, accurate, and complete. Fraudulent activity results in immediate ban and legal action.
@@ -66,7 +66,7 @@ export const TermsOfUsePage: React.FC = () => {
                 2. Definitions
               </h2>
               <ul className="list-disc pl-5 space-y-2">
-                <li><strong>Platform:</strong> The NexGen Solutions eCommerce application, including all subdomains, APIs, and related services.</li>
+                <li><strong>Platform:</strong> The NexGen Gadgets eCommerce application, including all subdomains, APIs, and related services.</li>
                 <li><strong>Order:</strong> The formal request submitted by a customer to purchase a product from our inventory.</li>
               </ul>
             </section>

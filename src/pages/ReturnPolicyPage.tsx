@@ -13,7 +13,7 @@ export const ReturnPolicyPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 font-sans flex flex-col">
       <SEO 
-        title="Return & Refund Policy | NexGen Solutions"
+        title="Return & Refund Policy | NexGen Gadgets"
         description="Read our return and refund policy. Clear, fair, and transparent guidelines for returns and refunds on laptops and accessories in Kenya."
         url="/returns"
       />
@@ -45,7 +45,7 @@ export const ReturnPolicyPage: React.FC = () => {
                 1. Standard Return Window
               </h2>
               <p>
-                At NexGen Solutions, we stand behind the quality of our products. If you are not entirely satisfied with your purchase, you may return the item within <strong>7 calendar days</strong> from the date of delivery. To be eligible for a full refund (excluding shipping costs), the item must be completely <strong>unused, sealed in its original packaging, and in the same condition that you received it</strong>.
+                At NexGen Gadgets, we stand behind the quality of our products. If you are not entirely satisfied with your purchase, you may return the item within <strong>7 calendar days</strong> from the date of delivery. To be eligible for a full refund (excluding shipping costs), the item must be completely <strong>unused, sealed in its original packaging, and in the same condition that you received it</strong>.
               </p>
             </section>
 

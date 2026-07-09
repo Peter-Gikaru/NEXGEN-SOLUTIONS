@@ -173,7 +173,7 @@ export const ProductListingPage: React.FC = () => {
   return (
     <div className="w-full flex flex-col min-h-screen bg-bg-gray">
       <SEO 
-        title={activeFilters.category ? `${activeFilters.category} Laptops in Kenya | NexGen Solutions` : "All Laptops & Accessories | NexGen Solutions"}
+        title={activeFilters.category ? `${activeFilters.category} Laptops in Kenya | NexGen Gadgets` : "All Laptops & Accessories | NexGen Gadgets"}
         description={activeFilters.category ? `Browse our collection of ${activeFilters.category} laptops. Top models, best prices in Kenya, and fast delivery.` : "Explore our wide range of premium laptops from top brands. Find the perfect device for gaming, work, or school."}
         url={activeFilters.category ? `/products?category=${activeFilters.category}` : "/products"}
         schema={breadcrumbSchema}

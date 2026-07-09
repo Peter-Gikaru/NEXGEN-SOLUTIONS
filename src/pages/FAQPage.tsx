@@ -64,7 +64,7 @@ export const FAQPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 font-sans flex flex-col">
       <SEO 
-        title="Frequently Asked Questions (FAQ) | NexGen Solutions"
+        title="Frequently Asked Questions (FAQ) | NexGen Gadgets"
         description="Find answers to the most common questions about our products, shipping, warranties, and store policies in Kenya."
         url="/faq"
         schema={[faqSchema, breadcrumbSchema]}

@@ -18,7 +18,7 @@ export const Footer: React.FC = () => {
       <div className="border-b border-slate-800 bg-slate-900/50 py-8">
         <div className="max-w-[1600px] mx-auto px-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <h3 className="text-[18px] font-semibold font-sans text-[#F59E0B] uppercase tracking-wider">New to NexGen Solutions?</h3>
+            <h3 className="text-[18px] font-semibold font-sans text-[#F59E0B] uppercase tracking-wider">New to NexGen Gadgets?</h3>
             <p className="text-[16px] text-gray-300 mt-1">Subscribe to our newsletter to get updates on our latest premium laptop deals!</p>
           </div>
           <form onSubmit={handleSubscribe} className="flex w-full md:w-auto max-w-md shrink-0 gap-2 font-sans">
@@ -51,7 +51,7 @@ export const Footer: React.FC = () => {
             <li><Link to="/faq" className="hover:text-[#F59E0B] transition-colors">Help Center & FAQs</Link></li>
             <li><Link to="/shipping" className="hover:text-[#F59E0B] transition-colors">Delivery Timelines</Link></li>
             <li><Link to="/returns" className="hover:text-[#F59E0B] transition-colors">Return Policy & Refunds</Link></li>
-            <li><Link to="/how-to-shop" className="hover:text-[#F59E0B] transition-colors">How to Shop on NexGen Solutions</Link></li>
+            <li><Link to="/how-to-shop" className="hover:text-[#F59E0B] transition-colors">How to Shop on NexGen Gadgets</Link></li>
             <li><Link to="/faq" className="hover:text-[#F59E0B] transition-colors">Report a Product / Dispute</Link></li>
           </ul>
         </div>
@@ -59,7 +59,7 @@ export const Footer: React.FC = () => {
         <div>
           <h4 className="text-[18px] font-semibold font-sans text-[#F59E0B] mb-4">Information</h4>
           <ul className="space-y-2.5 text-[16px] text-gray-300">
-              <li><a href="mailto:support@nexgensolutions.co.ke" className="hover:text-[#F59E0B] transition-colors flex items-center gap-2"><ArrowRight className="h-3 w-3" /> Contact Us</a></li>
+              <li><a href="mailto:support@nexgen-gadgets.com" className="hover:text-[#F59E0B] transition-colors flex items-center gap-2"><ArrowRight className="h-3 w-3" /> Contact Us</a></li>
               <li><Link to="/track" className="hover:text-[#F59E0B] transition-colors flex items-center gap-2"><ArrowRight className="h-3 w-3" /> Track Order</Link></li>
               <li><Link to="/faq" className="hover:text-[#F59E0B] transition-colors flex items-center gap-2"><ArrowRight className="h-3 w-3" /> FAQs</Link></li>
             <li><Link to="/terms" className="hover:text-[#F59E0B] transition-colors flex items-center gap-2"><ArrowRight className="h-3 w-3" /> Terms & Conditions</Link></li>
@@ -147,7 +147,7 @@ export const Footer: React.FC = () => {
           </div>
           {}
           <p className="text-[14px] text-gray-400">
-            © 2026 NexGen Solutions. All Rights Reserved.
+            © 2026 NexGen Gadgets. All Rights Reserved.
           </p>
         </div>
       </div>

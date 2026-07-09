@@ -13,8 +13,8 @@ export const PrivacyPolicyPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 font-sans flex flex-col">
       <SEO 
-        title="Privacy Policy | NexGen Solutions"
-        description="Learn how NexGen Solutions collects, uses, and protects your personal data when you use our platform."
+        title="Privacy Policy | NexGen Gadgets"
+        description="Learn how NexGen Gadgets collects, uses, and protects your personal data when you use our platform."
         url="/privacy"
       />
       <div className="max-w-4xl mx-auto w-full flex-1">
@@ -153,7 +153,7 @@ export const PrivacyPolicyPage: React.FC = () => {
               </ul>
               
               <h3 className="text-lg font-bold text-slate-800 mt-6 mb-2">7.2 Dispute Resolution</h3>
-              <p>In case of any complaints, kindly reach out to us through <strong>support@nexgensolutions.co.ke</strong>.</p>
+              <p>In case of any complaints, kindly reach out to us through <strong>support@nexgen-gadgets.com</strong>.</p>
             </section>
 
             <section>

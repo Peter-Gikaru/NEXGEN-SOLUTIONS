@@ -121,7 +121,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
     e.preventDefault();
     e.stopPropagation();
     const phoneNumber = "254717043408";
-    const message = `Hello NexGen Solutions, I am interested in ordering the ${title} which costs KES ${price.toLocaleString()}. Please assist me with the order process.`;
+    const message = `Hello NexGen Gadgets, I am interested in ordering the ${title} which costs KES ${price.toLocaleString()}. Please assist me with the order process.`;
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };

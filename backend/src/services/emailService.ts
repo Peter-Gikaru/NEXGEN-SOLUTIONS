@@ -11,9 +11,9 @@ const transporter = nodemailer.createTransport({
 const fromEmail = process.env.SMTP_FROM_EMAIL || 'noreply@nexgen.com';
 export const sendPasswordResetEmail = async (email: string, resetUrl: string) => {
   const mailOptions = {
-    from: `"NexGen Laptops" <${fromEmail}>`,
+    from: `"NexGen Gadgets" <${fromEmail}>`,
     to: email,
-    subject: 'Reset Your Password - NexGen Laptops',
+    subject: 'Reset Your Password - NexGen Gadgets',
     html: `
       <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto;">
         <h2 style="color: #333;">Password Reset Request</h2>
@@ -43,7 +43,7 @@ export const sendPasswordResetEmail = async (email: string, resetUrl: string) =>
 };
 export const sendOrderConfirmationEmail = async (email: string, orderDetails: any, trackingNumber: string) => {
   const mailOptions = {
-    from: `"NexGen Laptops" <${fromEmail}>`,
+    from: `"NexGen Gadgets" <${fromEmail}>`,
     to: email,
     subject: `Order Confirmation - #${orderDetails.id.substring(0, 8).toUpperCase()}`,
     html: `
@@ -86,9 +86,9 @@ export const sendTrackingRecoveryEmail = async (email: string, orders: any[]) =>
     </li>
   `).join('');
   const mailOptions = {
-    from: `"NexGen Laptops" <${fromEmail}>`,
+    from: `"NexGen Gadgets" <${fromEmail}>`,
     to: email,
-    subject: 'Your Tracking Details - NexGen Laptops',
+    subject: 'Your Tracking Details - NexGen Gadgets',
     html: `
       <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto;">
         <h2 style="color: #333;">Your Tracking Information</h2>
@@ -117,13 +117,13 @@ export const sendTrackingRecoveryEmail = async (email: string, orders: any[]) =>
 };
 export const sendWelcomeEmail = async (email: string, name: string) => {
   const mailOptions = {
-    from: `"NexGen Laptops" <${fromEmail}>`,
+    from: `"NexGen Gadgets" <${fromEmail}>`,
     to: email,
-    subject: 'Welcome to NexGen Laptops!',
+    subject: 'Welcome to NexGen Gadgets!',
     html: `
       <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto;">
         <h2 style="color: #333;">Welcome, ${name}!</h2>
-        <p>We are thrilled to have you join NexGen Laptops.</p>
+        <p>We are thrilled to have you join NexGen Gadgets.</p>
         <p>You can now save your addresses, track your orders easily, and enjoy faster checkout.</p>
         <p>Head over to your dashboard to complete your profile.</p>
         <div style="margin-top: 30px; font-size: 12px; color: #777;">
@@ -170,7 +170,7 @@ export const sendOrderStatusEmail = async (email: string, orderId: string, statu
       statusMessage = `status has been updated to: ${status}`;
   }
   const mailOptions = {
-    from: `"NexGen Laptops" <${fromEmail}>`,
+    from: `"NexGen Gadgets" <${fromEmail}>`,
     to: email,
     subject: `Order Update - #${orderId.substring(0, 8).toUpperCase()}`,
     html: `
@@ -203,7 +203,7 @@ export const sendPasswordChangedAlertEmail = async (email: string) => {
     html: `
       <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto;">
         <h2 style="color: #D97706;">Security Alert</h2>
-        <p>Your NexGen Laptops account password was recently changed.</p>
+        <p>Your NexGen Gadgets account password was recently changed.</p>
         <p>If you performed this action, you can safely ignore this email.</p>
         <p><strong>If you did NOT change your password</strong>, please contact support immediately to secure your account.</p>
       </div>

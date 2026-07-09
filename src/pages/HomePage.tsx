@@ -13,7 +13,7 @@ export const HomePage: React.FC = () => {
   const organizationSchema = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    'name': 'NexGen Solutions',
+    'name': 'NexGen Gadgets',
     'url': 'https://yourdomain.co.ke',
     'logo': 'https://yourdomain.co.ke/favicon.png',
     'description': 'Buy laptops in Kenya from top brands like HP, Dell, Lenovo, and Apple. Genuine products, best prices, fast delivery, and warranty included.',
@@ -29,9 +29,9 @@ export const HomePage: React.FC = () => {
   const websiteSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    'name': 'NexGen Solutions',
+    'name': 'NexGen Gadgets',
     'url': 'https://yourdomain.co.ke',
-    'description': 'Best Laptops in Kenya | NexGen Solutions',
+    'description': 'Best Laptops in Kenya | NexGen Gadgets',
     'potentialAction': {
       '@type': 'SearchAction',
       'target': 'https://yourdomain.co.ke/products?search={search_term_string}',
@@ -159,7 +159,7 @@ export const HomePage: React.FC = () => {
   return (
     <div className="w-full flex flex-col min-h-screen bg-bg-gray">
       <SEO 
-        title="Best Laptops in Kenya | NexGen Solutions"
+        title="Best Laptops in Kenya | NexGen Gadgets"
         description="Buy laptops in Kenya from top brands like HP, Dell, Lenovo, and Apple. Genuine products, best prices, fast delivery, and warranty included."
         url="/"
         schema={[organizationSchema, websiteSchema]}

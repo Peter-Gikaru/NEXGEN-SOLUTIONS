@@ -10,8 +10,8 @@ export const HowToShopPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4 font-sans flex flex-col">
       <SEO 
-        title="How to Shop | NexGen Solutions"
-        description="A step-by-step guide on how to place an order, make a payment, and receive your delivery on NexGen Solutions."
+        title="How to Shop | NexGen Gadgets"
+        description="A step-by-step guide on how to place an order, make a payment, and receive your delivery on NexGen Gadgets."
         url="/how-to-shop"
       />
       <div className="max-w-4xl mx-auto w-full flex-1">

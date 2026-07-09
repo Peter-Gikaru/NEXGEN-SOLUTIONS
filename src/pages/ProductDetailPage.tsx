@@ -198,7 +198,7 @@ export const ProductDetailPage: React.FC = () => {
     if (!product) return;
     const phoneNumber = "254717043408";
     const currentPrice = product.price + (selectedVariant?.priceOffset || 0);
-    const message = `Hello NexGen Solutions, I am interested in ordering the ${product.name} which costs KES ${currentPrice.toLocaleString()}. Please assist me with the order process.`;
+    const message = `Hello NexGen Gadgets, I am interested in ordering the ${product.name} which costs KES ${currentPrice.toLocaleString()}. Please assist me with the order process.`;
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -270,7 +270,7 @@ export const ProductDetailPage: React.FC = () => {
   if (!product) {
     return (
       <div className="flex-1 min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 font-sans">
-        <SEO title="Product Not Found | NexGen Solutions" description="The product you are looking for does not exist." />
+        <SEO title="Product Not Found | NexGen Gadgets" description="The product you are looking for does not exist." />
         <AlertTriangle className="h-16 w-16 text-amber-500 mb-4" />
         <h2 className="text-2xl font-bold text-[#1a1a2e] mb-2">Product Not Found</h2>
         <p className="text-gray-500 text-sm mb-6 max-w-sm text-center">We couldn't locate the system model you requested. It might have been sold out or catalog removed.</p>
@@ -563,7 +563,7 @@ export const ProductDetailPage: React.FC = () => {
               <div className="prose max-w-none text-gray-650 space-y-4">
                 <h3 className="text-lg font-bold text-[#1a1a2e] mb-2">Notebook Overview</h3>
                 <p>{product.description}</p>
-                <p>Every system ordered through NexGen Solutions undergoes hardware stress-testing and quality verification to ensure flawless performance out of the box.</p>
+                <p>Every system ordered through NexGen Gadgets undergoes hardware stress-testing and quality verification to ensure flawless performance out of the box.</p>
               </div>
             )}
 

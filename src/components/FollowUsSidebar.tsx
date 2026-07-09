@@ -3,7 +3,7 @@ export const FollowUsSidebar: React.FC = () => {
   const socialLinks = [
     {
       name: 'Facebook',
-      url: 'https://facebook.com/nexgensolutions',
+      url: 'https://facebook.com/nexgengadgets',
       bgColor: 'bg-[#1877F2]',
       icon: (
         <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">
@@ -13,7 +13,7 @@ export const FollowUsSidebar: React.FC = () => {
     },
     {
       name: 'Instagram',
-      url: 'https://instagram.com/nexgensolutions',
+      url: 'https://instagram.com/nexgengadgets',
       bgColor: 'bg-[#833AB4]', 
       icon: (
         <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -35,7 +35,7 @@ export const FollowUsSidebar: React.FC = () => {
     },
     {
       name: 'TikTok',
-      url: 'https://tiktok.com/@nexgensolutions',
+      url: 'https://tiktok.com/@nexgengadgets',
       bgColor: 'bg-[#000000]',
       icon: (
         <svg className="h-6 w-6 fill-current" viewBox="0 0 24 24">

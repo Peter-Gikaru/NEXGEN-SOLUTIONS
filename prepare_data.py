@@ -32,7 +32,7 @@ def extract_brand(name):
 def main():
     data_dir = Path(r"C:\Users\njoki\.gemini\antigravity\scratch\laptop-ecommerce-frontend\data")
     laptops_dir = data_dir / "NEX GEN LAPTOPS" / "NEX GEN LAPTOPS"
-    docx_path = data_dir / "NEXGEN SOLUTIONS PRICING LIST  1 u.docx"
+    docx_path = data_dir / "NEXGEN GADGETS PRICING LIST  1 u.docx"
     output_csv = Path(r"C:\Users\njoki\.gemini\antigravity\scratch\laptop-ecommerce-frontend\products_upload_v3.csv")
 
     products = []

@@ -148,7 +148,7 @@ export const Header: React.FC = () => {
               <Link to="/" className="hover:opacity-90 transition-opacity flex items-center gap-2" aria-label="NexGen Gadgets Home">
                 <img src="/favicon.png" alt="NexGen Logo" className="h-8 w-8 md:h-10 md:w-10 object-contain" />
                 <span className="font-sans text-2xl md:text-3xl font-semibold leading-none tracking-wide text-white">
-                  NexGen <span className="text-[#F59E0B]">Solutions</span>
+                  NexGen <span className="text-[#F59E0B]">Gadgets</span>
                 </span>
               </Link>
             </div>
@@ -570,7 +570,7 @@ export const Header: React.FC = () => {
                 <img src="/favicon.png" alt="NexGen Logo" className="h-8 w-8 object-contain" />
                 <div className="flex flex-col items-start">
                   <span className="font-sans text-[20px] font-semibold text-white">
-                    NexGen <span className="text-[#d97706]">Solutions</span>
+                    NexGen <span className="text-[#d97706]">Gadgets</span>
                   </span>
                   <span className="text-[10px] text-gray-300 uppercase tracking-wider">
                     Menu

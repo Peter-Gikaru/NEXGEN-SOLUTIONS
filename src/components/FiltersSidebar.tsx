@@ -34,7 +34,7 @@ const RecursiveCategoryFilter: React.FC<{
         <span 
           className="flex-1 truncate"
           onClick={() => {
-            onSelect(isSelected ? '' : node.slug); // toggle
+            onSelect(isSelected ? '' : node.slug);
           }}
         >
           {node.name}
@@ -79,7 +79,6 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
   onApplyFilters
 }) => {
   const { categories, loading } = useCategories();
-  // Some standard brands for filtering
   const brands = ['HP', 'Dell', 'Lenovo', 'Apple', 'ASUS', 'Acer', 'Samsung', 'MSI', 'Generic'];
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden sticky top-24">

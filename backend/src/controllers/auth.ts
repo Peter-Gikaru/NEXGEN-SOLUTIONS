@@ -419,7 +419,6 @@ export const facebookLogin = async (
     
     const { id: facebookId, name, email } = fbRes.data;
     
-    // Fallback if no email is provided by FB
     const userEmail = email || `${facebookId}@facebook.local`;
     
     let user = await prisma.user.findUnique({ where: { email: userEmail } });
@@ -465,7 +464,6 @@ export const facebookLogin = async (
   }
 };
 
-// WebAuthn 
 const getRPInfo = (req: Request) => {
   const rpOrigin = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:5173';
   const rpId = new URL(rpOrigin).hostname;
@@ -505,7 +503,6 @@ export const passkeyRegisterStart = async (
       },
     });
     
-    // Store challenge
     await prisma.webAuthnChallenge.create({
       data: {
         challenge: options.challenge,
@@ -602,9 +599,8 @@ export const passkeyLoginFinish = async (
   try {
     const body = req.body;
     
-    // Find challenge
     const challengeObj = await prisma.webAuthnChallenge.findFirst({
-      orderBy: { createdAt: 'desc' } // Note: In production we'd pass a session ID or challenge ID
+      orderBy: { createdAt: 'desc' }
     });
     
     if (!challengeObj) {
@@ -637,13 +633,11 @@ export const passkeyLoginFinish = async (
     });
     
     if (verification.verified && verification.authenticationInfo) {
-      // Update sign count
       await prisma.webAuthnCredential.update({
         where: { id: credential.id },
         data: { signCount: verification.authenticationInfo.newCounter }
       });
       
-      // Cleanup challenge
       await prisma.webAuthnChallenge.delete({ where: { id: challengeObj.id } });
       
       if (credential.user.status === 'SUSPENDED') {

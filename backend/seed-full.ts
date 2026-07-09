@@ -46,7 +46,7 @@ async function main() {
   await prisma.category.deleteMany({});
 
   console.log('Seeding original categories in recursive structure...');
-  const createdCategories: Record<string, string> = {}; // keep track of names -> ids
+  const createdCategories: Record<string, string> = {};
 
   for (const cat of categories) {
     const slug = cat.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');

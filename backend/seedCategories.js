@@ -38,7 +38,6 @@ const categories = [
 
 async function main() {
   console.log('Seeding categories...');
-  // Clear existing
   await prisma.subcategory.deleteMany({});
   await prisma.category.deleteMany({});
 

@@ -43,7 +43,6 @@ async function main() {
     },
   });
 
-  // 8 Main Categories
   const catAllInOnes = await prisma.category.create({ data: { name: 'All-in-Ones', slug: 'all-in-ones' } });
   const catDesktops = await prisma.category.create({ data: { name: 'Desktops', slug: 'desktops' } });
   const catPCAccessories = await prisma.category.create({ data: { name: 'PC Accessories', slug: 'pc-accessories' } });
@@ -53,8 +52,6 @@ async function main() {
   const catPrinters = await prisma.category.create({ data: { name: 'Printers', slug: 'printers' } });
   const catUPS = await prisma.category.create({ data: { name: 'UPS', slug: 'ups' } });
 
-  // Subcategories (now just categories with a parentId)
-  // Laptop Brand Subcategories
   const hpSub = await prisma.category.create({ data: { name: 'HP', slug: 'hp-laptops', parentId: catLaptops.id } });
   const dellSub = await prisma.category.create({ data: { name: 'Dell', slug: 'dell-laptops', parentId: catLaptops.id } });
   const lenovoSub = await prisma.category.create({ data: { name: 'Lenovo', slug: 'lenovo-laptops', parentId: catLaptops.id } });

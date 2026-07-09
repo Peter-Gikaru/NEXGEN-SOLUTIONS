@@ -13,7 +13,7 @@ import {
   Heart,
   Share2, 
   AlertTriangle,
-  Box,
+
   Truck,
   Search
 } from 'lucide-react';
@@ -96,7 +96,6 @@ export const ProductDetailPage: React.FC = () => {
         setSelectedVariant(data.variants[0]);
       }
 
-      // Add to recently viewed in local storage
       const storageKey = user ? `recentlyViewed_${user.id}` : 'recentlyViewed_guest';
       const rvStr = localStorage.getItem(storageKey) || '[]';
       let rvArr = JSON.parse(rvStr);
@@ -111,10 +110,8 @@ export const ProductDetailPage: React.FC = () => {
       if (rvArr.length > 5) rvArr.pop();
       localStorage.setItem(storageKey, JSON.stringify(rvArr));
 
-      // Load recently viewed (excluding current)
       setRecentlyViewed(rvArr.filter((p: any) => p.id !== data.id));
 
-      // Fetch related products
       const relatedRes = await api.get(`/products/${data.id}/related`);
       setRelatedProducts(relatedRes.data);
 

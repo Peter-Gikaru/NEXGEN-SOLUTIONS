@@ -27,7 +27,7 @@ model User {
   resetPasswordExpires DateTime?
   googleId            String?    @unique
   facebookId          String?    @unique
-  defaultAddress      String?    // Stored as JSON string
+  defaultAddress      String?
   addresses           Address[]
   cart                Cart?
   orders              Order[]

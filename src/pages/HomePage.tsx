@@ -101,7 +101,6 @@ export const HomePage: React.FC = () => {
   const filteredProducts = useMemo(() => {
     let result = [...products];
     const searchQuery = searchParams.get('search') || '';
-    // Search query filter
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -111,22 +110,18 @@ export const HomePage: React.FC = () => {
           p.description.toLowerCase().includes(q)
       );
     }
-    // Category filter
     if (selectedCategory) {
       result = result.filter((p) => p.category === selectedCategory);
     }
-    // Brand filter
     if (selectedBrands.length > 0) {
       result = result.filter((p) => selectedBrands.includes(p.brand));
     }
-    // Price range filters
     if (minPrice) {
       result = result.filter((p) => p.price >= parseFloat(minPrice));
     }
     if (maxPrice) {
       result = result.filter((p) => p.price <= parseFloat(maxPrice));
     }
-    // Sorting
     if (sortBy === 'price-asc') {
       result.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-desc') {

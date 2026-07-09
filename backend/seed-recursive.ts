@@ -23,49 +23,40 @@ async function main() {
 
   console.log('Seeding recursive categories...');
   
-  // 1. Laptops
   const laptops = await prisma.category.create({
     data: { name: 'Laptops', slug: 'laptops' }
   });
 
-  // 2. Laptop Bags & Sleeves (Child of Laptops)
   const bagsAndSleeves = await prisma.category.create({
     data: { name: 'Laptop Bags & Sleeves', slug: 'laptop-bags-and-sleeves', parentId: laptops.id }
   });
 
-  // 3a. Sleeves (Child of Bags & Sleeves)
   const sleeves = await prisma.category.create({
     data: { name: 'Sleeves', slug: 'sleeves', parentId: bagsAndSleeves.id }
   });
 
-  // 4a. 14 inch sleeves
   await prisma.category.create({
     data: { name: '14 inch sleeves', slug: '14-inch-sleeves', parentId: sleeves.id }
   });
 
-  // 4b. 16 inch sleeves
   await prisma.category.create({
     data: { name: '16 inch sleeves', slug: '16-inch-sleeves', parentId: sleeves.id }
   });
 
-  // 3b. Bags (Child of Bags & Sleeves)
   const bags = await prisma.category.create({
     data: { name: 'Bags', slug: 'bags', parentId: bagsAndSleeves.id }
   });
 
-  // 4c. 14 inch bags
   await prisma.category.create({
     data: { name: '14 inch bags', slug: '14-inch-bags', parentId: bags.id }
   });
 
-  // 4d. 16 inch bags
   await prisma.category.create({
     data: { name: '16 inch bags', slug: '16-inch-bags', parentId: bags.id }
   });
 
   console.log('Categories seeded successfully!');
 
-  // Generate CSV File
   console.log('Generating test CSV file...');
   const csvContent = `name,description,brand,price,compareAtPrice,stock,categoryName,imageUrls,specs
 "Premium 14-inch Sleeve","High quality leather sleeve","HP",2500,3000,50,"14 inch sleeves","https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&q=80&w=800","{}"

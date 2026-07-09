@@ -19,7 +19,6 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 router.post('/force-change-password', authenticateJWT, forceChangePassword);
 
-// WebAuthn Routes
 router.post('/passkey/register/start', authenticateJWT, passkeyRegisterStart);
 router.post('/passkey/register/finish', authenticateJWT, passkeyRegisterFinish);
 router.post('/passkey/login/start', authLimiter, passkeyLoginStart);

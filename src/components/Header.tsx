@@ -37,7 +37,6 @@ export const Header: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [didYouMean, setDidYouMean] = useState<string | null>(null);
   const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
-  // Mini-carousel states for Support info (Order Now vs Free Delivery)
   const [topBarIndex, setTopBarIndex] = useState(0);
   const [topBarFade, setTopBarFade] = useState(true);
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);

@@ -6,6 +6,7 @@ interface User {
   email: string;
   role: string;
   requiresPasswordChange?: boolean;
+  defaultAddress?: string | null;
 }
 interface AuthContextType {
   user: User | null;

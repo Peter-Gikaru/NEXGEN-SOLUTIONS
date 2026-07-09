@@ -111,16 +111,8 @@ export const ProductListingPage: React.FC = () => {
     }, 400);
     return () => clearTimeout(timer);
   };
-  // Filter & Sort Logic
   const processedProducts = useMemo(() => {
     let result = [...products];
-    // Search Query Filter
-    // (Removed redundant frontend search query filter; handled by backend)
-    // Category Filter
-    // (Removed redundant frontend category filter; handled by backend)
-    // Brand Filter
-    // (Removed redundant frontend brand filter; handled by backend)
-    // Price Filter
     if (activeFilters.minPrice) {
       const min = parseFloat(activeFilters.minPrice);
       result = result.filter((p) => p.price >= min);
@@ -129,12 +121,10 @@ export const ProductListingPage: React.FC = () => {
       const max = parseFloat(activeFilters.maxPrice);
       result = result.filter((p) => p.price <= max);
     }
-    // Rating Filter
     if (activeFilters.rating) {
       const ratingMin = parseFloat(activeFilters.rating);
       result = result.filter((p) => p.rating >= ratingMin);
     }
-    // Availability Filter
     if (activeFilters.inStockOnly) {
       result = result.filter((p) => p.stockStatus !== 'out_of_stock');
     }

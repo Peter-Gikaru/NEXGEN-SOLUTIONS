@@ -6,7 +6,7 @@ import { AuthenticatedRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { OAuth2Client } from 'google-auth-library';
 import crypto from 'crypto';
-import { sendPasswordResetEmail } from '../services/emailService';
+import { sendPasswordResetEmail, sendWelcomeEmail, sendPasswordChangedAlertEmail } from '../services/emailService';
 import axios from 'axios';
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
 
@@ -55,6 +55,7 @@ export const register = async (
         createdAt: true,
       },
     });
+    sendWelcomeEmail(email, name).catch(console.error);
     const token = generateToken(user);
     res.cookie('token', token, {
       httpOnly: true,
@@ -279,6 +280,7 @@ export const googleLogin = async (
           cart: { create: {} },
         },
       });
+      sendWelcomeEmail(email, name || 'Google User').catch(console.error);
     } else if (!user.googleId) {
       user = await prisma.user.update({
         where: { id: user.id },
@@ -362,6 +364,7 @@ export const resetPassword = async (
         lockedUntil: null
       }
     });
+    sendPasswordChangedAlertEmail(user.email).catch(console.error);
     return res.json({ message: 'Password reset successful. You can now log in.' });
   } catch (error) {
     return next(error);
@@ -391,6 +394,7 @@ export const forceChangePassword = async (
         requiresPasswordChange: false
       }
     });
+    sendPasswordChangedAlertEmail(user.email).catch(console.error);
     return res.json({ message: 'Password updated successfully' });
   } catch (error) {
     return next(error);
@@ -429,6 +433,7 @@ export const facebookLogin = async (
           cart: { create: {} },
         },
       });
+      sendWelcomeEmail(userEmail, name || 'Facebook User').catch(console.error);
     } else if (!user.facebookId) {
       user = await prisma.user.update({
         where: { id: user.id },

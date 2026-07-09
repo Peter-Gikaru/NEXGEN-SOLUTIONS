@@ -115,3 +115,110 @@ export const sendTrackingRecoveryEmail = async (email: string, orders: any[]) =>
     console.error('Error sending tracking recovery email:', error);
   }
 };
+export const sendWelcomeEmail = async (email: string, name: string) => {
+  const mailOptions = {
+    from: `"NexGen Laptops" <${fromEmail}>`,
+    to: email,
+    subject: 'Welcome to NexGen Laptops!',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">Welcome, ${name}!</h2>
+        <p>We are thrilled to have you join NexGen Laptops.</p>
+        <p>You can now save your addresses, track your orders easily, and enjoy faster checkout.</p>
+        <p>Head over to your dashboard to complete your profile.</p>
+        <div style="margin-top: 30px; font-size: 12px; color: #777;">
+          <p>If you have any questions, reply to this email. We're here to help.</p>
+        </div>
+      </div>
+    `,
+  };
+  try {
+    if (process.env.SMTP_USER && process.env.SMTP_USER !== 'mock_user') {
+      await transporter.sendMail(mailOptions);
+      console.log(`Welcome email sent to ${email}`);
+    } else {
+      console.log('--- MOCK EMAIL INTERCEPTED ---');
+      console.log(`To: ${email}`);
+      console.log(`Subject: Welcome to NexGen`);
+    }
+  } catch (error) {
+    console.error('Error sending welcome email:', error);
+  }
+};
+export const sendOrderStatusEmail = async (email: string, orderId: string, status: string, name: string) => {
+  let statusMessage = '';
+  switch (status) {
+    case 'CONFIRMED':
+      statusMessage = 'has been confirmed and is currently processing.';
+      break;
+    case 'SHIPPED':
+      statusMessage = 'has been shipped and is on its way to you!';
+      break;
+    case 'DELIVERED':
+      statusMessage = 'has been delivered. We hope you enjoy your new laptop!';
+      break;
+    case 'CANCELLED':
+      statusMessage = 'has been cancelled. If you have been charged, a refund will be processed shortly.';
+      break;
+    case 'RETURN_REQUESTED':
+      statusMessage = 'has a return request pending. Our team will review it and get back to you.';
+      break;
+    case 'RETURNED':
+      statusMessage = 'has been successfully returned and processed.';
+      break;
+    default:
+      statusMessage = `status has been updated to: ${status}`;
+  }
+  const mailOptions = {
+    from: `"NexGen Laptops" <${fromEmail}>`,
+    to: email,
+    subject: `Order Update - #${orderId.substring(0, 8).toUpperCase()}`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto;">
+        <h2 style="color: #333;">Hello ${name},</h2>
+        <p>This is an update regarding your recent order (#${orderId.substring(0, 8).toUpperCase()}).</p>
+        <p style="font-size: 16px; margin: 20px 0;">Your order <strong>${statusMessage}</strong></p>
+        <p>You can check the full details on our Track Order page.</p>
+      </div>
+    `,
+  };
+  try {
+    if (process.env.SMTP_USER && process.env.SMTP_USER !== 'mock_user') {
+      await transporter.sendMail(mailOptions);
+      console.log(`Order status email sent to ${email}`);
+    } else {
+      console.log('--- MOCK EMAIL INTERCEPTED ---');
+      console.log(`To: ${email}`);
+      console.log(`Subject: Order Update (${status})`);
+    }
+  } catch (error) {
+    console.error('Error sending order status email:', error);
+  }
+};
+export const sendPasswordChangedAlertEmail = async (email: string) => {
+  const mailOptions = {
+    from: `"NexGen Security" <${fromEmail}>`,
+    to: email,
+    subject: 'Security Alert: Password Changed',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto;">
+        <h2 style="color: #D97706;">Security Alert</h2>
+        <p>Your NexGen Laptops account password was recently changed.</p>
+        <p>If you performed this action, you can safely ignore this email.</p>
+        <p><strong>If you did NOT change your password</strong>, please contact support immediately to secure your account.</p>
+      </div>
+    `,
+  };
+  try {
+    if (process.env.SMTP_USER && process.env.SMTP_USER !== 'mock_user') {
+      await transporter.sendMail(mailOptions);
+      console.log(`Password changed alert email sent to ${email}`);
+    } else {
+      console.log('--- MOCK EMAIL INTERCEPTED ---');
+      console.log(`To: ${email}`);
+      console.log(`Subject: Password Changed`);
+    }
+  } catch (error) {
+    console.error('Error sending password alert email:', error);
+  }
+};

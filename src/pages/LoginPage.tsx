@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Lock, Mail, ArrowRight, Eye, EyeOff, AlertCircle, Key } from 'lucide-react';
+import { Key, Eye, EyeOff, ArrowRight, ArrowLeft, AlertCircle, Lock, Mail } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import api from '../services/api';
 import { GoogleLogin } from '@react-oauth/google';
 import { startAuthentication } from '@simplewebauthn/browser';
+
+const isGoogleEnabled = import.meta.env.VITE_GOOGLE_CLIENT_ID && import.meta.env.VITE_GOOGLE_CLIENT_ID !== 'your_google_client_id.apps.googleusercontent.com';
 
 export const LoginPage: React.FC = () => {
   const { login, googleLogin, facebookLogin, passkeyLoginAction } = useAuth();
@@ -118,7 +120,17 @@ export const LoginPage: React.FC = () => {
   };
 
   const handlePasskeyLogin = async () => {
+    if (!email) {
+      toast.error('Please enter your email first to use a passkey.');
+      return;
+    }
     try {
+      const checkResp = await api.get(`/auth/passkey/check?email=${encodeURIComponent(email)}`);
+      if (!checkResp.data.hasPasskey) {
+        toast.error('No passkey registered for this email. Please log in with your password.');
+        return;
+      }
+      
       const resp = await api.post('/auth/passkey/login/start');
       const options = resp.data;
       
@@ -147,14 +159,18 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex items-center justify-center px-4 py-16 bg-slate-900 text-white min-h-[80vh]">
-      <Toaster position="top-center" />
-      <div className="w-full max-w-md bg-slate-800/50 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
+    <>
+        <div className="mb-6 flex justify-center">
+          <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-[#F59E0B] transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100 hover:shadow">
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </Link>
+        </div>
         <div className="text-center mb-8">
-          <h2 className="font-sans text-3xl font-bold tracking-tight">
+          <h2 className="font-sans text-3xl font-extrabold tracking-tight text-slate-900">
             Welcome <span className="text-[#F59E0B]">Back</span>
           </h2>
-          <p className="text-slate-400 text-sm mt-2">
+          <p className="text-slate-500 text-sm mt-2 font-medium">
             Access your secure portal and manage your orders
           </p>
         </div>
@@ -163,11 +179,11 @@ export const LoginPage: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-slate-300 text-sm font-semibold mb-2" htmlFor="email">
+            <label className="block text-slate-700 text-sm font-bold mb-2" htmlFor="email">
               Email Address
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
+              <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
               <input
                 id="email"
                 type="email"
@@ -175,22 +191,22 @@ export const LoginPage: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full bg-slate-950/55 border border-slate-700 rounded-lg pl-11 pr-4 py-3 text-sm focus:outline-none focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B] transition-all placeholder-slate-600 text-white"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:bg-white focus:border-[#F59E0B] focus:ring-2 focus:ring-[#F59E0B]/20 transition-all placeholder-slate-400 text-slate-900 font-medium"
               />
             </div>
           </div>
 
           <div>
             <div className="flex justify-between items-center mb-2">
-              <label className="block text-slate-300 text-sm font-semibold" htmlFor="password">
+              <label className="block text-slate-700 text-sm font-bold" htmlFor="password">
                 Password
               </label>
-              <Link to="/forgot-password" className="text-xs text-[#F59E0B] hover:underline font-medium">
+              <Link to="/forgot-password" className="text-xs text-[#F59E0B] hover:underline font-bold">
                 Forgot password?
               </Link>
             </div>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
+              <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
@@ -198,12 +214,12 @@ export const LoginPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-slate-950/55 border border-slate-700 rounded-lg pl-11 pr-12 py-3 text-sm focus:outline-none focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B] transition-all placeholder-slate-600 text-white"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-12 py-3.5 text-sm focus:outline-none focus:bg-white focus:border-[#F59E0B] focus:ring-2 focus:ring-[#F59E0B]/20 transition-all placeholder-slate-400 text-slate-900 font-medium"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-3.5 text-slate-500 hover:text-white"
+                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 transition-colors"
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
@@ -213,35 +229,37 @@ export const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-[#F59E0B] text-slate-950 font-bold py-3.5 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-amber-500 transition-colors disabled:opacity-50 cursor-pointer shadow-lg shadow-amber-950/20"
+            className="w-full bg-[#F59E0B] text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-amber-600 transition-colors disabled:opacity-50 cursor-pointer shadow-lg shadow-amber-500/30"
           >
             <span>{isSubmitting ? 'Verifying Account...' : 'Secure Sign In'}</span>
             {!isSubmitting && <ArrowRight className="h-5 w-5" />}
           </button>
         </form>
 
-        <div className="mt-6">
+        <div className="mt-8">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-slate-700/50"></div>
+              <div className="w-full border-t border-slate-200"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-slate-800 text-slate-400">Or continue with</span>
+              <span className="px-3 bg-white text-slate-400 font-medium">Or continue with</span>
             </div>
           </div>
 
           <div className="mt-6 flex flex-col items-center gap-3">
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => toast.error('Google Login Failed')}
-              theme="filled_black"
-              shape="rectangular"
-              text="signin_with"
-            />
+            {isGoogleEnabled && (
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => toast.error('Google Login Failed')}
+                theme="outline"
+                shape="rectangular"
+                text="signin_with"
+              />
+            )}
             
             <button
               onClick={handleFacebookLogin}
-              className="w-[200px] bg-[#1877F2] text-white font-bold py-2 px-4 rounded-md flex items-center justify-center gap-2 hover:bg-[#166FE5] transition-colors shadow-sm h-[40px] text-sm"
+              className="w-full max-w-[280px] bg-[#1877F2] text-white font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-[#166FE5] transition-colors shadow-sm text-sm"
             >
               <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path
@@ -255,24 +273,22 @@ export const LoginPage: React.FC = () => {
             
             <button
               onClick={handlePasskeyLogin}
-              className="w-[200px] bg-slate-700 text-white font-bold py-2 px-4 rounded-md flex items-center justify-center gap-2 hover:bg-slate-600 transition-colors shadow-sm h-[40px] text-sm border border-slate-600"
+              className="w-full max-w-[280px] bg-slate-50 text-slate-700 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-100 transition-colors shadow-sm text-sm border border-slate-200"
             >
-              <Key className="h-5 w-5 text-[#F59E0B]" />
+              <Key className="h-5 w-5 text-slate-500" />
               <span>Continue with Passkey</span>
             </button>
           </div>
         </div>
 
-        <div className="mt-8 text-center border-t border-slate-700/50 pt-6">
-          <p className="text-slate-400 text-sm">
+        <div className="mt-8 text-center pt-6">
+          <p className="text-slate-500 text-sm font-medium">
             Don't have an account?{' '}
-            <Link to="/register" className="text-[#F59E0B] hover:underline font-semibold">
+            <Link to="/register" className="text-[#F59E0B] hover:text-amber-600 hover:underline font-bold transition-colors">
               Create secure account
             </Link>
           </p>
         </div>
-      </div>
-
       {isRestoreModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-xl max-w-md w-full p-6 text-white">
@@ -302,7 +318,7 @@ export const LoginPage: React.FC = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 export default LoginPage;

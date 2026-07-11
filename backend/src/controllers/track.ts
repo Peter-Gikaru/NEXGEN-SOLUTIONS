@@ -21,6 +21,9 @@ export const trackOrder = async (
             product: true,
           },
         },
+        trackingEvents: {
+          orderBy: { createdAt: 'asc' }
+        }
       },
     });
     if (!order) {
@@ -31,21 +34,19 @@ export const trackOrder = async (
       authorized = true;
     } else {
       try {
-        const shippingData = JSON.parse(order.shippingAddress);
-        if (shippingData.guestEmail && shippingData.guestEmail.toLowerCase() === (email as string).toLowerCase()) {
+        let shippingData: any = order.shippingAddress;
+        if (typeof shippingData === 'string') shippingData = JSON.parse(shippingData);
+        if (shippingData && shippingData.guestEmail && shippingData.guestEmail.toLowerCase() === (email as string).toLowerCase()) {
           authorized = true;
         }
-      } catch (e) {
-      }
+      } catch (e) {}
     }
     if (!authorized) {
       return res.status(403).json({ message: 'Email does not match the order' });
     }
-    let shippingParsed = {};
-    try {
-      shippingParsed = JSON.parse(order.shippingAddress);
-    } catch (e) {
-      shippingParsed = {};
+    let shippingParsed: any = order.shippingAddress;
+    if (typeof shippingParsed === 'string') {
+      try { shippingParsed = JSON.parse(shippingParsed); } catch(e) {}
     }
     const sanitizedOrder = {
       id: order.id,
@@ -66,7 +67,8 @@ export const trackOrder = async (
           imageUrls: item.product.imageUrls,
           brand: item.product.brand
         }
-      }))
+      })),
+      trackingEvents: order.trackingEvents
     };
     return res.json(sanitizedOrder);
   } catch (error) {

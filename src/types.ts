@@ -16,4 +16,24 @@ export interface Product {
   description: string;
   variant?: string;
   variants?: { id: string; name: string; priceOffset: number; stock: number }[];
+  specs?: {
+    condition?: string;
+    warranty?: string;
+    whatsInBox?: string[];
+    [key: string]: any;
+  };
+}
+
+export interface FilterState {
+  category: string;
+  brand: string[];
+  minPrice: string;
+  maxPrice: string;
+  rating: string;
+  inStockOnly: boolean;
+  cpu: string[];
+  ram: string[];
+  storage: string[];
+  condition: string[];
+  generation: string[];
 }

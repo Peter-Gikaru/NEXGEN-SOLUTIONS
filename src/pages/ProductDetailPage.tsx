@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useCompare } from '../context/CompareContext';
 import api from '../services/api';
 import { 
   Star,
@@ -13,7 +14,7 @@ import {
   Heart,
   Share2, 
   AlertTriangle,
-
+  Scale,
   Truck,
   Search
 } from 'lucide-react';
@@ -62,6 +63,7 @@ export const ProductDetailPage: React.FC = () => {
   const location = useLocation();
   const { addToCart, addToast } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { addToCompare, removeFromCompare, isInCompare } = useCompare();
   const { isAuthenticated, user } = useAuth();
 
   const [product, setProduct] = useState<ProductDetails | null>(null);
@@ -73,6 +75,9 @@ export const ProductDetailPage: React.FC = () => {
 
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
+
+  const [shippingZones, setShippingZones] = useState<any[]>([]);
+  const [selectedZoneId, setSelectedZoneId] = useState('');
 
   const [newReview, setNewReview] = useState({
     rating: 5,
@@ -96,21 +101,34 @@ export const ProductDetailPage: React.FC = () => {
         setSelectedVariant(data.variants[0]);
       }
 
-      const storageKey = user ? `recentlyViewed_${user.id}` : 'recentlyViewed_guest';
-      const rvStr = localStorage.getItem(storageKey) || '[]';
-      let rvArr = JSON.parse(rvStr);
-      rvArr = rvArr.filter((p: any) => p.id !== data.id);
-      rvArr.unshift({
-        id: data.id,
-        name: data.name,
-        slug: data.slug,
-        price: data.price,
-        image: data.imageUrls?.[0] || ''
-      });
-      if (rvArr.length > 5) rvArr.pop();
-      localStorage.setItem(storageKey, JSON.stringify(rvArr));
+      // Check if functional cookies are allowed
+      const consentStr = localStorage.getItem('nexgen_cookie_consent');
+      let functionalAllowed = true;
+      if (consentStr) {
+        try {
+          const consent = JSON.parse(consentStr);
+          if (consent.functional === false) functionalAllowed = false;
+        } catch(e) {}
+      }
 
-      setRecentlyViewed(rvArr.filter((p: any) => p.id !== data.id));
+      if (functionalAllowed) {
+        const storageKey = user ? `recentlyViewed_${user.id}` : 'recentlyViewed_guest';
+        const rvStr = localStorage.getItem(storageKey) || '[]';
+        let rvArr = JSON.parse(rvStr);
+        rvArr = rvArr.filter((p: any) => p.id !== data.id);
+        rvArr.unshift({
+          id: data.id,
+          name: data.name,
+          slug: data.slug,
+          price: data.price,
+          image: data.imageUrls?.[0] || ''
+        });
+        if (rvArr.length > 5) rvArr.pop();
+        localStorage.setItem(storageKey, JSON.stringify(rvArr));
+        setRecentlyViewed(rvArr.filter((p: any) => p.id !== data.id));
+      } else {
+        setRecentlyViewed([]);
+      }
 
       const relatedRes = await api.get(`/products/${data.id}/related`);
       setRelatedProducts(relatedRes.data);
@@ -125,6 +143,13 @@ export const ProductDetailPage: React.FC = () => {
         } catch (e) {
           console.error('Failed to check review status', e);
         }
+      }
+
+      try {
+        const zoneRes = await api.get('/shipping/zones');
+        setShippingZones(zoneRes.data);
+      } catch (e) {
+        console.error('Failed to fetch shipping zones', e);
       }
 
     } catch (err) {
@@ -211,6 +236,32 @@ export const ProductDetailPage: React.FC = () => {
       imageUrls: JSON.stringify(product.imageUrls),
       stock: product.stock
     });
+  };
+
+  const handleToggleCompare = () => {
+    if (!product) return;
+    if (isInCompare(product.id)) {
+      removeFromCompare(product.id);
+    } else {
+      addToCompare({
+        id: product.id,
+        slug: product.slug,
+        title: product.name,
+        price: product.price,
+        originalPrice: product.compareAtPrice || product.price,
+        image: product.imageUrls[0] || '',
+        rating: product.rating,
+        reviewCount: product.reviews.length,
+        discount: product.compareAtPrice ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100) : 0,
+        stockStatus: 'in_stock',
+        stockCount: product.stock,
+        isVerified: true,
+        brand: product.brand,
+        category: 'Laptops',
+        description: product.description,
+        specs: product.specs
+      });
+    }
   };
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
@@ -374,9 +425,25 @@ export const ProductDetailPage: React.FC = () => {
 
           <div className="flex flex-col text-left gap-4">
             <div className="space-y-2">
-              <span className="bg-slate-100 border border-slate-200 text-slate-700 text-xs px-2.5 py-1 rounded-md font-bold uppercase select-none">
-                {product.brand}
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="bg-slate-100 border border-slate-200 text-slate-700 text-xs px-2.5 py-1 rounded-md font-bold uppercase select-none">
+                  {product.brand}
+                </span>
+                {product.specs?.condition && (
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-md shadow-sm select-none uppercase ${
+                    String(product.specs.condition).toLowerCase() === 'new' ? 'bg-emerald-500 text-white' : 
+                    String(product.specs.condition).toLowerCase() === 'refurbished' ? 'bg-[#1a1a2e] text-white' : 
+                    'bg-[#F59E0B] text-white'
+                  }`}>
+                    {String(product.specs.condition)}
+                  </span>
+                )}
+                {product.specs?.warranty && (
+                  <span className="bg-blue-50 border border-blue-100 text-blue-700 text-xs px-2.5 py-1 rounded-md font-bold select-none flex items-center gap-1">
+                    <ShieldCheck className="h-3.5 w-3.5" /> {String(product.specs.warranty)} Warranty
+                  </span>
+                )}
+              </div>
               <h1 className="text-2xl md:text-3xl font-bold text-[#1a1a2e] leading-snug">{product.name}</h1>
             </div>
 
@@ -436,6 +503,44 @@ export const ProductDetailPage: React.FC = () => {
                 <span className="bg-emerald-50 text-accent border border-emerald-100 px-2.5 py-0.5 rounded text-xs font-bold">In Stock</span>
               </div>
 
+              <div className="bg-slate-50 border border-gray-200 rounded-xl p-4 mt-2">
+                <h4 className="font-bold text-[#1a1a2e] text-sm mb-3 flex items-center gap-2">
+                  <Truck className="w-4 h-4 text-[#F59E0B]" />
+                  Delivery Options & ETA
+                </h4>
+                <select
+                  value={selectedZoneId}
+                  onChange={(e) => setSelectedZoneId(e.target.value)}
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#F59E0B] mb-3"
+                >
+                  <option value="">Select your region to see ETA & fee</option>
+                  {shippingZones.map((zone) => (
+                    <option key={zone.id} value={zone.id}>
+                      {zone.regionName}
+                    </option>
+                  ))}
+                </select>
+                
+                {selectedZoneId && (
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Estimated Delivery:</span>
+                      <span className="font-bold text-[#1a1a2e]">
+                        {shippingZones.find(z => z.id === selectedZoneId)?.estimatedDays}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Delivery Fee:</span>
+                      <span className="font-bold text-[#F59E0B]">
+                        {((product?.price || 0) + (selectedVariant?.priceOffset || 0)) >= 50000 
+                          ? 'FREE (Orders over 50k)' 
+                          : `KES ${shippingZones.find(z => z.id === selectedZoneId)?.fee.toLocaleString()}`}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="flex items-center gap-3 select-none">
                 <span className="text-sm font-semibold text-slate-500 w-24">Quantity:</span>
                 <div className="flex items-center border border-gray-300 rounded-lg bg-slate-50">
@@ -482,6 +587,17 @@ export const ProductDetailPage: React.FC = () => {
                   aria-label="Wishlist"
                 >
                   <Heart className={`h-5 w-5 ${product && isInWishlist(product.id) ? 'fill-rose-500 text-rose-500' : ''}`} />
+                </button>
+                <button
+                  onClick={handleToggleCompare}
+                  className={`border p-3.5 rounded-xl transition-all cursor-pointer flex items-center justify-center shadow-sm ${
+                    product && isInCompare(product.id)
+                      ? 'border-blue-500 text-blue-500 bg-blue-50'
+                      : 'bg-white border-gray-200 text-gray-500 hover:text-blue-500 hover:border-blue-500'
+                  }`}
+                  aria-label="Compare"
+                >
+                  <Scale className={`h-5 w-5 ${product && isInCompare(product.id) ? 'text-blue-500' : ''}`} />
                 </button>
                 <button
                   className="bg-white border border-gray-200 text-gray-500 hover:text-[#F59E0B] hover:border-[#F59E0B] p-3.5 rounded-xl transition-all cursor-pointer flex items-center justify-center shadow-sm"
@@ -565,16 +681,32 @@ export const ProductDetailPage: React.FC = () => {
             )}
 
             {activeTab === 'specs' && (
-              <div className="max-w-2xl">
-                <h3 className="text-lg font-bold text-[#1a1a2e] mb-4">Technical Specifications</h3>
-                <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-150">
-                  {Object.entries(product.specs).map(([key, value]) => (
-                    <div key={key} className="grid grid-cols-3 p-3.5 text-sm bg-white hover:bg-slate-50/50">
-                      <span className="font-bold text-slate-500 col-span-1 capitalize">{key}</span>
-                      <span className="text-[#1a1a2e] col-span-2 font-medium">{value}</span>
-                    </div>
-                  ))}
+              <div className="max-w-2xl space-y-8">
+                <div>
+                  <h3 className="text-lg font-bold text-[#1a1a2e] mb-4">Technical Specifications</h3>
+                  <div className="border border-gray-200 rounded-xl overflow-hidden divide-y divide-gray-150">
+                    {Object.entries(product.specs).map(([key, value]) => {
+                      if (key === 'whatsInBox') return null;
+                      return (
+                        <div key={key} className="grid grid-cols-3 p-3.5 text-sm bg-white hover:bg-slate-50/50">
+                          <span className="font-bold text-slate-500 col-span-1 capitalize">{key}</span>
+                          <span className="text-[#1a1a2e] col-span-2 font-medium">{String(value)}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
+
+                {product.specs?.whatsInBox && Array.isArray(product.specs.whatsInBox) && (
+                  <div>
+                    <h3 className="text-lg font-bold text-[#1a1a2e] mb-4">What's in the Box</h3>
+                    <ul className="list-disc pl-5 space-y-2 text-slate-600">
+                      {product.specs.whatsInBox.map((item: string, idx: number) => (
+                        <li key={idx} className="text-sm font-medium">{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
 
@@ -758,6 +890,21 @@ export const ProductDetailPage: React.FC = () => {
         </div>
       )}
 
+      {/* Sticky Mobile CTA */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40 flex gap-3">
+        <button
+          onClick={handleBuyNow}
+          className="flex-1 bg-[#1a1a2e] text-white py-3 rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-slate-800 transition-all flex items-center justify-center shadow-md"
+        >
+          Buy Now
+        </button>
+        <button
+          onClick={handleAddToCart}
+          className="flex-1 bg-[#F59E0B] text-[#1a1a2e] py-3 rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-amber-500 hover:text-white transition-all flex items-center justify-center gap-2 shadow-md"
+        >
+          <ShoppingCart className="h-4 w-4" /> Add to Cart
+        </button>
+      </div>
     </div>
   );
 };

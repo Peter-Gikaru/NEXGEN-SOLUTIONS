@@ -11,14 +11,14 @@ import {
   deleteAllProducts,
   validateBulkProducts
 } from '../controllers/products';
-import { authenticateJWT, authorizeRoles } from '../middleware/auth';
+import { authenticateJWT, authorizeRoles, optionalAuthenticateJWT } from '../middleware/auth';
 import { validateBody, productSchema } from '../utils/validation';
 
 const router = Router();
 
-router.get('/', listProducts);
-router.get('/:id/related', getRelatedProducts);
-router.get('/:slug', getProductBySlug);
+router.get('/', optionalAuthenticateJWT, listProducts);
+router.get('/:id/related', optionalAuthenticateJWT, getRelatedProducts);
+router.get('/:slug', optionalAuthenticateJWT, getProductBySlug);
 router.post(
   '/',
   authenticateJWT,

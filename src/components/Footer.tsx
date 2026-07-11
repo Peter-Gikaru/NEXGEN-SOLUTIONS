@@ -5,11 +5,39 @@ import { Mail, CheckCircle2, ArrowRight } from 'lucide-react';
 export const Footer: React.FC = () => {
   const { addToast } = useCart();
   const [email, setEmail] = useState('');
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (email.trim()) {
-      addToast(`Subscribed successfully with: ${email}`);
-      setEmail('');
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        if (!apiUrl) {
+          throw new Error('VITE_API_URL must be configured');
+        }
+        const csrfToken = document.cookie
+          .split('; ')
+          .find((row) => row.startsWith('XSRF-TOKEN='))
+          ?.split('=')[1];
+        const response = await fetch(`${apiUrl}/newsletter/subscribe`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(csrfToken ? { 'x-csrf-token': decodeURIComponent(csrfToken) } : {}),
+          },
+          body: JSON.stringify({ email: email.trim() }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          addToast(data.message || `Subscribed successfully!`);
+          setEmail('');
+        } else {
+          addToast(data.message || 'Failed to subscribe');
+        }
+      } catch (error) {
+        addToast('An error occurred. Please try again.');
+      } finally {
+
+      }
     }
   };
   return (

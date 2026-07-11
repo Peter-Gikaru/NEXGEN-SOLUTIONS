@@ -41,8 +41,7 @@ export const ForceChangePasswordPage: React.FC = () => {
     }
   };
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-red-100 p-8">
+    <>
         <div className="text-center mb-8">
           <div className="bg-red-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
             <ShieldAlert className="h-8 w-8 text-red-600" />
@@ -107,7 +106,6 @@ export const ForceChangePasswordPage: React.FC = () => {
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Update Password'}
           </button>
         </form>
-      </div>
-    </div>
+      </>
   );
 };

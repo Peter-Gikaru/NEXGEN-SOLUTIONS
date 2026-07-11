@@ -8,6 +8,13 @@ import {
   updateUserStatus,
   createUserByAdmin,
   exportOrders,
+  getAdminReturns,
+  updateAdminReturn,
+  getAdminWarranties,
+  updateAdminWarranty,
+  getAdminCoupons,
+  createAdminCoupon,
+  updateAdminCoupon
 } from '../controllers/admin';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth';
 
@@ -24,6 +31,16 @@ router.get('/users', authorizeRoles('ADMIN'), listAllUsers);
 router.post('/users', authorizeRoles('ADMIN'), createUserByAdmin);
 router.put('/users/:id/role', authorizeRoles('ADMIN'), updateUserRole);
 router.put('/users/:id/status', authorizeRoles('ADMIN'), updateUserStatus);
+
+router.get('/returns', authorizeRoles('ADMIN'), getAdminReturns);
+router.put('/returns/:id', authorizeRoles('ADMIN'), updateAdminReturn);
+
+router.get('/warranties', authorizeRoles('ADMIN'), getAdminWarranties);
+router.put('/warranties/:id', authorizeRoles('ADMIN'), updateAdminWarranty);
+
+router.get('/coupons', authorizeRoles('ADMIN'), getAdminCoupons);
+router.post('/coupons', authorizeRoles('ADMIN'), createAdminCoupon);
+router.put('/coupons/:id', authorizeRoles('ADMIN'), updateAdminCoupon);
 
 export default router;
 

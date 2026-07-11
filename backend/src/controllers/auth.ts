@@ -328,7 +328,11 @@ export const forgotPassword = async (
         resetPasswordExpires: new Date(Date.now() + 60 * 60 * 1000), 
       }
     });
-    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+    const frontendUrl = process.env.FRONTEND_URL;
+    if (!frontendUrl) {
+      return res.status(500).json({ message: 'FRONTEND_URL is not configured' });
+    }
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
     await sendPasswordResetEmail(user.email, resetUrl);
     return res.json({ message: 'If an account exists, a reset link has been sent.' });
   } catch (error) {
@@ -465,7 +469,10 @@ export const facebookLogin = async (
 };
 
 const getRPInfo = (req: Request) => {
-  const rpOrigin = req.headers.origin || process.env.FRONTEND_URL || 'http://localhost:5173';
+  const rpOrigin = req.headers.origin || process.env.FRONTEND_URL;
+  if (!rpOrigin) {
+    throw new Error('FRONTEND_URL is not configured');
+  }
   const rpId = new URL(rpOrigin).hostname;
   return { rpId, rpOrigin };
 };
@@ -579,9 +586,11 @@ export const passkeyLoginStart = async (
       userVerification: 'preferred',
     });
     
+    const sessionId = req.headers['x-session-id'] as string;
     await prisma.webAuthnChallenge.create({
       data: {
-        challenge: options.challenge
+        challenge: options.challenge,
+        sessionId: sessionId || null
       }
     });
     
@@ -599,7 +608,9 @@ export const passkeyLoginFinish = async (
   try {
     const body = req.body;
     
+    const sessionId = req.headers['x-session-id'] as string;
     const challengeObj = await prisma.webAuthnChallenge.findFirst({
+      where: { sessionId: sessionId || null },
       orderBy: { createdAt: 'desc' }
     });
     
@@ -666,3 +677,6 @@ export const passkeyLoginFinish = async (
     return next(error);
   }
 };
+
+export const checkPasskey = async (req: Request, res: Response, next: NextFunction) => { try { const email = req.query.email as string; if (!email) return res.status(400).json({ message: 'Email required' }); const user = await prisma.user.findUnique({ where: { email }, include: { webAuthnCredentials: true } }); if (!user || user.webAuthnCredentials.length === 0) { return res.json({ hasPasskey: false }); } return res.json({ hasPasskey: true }); } catch (error) { return next(error); } };
+

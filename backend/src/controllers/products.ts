@@ -39,7 +39,10 @@ export const listProducts = async (
     const limitNum = parseInt(limit as string) || 10;
     const skip = (pageNum - 1) * limitNum;
     const whereClause: any = {};
-    if (req.query.includeInactive !== 'true') {
+    const userRole = (req as AuthenticatedRequest).user?.role;
+    if (req.query.includeInactive === 'true' && userRole === 'ADMIN') {
+      // Allow Admin to see inactive
+    } else {
       whereClause.isActive = true;
     }
     if (category) {
@@ -72,6 +75,16 @@ export const listProducts = async (
         { category: { name: { contains: searchStr } } },
       ];
     }
+    const { cpu, ram, storage, condition, generation } = req.query;
+    if (cpu || ram || storage || condition || generation) {
+      if (!whereClause.AND) whereClause.AND = [];
+      if (cpu) whereClause.AND.push({ specs: { path: ['cpu'], equals: cpu as string } });
+      if (ram) whereClause.AND.push({ specs: { path: ['ram'], equals: ram as string } });
+      if (storage) whereClause.AND.push({ specs: { path: ['storage'], equals: storage as string } });
+      if (condition) whereClause.AND.push({ specs: { path: ['condition'], equals: condition as string } });
+      if (generation) whereClause.AND.push({ specs: { path: ['generation'], equals: generation as string } });
+    }
+
     let orderByClause: any = { createdAt: 'desc' };
     if (sort === 'price_asc') {
       orderByClause = { price: 'asc' };
@@ -93,17 +106,22 @@ export const listProducts = async (
       })
     ]);
     const formattedProducts = products.map(product => {
-      const images = product.imageUrls ? product.imageUrls.split(',').filter(Boolean) : [];
+      let images = [];
+      if (Array.isArray(product.imageUrls)) {
+        images = product.imageUrls;
+      } else if (typeof product.imageUrls === 'string') {
+        try { images = JSON.parse(product.imageUrls); } catch(e) { images = [product.imageUrls]; }
+      }
       let totalRating = 0;
       product.reviews.forEach(r => totalRating += r.rating);
       const avgRating = product.reviews.length > 0 ? totalRating / product.reviews.length : 0;
-      let parsedVariants = [];
-      if (product.variants) {
-        try { parsedVariants = JSON.parse(product.variants); } catch(e) {}
+      let parsedVariants = product.variants || [];
+      if (typeof parsedVariants === 'string') {
+        try { parsedVariants = JSON.parse(parsedVariants); } catch(e) {}
       }
-      let parsedSpecs = {};
-      if (product.specs) {
-        try { parsedSpecs = JSON.parse(product.specs); } catch(e) {}
+      let parsedSpecs = product.specs || {};
+      if (typeof parsedSpecs === 'string') {
+        try { parsedSpecs = JSON.parse(parsedSpecs); } catch(e) {}
       }
       return {
         ...product,
@@ -172,18 +190,24 @@ export const getProductBySlug = async (
         }
       }
     });
-    if (product && (product.isActive || req.query.includeInactive === 'true')) {
-      const images = product.imageUrls ? product.imageUrls.split(',').filter(Boolean) : [];
+    const userRole = (req as AuthenticatedRequest).user?.role;
+    if (product && (product.isActive || (req.query.includeInactive === 'true' && userRole === 'ADMIN'))) {
+      let images = [];
+      if (Array.isArray(product.imageUrls)) {
+        images = product.imageUrls;
+      } else if (typeof product.imageUrls === 'string') {
+        try { images = JSON.parse(product.imageUrls); } catch(e) { images = [product.imageUrls]; }
+      }
       let totalRating = 0;
       product.reviews.forEach(r => totalRating += r.rating);
       const avgRating = product.reviews.length > 0 ? totalRating / product.reviews.length : 0;
-      let parsedVariants = [];
-      if (product.variants) {
-        try { parsedVariants = JSON.parse(product.variants); } catch(e) {}
+      let parsedVariants = product.variants || [];
+      if (typeof parsedVariants === 'string') {
+        try { parsedVariants = JSON.parse(parsedVariants); } catch(e) {}
       }
-      let parsedSpecs = {};
-      if (product.specs) {
-        try { parsedSpecs = JSON.parse(product.specs); } catch(e) {}
+      let parsedSpecs = product.specs || {};
+      if (typeof parsedSpecs === 'string') {
+        try { parsedSpecs = JSON.parse(parsedSpecs); } catch(e) {}
       }
       return res.json({
         ...product,
@@ -243,8 +267,8 @@ export const createProduct = async (
         compareAtPrice: compareAtPrice ? Number(compareAtPrice) : null,
         stock: Number(stock),
         categoryId,
-        specs: typeof specs === 'string' ? specs : JSON.stringify(specs),
-        imageUrls: Array.isArray(imageUrls) ? imageUrls.join(',') : imageUrls,
+        specs: typeof specs === 'string' ? JSON.parse(specs) : specs,
+        imageUrls: Array.isArray(imageUrls) ? imageUrls : (typeof imageUrls === 'string' ? imageUrls.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
         threeDModelUrl,
       }
     });
@@ -272,10 +296,10 @@ export const updateProduct = async (
     if (compareAtPrice !== undefined) updateData.compareAtPrice = compareAtPrice ? Number(compareAtPrice) : null;
     if (stock !== undefined) updateData.stock = Number(stock);
     if (categoryId) updateData.categoryId = categoryId;
-    if (specs) updateData.specs = typeof specs === 'string' ? specs : JSON.stringify(specs);
-    if (imageUrls) updateData.imageUrls = Array.isArray(imageUrls) ? imageUrls.join(',') : imageUrls;
+    if (specs) updateData.specs = typeof specs === 'string' ? JSON.parse(specs) : specs;
+    if (imageUrls) updateData.imageUrls = Array.isArray(imageUrls) ? imageUrls : (typeof imageUrls === 'string' ? imageUrls.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
     if (isActive !== undefined) updateData.isActive = Boolean(isActive);
-    if (variants !== undefined) updateData.variants = typeof variants === 'string' ? variants : JSON.stringify(variants);
+    if (variants !== undefined) updateData.variants = typeof variants === 'string' ? JSON.parse(variants) : variants;
     const product = await prisma.product.update({
       where: { id },
       data: updateData
@@ -328,11 +352,16 @@ export const getRelatedProducts = async (
       }
     });
       const formattedRelated = related.map(product => {
-        const images = product.imageUrls ? product.imageUrls.split(',').map(url => url.trim()).filter(Boolean) : [];
-        let parsedVariants = [];
-        try {
-          parsedVariants = typeof product.variants === 'string' && product.variants.trim() ? JSON.parse(product.variants) : (product.variants || []);
-        } catch(e) {}
+        let images = [];
+        if (Array.isArray(product.imageUrls)) {
+          images = product.imageUrls;
+        } else if (typeof product.imageUrls === 'string') {
+          try { images = JSON.parse(product.imageUrls); } catch(e) { images = [product.imageUrls]; }
+        }
+        let parsedVariants = product.variants || [];
+        if (typeof parsedVariants === 'string') {
+          try { parsedVariants = JSON.parse(parsedVariants); } catch(e) {}
+        }
         return {
           ...product,
           imageUrls: images,
@@ -420,9 +449,9 @@ export const createBulkProducts = async (
             compareAtPrice: row.compareAtPrice ? parseFloat(row.compareAtPrice) : null,
             stock: parseInt(row.stock) || 0,
             categoryId,
-            imageUrls: row.imageUrls || '',
-            specs: row.specs || '{}',
-            variants: row.variants || null,
+            imageUrls: typeof row.imageUrls === 'string' ? row.imageUrls.split(',').map((s: string) => s.trim()).filter(Boolean) : (Array.isArray(row.imageUrls) ? row.imageUrls : []),
+            specs: typeof row.specs === 'string' ? JSON.parse(row.specs) : (row.specs || {}),
+            variants: typeof row.variants === 'string' ? JSON.parse(row.variants) : (row.variants || []),
           }
         });
         createdProducts.push(product);

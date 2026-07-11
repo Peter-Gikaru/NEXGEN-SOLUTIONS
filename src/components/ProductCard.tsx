@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Star, StarHalf, ShieldCheck, ShoppingCart, Heart } from 'lucide-react';
+import { Star, StarHalf, ShieldCheck, ShoppingCart, Heart, Scale } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useCompare } from '../context/CompareContext';
 import { formatPrice } from '../utils/format';
 import type { Product } from '../types';
 import { WhatsAppIcon } from './WhatsAppIcon';
@@ -23,6 +24,7 @@ interface ProductCardProps {
   stockStatus: 'in_stock' | 'low_stock' | 'out_of_stock';
   stockCount?: number;
   isVerified: boolean;
+  condition?: string;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = React.memo(({
@@ -37,11 +39,24 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
   discount,
   stockStatus,
   stockCount,
-  isVerified
+  isVerified,
+  condition
 }) => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { addToCompare, removeFromCompare, isInCompare } = useCompare();
   const navigate = useNavigate();
+
+  const handleToggleCompare = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isInCompare(id)) {
+      removeFromCompare(id);
+    } else {
+      addToCompare({
+        id, slug, image, title, price, originalPrice, rating, reviewCount, discount, stockStatus, stockCount, isVerified, category: 'Laptops', brand: title.split(' ')[0], description: title, specs: { condition }
+      });
+    }
+  };
 
   const handleClick = () => {
     saveToRecentlyViewed(id);
@@ -161,6 +176,15 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
           -{discount}%
         </span>
       )}
+      {condition && (
+        <span className={`absolute top-3 ${discount > 0 ? 'left-14' : 'left-3'} z-10 text-xs font-bold px-2 py-1 rounded shadow-sm select-none ${
+          condition.toLowerCase() === 'new' ? 'bg-emerald-500 text-white' : 
+          condition.toLowerCase() === 'refurbished' ? 'bg-[#1a1a2e] text-white' : 
+          'bg-[#F59E0B] text-white'
+        }`}>
+          {condition}
+        </span>
+      )}
 
       <div className="w-full aspect-square bg-white p-4 flex items-center justify-center relative border-b border-border-gray select-none group/image">
         <img
@@ -175,6 +199,13 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
           title="Add to wishlist"
         >
           <Heart className={`h-5 w-5 ${isInWishlist(id) ? 'fill-rose-500 text-rose-500' : ''}`} />
+        </button>
+        <button
+          onClick={handleToggleCompare}
+          className="absolute top-14 right-3 bg-white/90 backdrop-blur text-slate-400 hover:text-blue-500 hover:bg-blue-50 p-2 rounded-full shadow-sm transition-colors z-20 opacity-0 group-hover/image:opacity-100 focus:opacity-100"
+          title={isInCompare(id) ? "Remove from compare" : "Add to compare"}
+        >
+          <Scale className={`h-5 w-5 ${isInCompare(id) ? 'text-blue-500' : ''}`} />
         </button>
       </div>
 
@@ -209,14 +240,14 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
       <div className="p-3.5 border-t border-border-gray bg-bg-gray mt-auto z-10 select-none flex flex-col gap-2">
         <button
           onClick={handleBuyNow}
-          className="w-full bg-[#1a1a2e] text-white py-2 rounded text-sm font-bold items-center justify-center gap-2 shadow hover:bg-slate-800 transition-all hidden group-hover:flex"
+          className="w-full bg-[#1a1a2e] text-white py-2.5 lg:py-2 rounded text-base lg:text-sm font-bold flex items-center justify-center gap-2 shadow hover:bg-slate-800 transition-all lg:hidden lg:group-hover:flex"
         >
           Buy Now
         </button>
 
         <button
           onClick={handleWhatsAppOrder}
-          className="w-full bg-[#25D366] text-white py-2 rounded text-sm font-bold items-center justify-center gap-2 shadow hover:bg-[#1ebd59] transition-all hidden group-hover:flex"
+          className="w-full bg-[#25D366] text-white py-2.5 lg:py-2 rounded text-base lg:text-sm font-bold flex items-center justify-center gap-2 shadow hover:bg-[#1ebd59] transition-all lg:hidden lg:group-hover:flex"
         >
           <WhatsAppIcon size={18} /> Quick Order
         </button>

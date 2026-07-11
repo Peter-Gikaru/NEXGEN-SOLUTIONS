@@ -1,7 +1,11 @@
 import axios from 'axios';
 import toast from 'react-hot-toast';
+const apiBaseUrl = import.meta.env.VITE_API_URL;
+if (!apiBaseUrl) {
+  throw new Error('VITE_API_URL must be configured. Refusing to use a hardcoded API URL.');
+}
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: apiBaseUrl,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -13,8 +17,18 @@ if (!sessionId) {
   sessionId = 'session_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   localStorage.setItem('nexgen_session_id', sessionId);
 }
+function getCookie(name: string) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+}
+
 api.interceptors.request.use((config) => {
   config.headers['x-session-id'] = sessionId;
+  const csrfToken = getCookie('XSRF-TOKEN');
+  if (csrfToken) {
+    config.headers['x-csrf-token'] = csrfToken;
+  }
   return config;
 });
 api.interceptors.response.use(

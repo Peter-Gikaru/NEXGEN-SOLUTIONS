@@ -22,6 +22,7 @@ interface OrderItem {
   price: number;
   quantity: number;
   product: {
+    id: string;
     name: string;
     imageUrls: string;
     brand: string;
@@ -473,6 +474,14 @@ export const CustomerDashboardPage: React.FC = () => {
                               <h5 className="font-semibold text-sm text-[#1a1a2e] truncate">{item.product.name}</h5>
                               <p className="text-xs text-gray-500 uppercase mt-0.5">{item.product.brand}</p>
                               <p className="text-xs text-gray-400 mt-1">Quantity: {item.quantity}</p>
+                              {selectedOrder.orderStatus === 'DELIVERED' && (
+                                <button
+                                  onClick={() => navigate(`/warranty-claim?orderId=${selectedOrder.id}&productId=${item.product.id}`)}
+                                  className="mt-1 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                                >
+                                  Claim Warranty
+                                </button>
+                              )}
                             </div>
                             <span className="font-bold text-sm text-[#1a1a2e] shrink-0">{formatPrice(item.price * item.quantity)}</span>
                           </div>

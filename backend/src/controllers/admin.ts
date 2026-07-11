@@ -2,7 +2,7 @@ import { Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import prisma from '../config/db';
 import { AuthenticatedRequest } from '../middleware/auth';
-import { sendOrderStatusEmail } from '../utils/email';
+import { sendOrderStatusEmail } from '../services/emailService';
 export const getDashboardStats = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -188,11 +188,9 @@ export const listAllOrders = async (
       })
     ]);
     const formattedOrders = orders.map((order) => {
-      let shippingParsed = {};
-      try {
-        shippingParsed = JSON.parse(order.shippingAddress);
-      } catch (e) {
-        shippingParsed = {};
+      let shippingParsed: any = order.shippingAddress;
+      if (typeof shippingParsed === 'string') {
+        try { shippingParsed = JSON.parse(shippingParsed); } catch(e) {}
       }
       return {
         ...order,
@@ -219,7 +217,7 @@ export const updateOrderStatus = async (
     const { orderStatus, paymentStatus, trackingNumber } = req.body;
     const existingOrder = await prisma.order.findUnique({
       where: { id },
-      include: { user: true, items: true },
+      include: { user: true, items: { include: { product: true } } },
     });
     if (!existingOrder) {
       return res.status(404).json({ message: 'Order not found' });
@@ -265,13 +263,14 @@ export const updateOrderStatus = async (
       let customerName = existingOrder.user?.name || 'Customer';
       if (!customerEmail) {
         try {
-          const shipping = JSON.parse(existingOrder.shippingAddress);
+          let shipping: any = existingOrder.shippingAddress;
+          if (typeof shipping === 'string') shipping = JSON.parse(shipping);
           customerEmail = shipping.guestEmail;
           customerName = shipping.guestName || 'Customer';
         } catch (e) {}
       }
       if (customerEmail) {
-        sendOrderStatusEmail(customerEmail, id, orderStatus, customerName).catch(console.error);
+        sendOrderStatusEmail(customerEmail, existingOrder, orderStatus, customerName).catch(console.error);
       }
     }
     return res.json(updatedOrder);
@@ -384,6 +383,145 @@ export const exportOrders = async (
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="orders_export.csv"');
     return res.status(200).send(csvContent);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getAdminReturns = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const returns = await prisma.returnRequest.findMany({
+      include: {
+        user: { select: { name: true, email: true } },
+        order: { select: { trackingNumber: true, totalAmount: true, orderStatus: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    return res.json(returns);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const updateAdminReturn = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const { status, adminNotes } = req.body;
+    const allowedStatuses = ['PENDING', 'APPROVED', 'REJECTED', 'REFUNDED'];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid return status' });
+    }
+    const updated = await prisma.returnRequest.update({
+      where: { id },
+      data: { status, adminNotes },
+    });
+    return res.json(updated);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getAdminWarranties = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const warranties = await prisma.warrantyClaim.findMany({
+      include: {
+        user: { select: { name: true, email: true } },
+        product: { select: { name: true, slug: true } },
+        order: { select: { trackingNumber: true, orderStatus: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+    return res.json(warranties);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const updateAdminWarranty = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const { status, adminNotes } = req.body;
+    const allowedStatuses = ['PENDING', 'IN_PROGRESS', 'RESOLVED', 'REJECTED'];
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid warranty status' });
+    }
+    const updated = await prisma.warrantyClaim.update({
+      where: { id },
+      data: { status, adminNotes },
+    });
+    return res.json(updated);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getAdminCoupons = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const coupons = await prisma.promoCode.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+    return res.json(coupons);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const createAdminCoupon = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { code, discountType, discountValue, maxUses, expiryDate } = req.body;
+    const coupon = await prisma.promoCode.create({
+      data: {
+        code,
+        discountType,
+        discountValue,
+        maxUses,
+        expiryDate: new Date(expiryDate),
+        active: true
+      }
+    });
+    return res.status(201).json(coupon);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const updateAdminCoupon = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const { active } = req.body;
+    const coupon = await prisma.promoCode.update({
+      where: { id },
+      data: { active }
+    });
+    return res.json(coupon);
   } catch (error) {
     return next(error);
   }

@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { getImageUrl } from '../utils/getImageUrl';
+import AdminAnnouncements from '../components/admin/AdminAnnouncements';
 import { 
   TrendingUp, 
   ShoppingBag, 
@@ -25,8 +26,17 @@ import {
   ChevronRight,
   ChevronDown,
   FolderTree,
-  Plus
+  Plus,
+  Volume2,
+  Mail,
+  RotateCcw,
+  ShieldCheck,
+  Megaphone
 } from 'lucide-react';
+import AdminNewsletter from '../components/admin/AdminNewsletter';
+import AdminReturns from '../components/admin/AdminReturns';
+import AdminWarranties from '../components/admin/AdminWarranties';
+import AdminCoupons from '../components/admin/AdminCoupons';
 const RecursiveCategoryItem = ({ 
   category, 
   level = 0,
@@ -166,7 +176,7 @@ interface Order {
 export const AdminDashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'stats' | 'orders' | 'users' | 'addProduct' | 'productsList' | 'categories' | 'flashSales' | 'shippingZones' | 'adminLogs'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'orders' | 'users' | 'addProduct' | 'productsList' | 'categories' | 'flashSales' | 'shippingZones' | 'adminLogs' | 'announcements' | 'newsletter' | 'returns' | 'warranties' | 'coupons'>('stats');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [stats, setStats] = useState<Stats>({ totalSales: 0, totalOrders: 0, totalUsers: 0 });
   const [lowStock, setLowStock] = useState<LowStock[]>([]);
@@ -738,7 +748,8 @@ export const AdminDashboardPage: React.FC = () => {
     productsList: 'Manage Products',
     flashSales: 'Flash Sales',
     shippingZones: 'Shipping Zones',
-    adminLogs: 'Admin Logs'
+    adminLogs: 'Admin Logs',
+    announcements: 'Manage Announcements'
   }[activeTab] || 'Dashboard';
   return (
     <div className="flex h-screen w-full bg-slate-50 text-slate-900 font-sans overflow-hidden">
@@ -764,7 +775,7 @@ export const AdminDashboardPage: React.FC = () => {
           <div className="text-sm font-medium text-white truncate">{user?.email}</div>
           <div className="text-xs text-blue-400 mt-0.5">Role: {user?.role}</div>
         </div>
-        <nav className="space-y-1">
+        <nav className="flex-1 overflow-y-auto space-y-1 py-2 px-2">
               <button
                 onClick={() => { setActiveTab('stats'); setIsSidebarOpen(false); }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
@@ -872,6 +883,71 @@ export const AdminDashboardPage: React.FC = () => {
               <span>Categories</span>
             </button>
           )}
+          {user?.role === 'ADMIN' && (
+            <button
+              onClick={() => { setActiveTab('newsletter'); setIsSidebarOpen(false); }}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
+                activeTab === 'newsletter'
+                  ? 'bg-blue-600 text-white'
+                  : 'hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Mail className="h-4.5 w-4.5" />
+              <span>Newsletter</span>
+            </button>
+          )}
+          {user?.role === 'ADMIN' && (
+            <button
+              onClick={() => { setActiveTab('returns'); setIsSidebarOpen(false); }}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
+                activeTab === 'returns'
+                  ? 'bg-blue-600 text-white'
+                  : 'hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <RotateCcw className="h-4.5 w-4.5" />
+              <span>Returns & Refunds</span>
+            </button>
+          )}
+          {user?.role === 'ADMIN' && (
+            <button
+              onClick={() => { setActiveTab('warranties'); setIsSidebarOpen(false); }}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
+                activeTab === 'warranties'
+                  ? 'bg-blue-600 text-white'
+                  : 'hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <ShieldCheck className="h-4.5 w-4.5" />
+              <span>Warranty Claims</span>
+            </button>
+          )}
+          {user?.role === 'ADMIN' && (
+            <button
+              onClick={() => { setActiveTab('coupons'); setIsSidebarOpen(false); }}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
+                activeTab === 'coupons'
+                  ? 'bg-blue-600 text-white'
+                  : 'hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Megaphone className="h-4.5 w-4.5" />
+              <span>Coupons & Campaigns</span>
+            </button>
+          )}
+          {user?.role === 'ADMIN' && (
+            <button
+              onClick={() => { setActiveTab('announcements'); setIsSidebarOpen(false); }}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
+                activeTab === 'announcements'
+                  ? 'bg-blue-600 text-white'
+                  : 'hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <Volume2 className="h-4.5 w-4.5" />
+              <span>Announcements</span>
+            </button>
+          )}
         </nav>
         <div className="p-4 border-t border-slate-800 shrink-0">
           <button 
@@ -906,6 +982,21 @@ export const AdminDashboardPage: React.FC = () => {
         {}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-[1600px] mx-auto space-y-6 lg:space-y-8">
+            {activeTab === 'announcements' && (
+              <AdminAnnouncements />
+            )}
+            {activeTab === 'newsletter' && (
+              <AdminNewsletter />
+            )}
+            {activeTab === 'returns' && (
+              <AdminReturns />
+            )}
+            {activeTab === 'warranties' && (
+              <AdminWarranties />
+            )}
+            {activeTab === 'coupons' && (
+              <AdminCoupons />
+            )}
             {activeTab === 'stats' && (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">

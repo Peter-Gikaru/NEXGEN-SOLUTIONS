@@ -47,6 +47,8 @@ const mapCategoryNodes = (categories: any[]): CategoryNode[] => {
   }));
 };
 
+
+
 let cachedCategories: CategoryNode[] | null = null;
 let fetchPromise: Promise<CategoryNode[]> | null = null;
 
@@ -58,6 +60,7 @@ export const useCategories = (forceRefetch = false) => {
     try {
       const res = await api.get('/categories');
       const mapped = mapCategoryNodes(res.data);
+      
       cachedCategories = mapped;
       setCategories(mapped);
       setLoading(false);

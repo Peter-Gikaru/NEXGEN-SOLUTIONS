@@ -5,6 +5,7 @@ import { Carousel } from '../components/Carousel';
 import { FlashDeals } from '../components/FlashDeals';
 import { ProductGrid } from '../components/ProductGrid';
 import { TrustBadges } from '../components/TrustBadges';
+import { RecentlyViewed } from '../components/RecentlyViewed';
 import { ProductCard } from '../components/ProductCard';
 import { FiltersSidebar } from '../components/FiltersSidebar';
 import { SlidersHorizontal, X, ChevronDown } from 'lucide-react';
@@ -274,17 +275,45 @@ export const HomePage: React.FC = () => {
               }`}
             >
               <FiltersSidebar
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                selectedSubcategory={""}
-                setSelectedSubcategory={() => {}}
-                selectedBrand={selectedBrands[0] || ""}
-                setSelectedBrand={(b) => setSelectedBrands([b])}
-                minPrice={minPrice}
-                setMinPrice={setMinPrice}
-                maxPrice={maxPrice}
-                setMaxPrice={setMaxPrice}
-                onApplyFilters={() => {}}
+                filters={{
+                  category: selectedCategory,
+
+                  minPrice: minPrice,
+                  maxPrice: maxPrice,
+                  brand: selectedBrands,
+                  cpu: [],
+                  ram: [],
+                  storage: [],
+                  condition: [],
+                  generation: [],
+                  rating: '',
+                  inStockOnly: false
+
+
+                }}
+                onChange={(newFilters: any) => {
+                  const f = typeof newFilters === 'function' ? newFilters({
+                    category: selectedCategory,
+  
+                    minPrice: minPrice,
+                    maxPrice: maxPrice,
+                    brand: selectedBrands,
+                    cpu: [],
+                    ram: [],
+                    storage: [],
+                    condition: [],
+                  generation: [],
+                  rating: '',
+                  inStockOnly: false
+  
+  
+                  }) : newFilters;
+                  if (f.category !== selectedCategory) setSelectedCategory(f.category || '');
+                  if (f.minPrice !== minPrice) setMinPrice(f.minPrice);
+                  if (f.maxPrice !== maxPrice) setMaxPrice(f.maxPrice);
+                  if (f.brand !== selectedBrands) setSelectedBrands(f.brand || []);
+                }}
+
               />
             </div>
             <div className="flex-1 min-w-0">
@@ -350,6 +379,7 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+      <RecentlyViewed />
       </div>
       {}
       {isMobileFiltersOpen && (
@@ -366,16 +396,44 @@ export const HomePage: React.FC = () => {
             </div>
             <div className="flex-1 overflow-y-auto p-4 bg-white">
               <FiltersSidebar
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-                selectedSubcategory={""}
-                setSelectedSubcategory={() => {}}
-                selectedBrand={selectedBrands[0] || ""}
-                setSelectedBrand={(b) => setSelectedBrands([b])}
-                minPrice={minPrice}
-                setMinPrice={setMinPrice}
-                maxPrice={maxPrice}
-                setMaxPrice={setMaxPrice}
+                filters={{
+                  category: selectedCategory,
+
+                  minPrice: minPrice,
+                  maxPrice: maxPrice,
+                  brand: selectedBrands,
+                  cpu: [],
+                  ram: [],
+                  storage: [],
+                  condition: [],
+                  generation: [],
+                  rating: '',
+                  inStockOnly: false
+
+
+                }}
+                onChange={(newFilters: any) => {
+                  const f = typeof newFilters === 'function' ? newFilters({
+                    category: selectedCategory,
+  
+                    minPrice: minPrice,
+                    maxPrice: maxPrice,
+                    brand: selectedBrands,
+                    cpu: [],
+                    ram: [],
+                    storage: [],
+                    condition: [],
+                  generation: [],
+                  rating: '',
+                  inStockOnly: false
+  
+  
+                  }) : newFilters;
+                  if (f.category !== selectedCategory) setSelectedCategory(f.category || '');
+                  if (f.minPrice !== minPrice) setMinPrice(f.minPrice);
+                  if (f.maxPrice !== maxPrice) setMaxPrice(f.maxPrice);
+                  if (f.brand !== selectedBrands) setSelectedBrands(f.brand || []);
+                }}
                 onApplyFilters={() => {}}
               />
             </div>

@@ -19,11 +19,11 @@ export const listFlashSales = async (
     });
 
     const formattedSales = flashSales.map((sale) => {
-      let imageUrlsParsed = [];
-      try {
-        imageUrlsParsed = JSON.parse(sale.product.imageUrls);
-      } catch (e) {
-        imageUrlsParsed = [sale.product.imageUrls];
+      let imageUrlsParsed: any = [];
+      if (Array.isArray(sale.product.imageUrls)) {
+        imageUrlsParsed = sale.product.imageUrls;
+      } else if (typeof sale.product.imageUrls === 'string') {
+        try { imageUrlsParsed = JSON.parse(sale.product.imageUrls); } catch(e) { imageUrlsParsed = [sale.product.imageUrls]; }
       }
 
       return {

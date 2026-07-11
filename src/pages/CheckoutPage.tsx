@@ -10,7 +10,8 @@ import {
   ShoppingBag, 
   CheckCircle, 
   CreditCard,
-  Truck
+  Truck,
+  Smartphone
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 export const CheckoutPage: React.FC = () => {
@@ -58,9 +59,17 @@ export const CheckoutPage: React.FC = () => {
   const zoneFee = selectedZone ? selectedZone.fee : 500; 
   const deliveryFee = subtotal >= 50000 ? 0 : zoneFee;
   const total = subtotal + deliveryFee;
+
+  const [promoCode, setPromoCode] = useState('');
+
+  useEffect(() => {
+    if (city && !city.toLowerCase().includes('nairobi') && paymentMethod === 'COD') {
+      setPaymentMethod('MPESA');
+    }
+  }, [city, paymentMethod]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (cartItems.length === 0) return;
+    if (checkoutItems.length === 0) return;
     setIsSubmitting(true);
     const payload = {
       shippingAddress: {
@@ -77,6 +86,7 @@ export const CheckoutPage: React.FC = () => {
       })),
       expectedSubtotal: subtotal,
       paymentMethod,
+      promoCode: promoCode ? promoCode : undefined,
     };
     try {
       const response = await api.post('/orders', payload);
@@ -94,6 +104,20 @@ export const CheckoutPage: React.FC = () => {
       setIsSubmitting(false);
     }
   };
+  const handleRetryPayment = async () => {
+    if (!successOrder) return;
+    try {
+      toast.loading('Resending M-Pesa prompt...', { id: 'retry' });
+      await api.post('/payments/retry', { 
+        orderId: successOrder.id, 
+        phoneNumber: phoneNumber 
+      });
+      toast.success('M-Pesa prompt sent to your phone. Please check and enter your PIN.', { id: 'retry' });
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to resend prompt. Please try again.', { id: 'retry' });
+    }
+  };
+
   if (successOrder) {
     return (
       <div className="flex-1 bg-slate-50 text-slate-900 min-h-screen py-16 px-4">
@@ -102,7 +126,31 @@ export const CheckoutPage: React.FC = () => {
             <CheckCircle className="h-16 w-16" />
           </div>
           <h2 className="font-sans text-3xl font-bold tracking-tight text-slate-900">Order Placed Successfully!</h2>
-          <p className="text-slate-500 mt-2">Thank you for shopping with NexGen Gadgets. Your order is being processed.</p>
+          
+          {successOrder.paymentMethod === 'MPESA' ? (
+            <div className="my-6 p-6 bg-blue-50 border border-blue-200 rounded-xl text-center">
+              <h3 className="font-bold text-blue-900 text-lg flex items-center justify-center gap-2 mb-2">
+                <Smartphone className="h-6 w-6" /> M-Pesa Request Sent
+              </h3>
+              <p className="text-blue-800 mb-4">Please check your phone ({phoneNumber}) and enter your M-Pesa PIN to complete the payment.</p>
+              <div className="flex flex-col gap-3 max-w-sm mx-auto">
+                <button 
+                   onClick={() => navigate(`/track?order=${successOrder.id}`)}
+                   className="bg-blue-600 text-white font-bold py-3 px-4 rounded-xl hover:bg-blue-700 transition cursor-pointer"
+                >
+                   Check Payment Status
+                </button>
+                <button 
+                   onClick={handleRetryPayment}
+                   className="text-blue-700 font-bold py-2 px-4 hover:underline cursor-pointer"
+                >
+                   Did not receive prompt? Resend
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-slate-500 mt-2">Thank you for shopping with NexGen Gadgets. Your order is being processed.</p>
+          )}
           <div className="my-8 p-6 bg-slate-50 rounded-xl border border-slate-200 text-left space-y-4 font-sans shadow-inner">
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
               <span className="text-slate-500 text-sm font-medium">Tracking Number</span>
@@ -265,7 +313,7 @@ export const CheckoutPage: React.FC = () => {
                 <span>Payment Method</span>
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <label className="border-2 border-[#F59E0B] bg-amber-50 p-5 rounded-xl flex items-center justify-between cursor-pointer shadow-sm hover:bg-amber-100/50 transition-colors">
+                <label className={`border-2 ${paymentMethod === 'COD' ? 'border-[#F59E0B] bg-amber-50' : 'border-slate-200 bg-slate-50'} p-5 rounded-xl flex items-center justify-between shadow-sm transition-colors ${!city.toLowerCase().includes('nairobi') ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:bg-amber-100/50'}`}>
                   <div className="flex items-center gap-4">
                     <input 
                       type="radio" 
@@ -273,26 +321,30 @@ export const CheckoutPage: React.FC = () => {
                       value="COD" 
                       checked={paymentMethod === 'COD'}
                       onChange={() => setPaymentMethod('COD')}
-                      className="accent-[#F59E0B] w-5 h-5 cursor-pointer"
+                      disabled={!city.toLowerCase().includes('nairobi')}
+                      className="accent-[#F59E0B] w-5 h-5 cursor-pointer disabled:cursor-not-allowed"
                     />
                     <div>
                       <span className="block font-bold text-slate-900 text-base">Cash on Delivery</span>
-                      <span className="text-sm text-slate-600 font-medium mt-1">Pay when goods arrive at your doorstep</span>
+                      <span className="text-sm text-slate-600 font-medium mt-1">
+                        {city.toLowerCase().includes('nairobi') ? 'Pay when goods arrive' : 'Only available in Nairobi'}
+                      </span>
                     </div>
                   </div>
                 </label>
-                <label className="border border-slate-200 bg-slate-50 p-5 rounded-xl flex items-center justify-between opacity-60 cursor-not-allowed">
+                <label className={`border-2 ${paymentMethod === 'MPESA' ? 'border-blue-500 bg-blue-50' : 'border-slate-200 bg-slate-50'} p-5 rounded-xl flex items-center justify-between cursor-pointer shadow-sm hover:bg-blue-100/50 transition-colors`}>
                   <div className="flex items-center gap-4">
                     <input 
                       type="radio" 
                       name="payment" 
                       value="MPESA" 
-                      disabled
-                      className="accent-slate-400 w-5 h-5"
+                      checked={paymentMethod === 'MPESA'}
+                      onChange={() => setPaymentMethod('MPESA')}
+                      className="accent-blue-600 w-5 h-5 cursor-pointer"
                     />
                     <div>
                       <span className="block font-bold text-slate-900 text-base">Safaricom M-Pesa</span>
-                      <span className="text-sm text-slate-500 font-medium mt-1">Secure instant STK push (Disabled)</span>
+                      <span className="text-sm text-slate-600 font-medium mt-1">Secure instant STK push</span>
                     </div>
                   </div>
                 </label>
@@ -322,6 +374,15 @@ export const CheckoutPage: React.FC = () => {
                 ))}
               </div>
               <div className="border-t border-slate-100 pt-5 space-y-4 font-sans text-base">
+                <div className="mb-2">
+                  <input
+                    type="text"
+                    placeholder="Enter Promo Code"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/50 focus:border-[#F59E0B] text-slate-900 transition-all uppercase placeholder:normal-case placeholder:text-slate-400"
+                  />
+                </div>
                 <div className="flex justify-between font-semibold text-slate-600">
                   <span>Subtotal</span>
                   <span className="text-slate-900">KES {subtotal.toLocaleString()}</span>

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../config/db';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { initiateSTKPush } from '../services/mpesaService';
 
 export const initiateMpesaPush = async (
   req: AuthenticatedRequest,
@@ -26,80 +27,94 @@ export const initiateMpesaPush = async (
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    const checkoutRequestId = `ws_CO_${Math.floor(100000 + Math.random() * 900000)}`;
-
-    setTimeout(async () => {
-      try {
-        const mockCallbackPayload = {
-          Body: {
-            stkCallback: {
-              CheckoutRequestID: checkoutRequestId,
-              ResultCode: 0,
-              ResultDesc: 'The service request is processed successfully.',
-              CallbackMetadata: {
-                Item: [
-                  { Name: 'Amount', Value: order.totalAmount },
-                  { Name: 'MpesaReceiptNumber', Value: `RC_${Math.random().toString(36).substring(2, 10).toUpperCase()}` },
-                  { Name: 'TransactionDate', Value: Date.now() },
-                  { Name: 'PhoneNumber', Value: phoneNumber },
-                ],
-              },
-            },
-          },
-        };
-
-        const receiptItem = mockCallbackPayload.Body.stkCallback.CallbackMetadata.Item.find(
-          (item) => item.Name === 'MpesaReceiptNumber'
-        );
-        const receipt = receiptItem ? receiptItem.Value : 'MPESARECEIPT';
-
-        await prisma.order.update({
-          where: { id: order.id },
-          data: {
-            paymentStatus: 'PAID',
-            orderStatus: 'CONFIRMED',
-            mpesaReceiptNumber: receipt,
-          },
-        });
-      } catch (err) {
-        console.error(err);
+    const response = await initiateSTKPush(phoneNumber, order.totalAmount, order.id);
+    
+    await prisma.paymentTransaction.create({
+      data: {
+        orderId: order.id,
+        amount: order.totalAmount,
+        provider: 'MPESA',
+        checkoutRequestId: response.CheckoutRequestID,
+        status: 'PENDING',
       }
-    }, 5000);
+    });
 
     return res.json({
-      message: 'Mpesa payment request sent to phone. Please enter PIN to complete payment.',
-      checkoutRequestId,
+      message: 'M-Pesa payment request sent to phone. Please enter PIN to complete payment.',
+      checkoutRequestId: response.CheckoutRequestID,
     });
   } catch (error) {
     return next(error);
   }
 };
 
-export const mpesaCallback = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const mpesaCallback = async (req: Request, res: Response) => {
+  console.log('--- M-Pesa Webhook Callback Received ---');
   try {
-    const callbackHeader = req.headers['x-mpesa-token'];
-    const securityToken = process.env.MPESA_CALLBACK_TOKEN || 'secure-webhook-token';
-
-    if (callbackHeader !== securityToken) {
-      return res.status(401).json({ message: 'Unauthorized callback origin' });
-    }
-
     const { Body } = req.body;
+    
     if (!Body || !Body.stkCallback) {
-      return res.status(400).json({ message: 'Invalid callback payload' });
+      console.warn('Invalid M-Pesa callback payload');
+      return res.status(400).json({ message: 'Invalid payload' });
     }
 
-    const callback = Body.stkCallback;
-    if (callback.ResultCode !== 0) {
-      return res.json({ message: 'Payment cancelled or failed' });
+    const { CheckoutRequestID, ResultCode, ResultDesc, CallbackMetadata } = Body.stkCallback;
+    console.log(`CheckoutRequestID: ${CheckoutRequestID}, ResultCode: ${ResultCode}, ResultDesc: ${ResultDesc}`);
+
+    const transaction = await prisma.paymentTransaction.findFirst({
+      where: { checkoutRequestId: CheckoutRequestID }
+    });
+
+    if (!transaction) {
+      console.error(`No transaction found for CheckoutRequestID: ${CheckoutRequestID}`);
+      return res.status(404).json({ message: 'Transaction not found' });
     }
 
-    return res.json({ message: 'Callback received' });
+    if (ResultCode === 0) {
+      let mpesaReceiptNumber = '';
+      if (CallbackMetadata && CallbackMetadata.Item) {
+        const receiptItem = CallbackMetadata.Item.find((item: any) => item.Name === 'MpesaReceiptNumber');
+        if (receiptItem) mpesaReceiptNumber = receiptItem.Value;
+      }
+
+      await prisma.$transaction(async (tx) => {
+        await tx.paymentTransaction.update({
+          where: { id: transaction.id },
+          data: { status: 'SUCCESS', providerRef: mpesaReceiptNumber, rawPayload: Body.stkCallback }
+        });
+
+        await tx.order.update({
+          where: { id: transaction.orderId },
+          data: { paymentStatus: 'PAID', orderStatus: 'CONFIRMED', mpesaReceiptNumber }
+        });
+        
+        await tx.trackingEvent.create({
+          data: {
+            orderId: transaction.orderId,
+            status: 'CONFIRMED',
+            description: `Payment received via M-Pesa (${mpesaReceiptNumber}). Order confirmed.`
+          }
+        });
+      });
+      console.log(`Payment successful for Order ${transaction.orderId}. Receipt: ${mpesaReceiptNumber}`);
+    } else {
+      await prisma.$transaction(async (tx) => {
+        await tx.paymentTransaction.update({
+          where: { id: transaction.id },
+          data: { status: 'FAILED', errorMessage: ResultDesc, rawPayload: Body.stkCallback }
+        });
+
+        await tx.order.update({
+          where: { id: transaction.orderId },
+          data: { paymentStatus: 'FAILED', paymentAttempts: { increment: 1 } }
+        });
+      });
+      console.log(`Payment failed for Order ${transaction.orderId}. Reason: ${ResultDesc}`);
+    }
+
+    return res.status(200).json({ message: 'Callback processed successfully' });
   } catch (error) {
-    return next(error);
+    console.error('Error processing M-Pesa callback:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };

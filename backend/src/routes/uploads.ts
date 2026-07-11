@@ -69,4 +69,21 @@ router.post(
     });
   }
 );
+router.post(
+  '/returns',
+  authenticateJWT,
+  (req: Request, res: Response, next: NextFunction) => {
+    upload.array('images', 5)(req, res, (err) => {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: 'No images uploaded' });
+      }
+      const urls = files.map((file) => `/uploads/${file.filename}`);
+      return res.status(201).json({ urls });
+    });
+  }
+);
 export default router;

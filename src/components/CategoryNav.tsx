@@ -66,19 +66,25 @@ export const CategoryNav: React.FC = () => {
         <div className="flex items-center gap-8 h-14">
           
           <div 
-            className="relative h-full flex items-center"
+            className="relative h-full flex items-end"
             onMouseEnter={() => setIsDropdownOpen(true)}
             onMouseLeave={() => setIsDropdownOpen(false)}
           >
-            <button className="flex items-center gap-3 bg-[#F59E0B] hover:bg-amber-500 text-white px-6 h-full font-bold uppercase tracking-wide text-sm transition-colors rounded-t-xl rounded-b-none mt-2">
+            <button className={`flex items-center gap-3 px-6 h-12 font-bold uppercase tracking-wide text-sm transition-colors rounded-t-lg ${
+              isDropdownOpen 
+                ? 'bg-white border-t border-l border-r border-slate-200 text-[#1a1a2e]' 
+                : 'bg-[#F59E0B] text-white hover:bg-amber-500'
+            }`}>
               <Menu className="h-5 w-5" />
               <span>All Categories</span>
-              <ChevronDown className="h-4 w-4 ml-2" />
+              <ChevronDown className={`h-4 w-4 ml-2 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute top-full left-0 w-[280px] bg-white border border-slate-200 shadow-2xl rounded-b-xl rounded-tr-xl py-3 z-50 animate-fade-in origin-top-left">
-                <ul className="flex flex-col">
+              <div className="absolute top-full left-0 w-[280px] bg-white border border-slate-200 border-t-0 shadow-2xl rounded-b-xl rounded-tr-xl py-3 z-50 origin-top-left -mt-[1px]">
+                {/* To create a seamless look if the button is white when open, we overlay a small white block over the border */}
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-white z-10" style={{ width: 'calc(100% - 2px)' }}></div>
+                <ul className="flex flex-col relative z-20">
                   {categories.map((cat) => (
                     <RecursiveMenuItem 
                       key={cat.id} 
@@ -95,30 +101,12 @@ export const CategoryNav: React.FC = () => {
             )}
           </div>
 
-          <nav className="flex items-center gap-8 font-sans font-bold text-sm text-slate-700">
-            <Link to="/" className="hover:text-[#F59E0B] transition-colors h-14 flex items-center uppercase">HOME</Link>
-            {categories.slice(0, 4).map(cat => (
-              <div key={cat.id} className="relative group cursor-pointer h-14 flex items-center">
-                <span onClick={() => handleSelect(cat.slug)} className="hover:text-[#F59E0B] transition-colors uppercase">{cat.name}</span>
-                {cat.children && cat.children.length > 0 && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 min-w-[200px] bg-white border border-slate-200 shadow-xl rounded-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <ul className="flex flex-col">
-                      {cat.children.map(child => (
-                        <RecursiveMenuItem 
-                          key={child.id} 
-                          node={child} 
-                          level={1} 
-                          onSelect={handleSelect} 
-                        />
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            ))}
-            <Link to="/products" className="hover:text-[#F59E0B] transition-colors h-14 flex items-center uppercase">ALL PRODUCTS</Link>
-            <Link to="/track" className="hover:text-[#F59E0B] transition-colors h-14 flex items-center uppercase">TRACK ORDER</Link>
+          <nav className="flex items-center gap-8 font-sans font-bold text-sm text-slate-700 h-full">
+            <Link to="/" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase">HOME</Link>
+            <Link to="/products" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase">ALL PRODUCTS</Link>
+            <Link to="/track" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase">TRACK ORDER</Link>
           </nav>
+
 
         </div>
       </div>

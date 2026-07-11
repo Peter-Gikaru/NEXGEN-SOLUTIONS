@@ -12,13 +12,13 @@ export const createOrder = async (
     if (!req.user && !sessionId) {
       return res.status(401).json({ message: 'Authentication or session ID required' });
     }
-    const { shippingAddress, items, paymentMethod, guestName, guestEmail, expectedSubtotal } = req.body;
+    const { shippingAddress, items, paymentMethod, guestName, guestEmail, expectedSubtotal, promoCode } = req.body;
     const finalShippingAddress = {
       ...shippingAddress,
       guestName,
       guestEmail
     };
-    let totalAmount = 0;
+    let subtotal = 0;
     const orderItemsData: { productId: string; price: number; quantity: number }[] = [];
     for (const item of items) {
       const product = await prisma.product.findFirst({
@@ -41,16 +41,48 @@ export const createOrder = async (
       if (!product) {
         return res.status(404).json({ message: `Product not found: ${item.productId}` });
       }
+      if (product.stock < item.quantity) {
+        return res.status(400).json({
+          message: `Only ${product.stock} units available for ${product.name}`,
+        });
+      }
       const activeFlashSale = product.flashSale;
       const priceToUse = activeFlashSale ? activeFlashSale.salePrice : product.price;
-      totalAmount += priceToUse * item.quantity;
+      subtotal += priceToUse * item.quantity;
       orderItemsData.push({
         productId: product.id,
         price: priceToUse,
         quantity: item.quantity,
       });
     }
-    if (expectedSubtotal !== undefined && Math.abs(totalAmount - expectedSubtotal) > 1) {
+    let shippingFee = 500; // default if zone not found
+    if (subtotal >= 50000) {
+      shippingFee = 0;
+    } else if (shippingAddress.city) {
+      const zone = await prisma.shippingZone.findFirst({
+        where: { regionName: shippingAddress.city }
+      });
+      if (zone) shippingFee = zone.fee;
+    }
+
+    let discount = 0;
+    let promoCodeId: string | null = null;
+    if (promoCode) {
+      const promo = await prisma.promoCode.findUnique({ where: { code: promoCode } });
+      if (promo && promo.active && promo.expiryDate > new Date() && promo.usedCount < promo.maxUses) {
+        promoCodeId = promo.id;
+        if (promo.discountType === 'PERCENTAGE' || promo.discountType === 'PERCENT') {
+          discount = subtotal * (promo.discountValue / 100);
+        } else if (promo.discountType === 'FIXED' || promo.discountType === 'FLAT') {
+          discount = promo.discountValue;
+        }
+      } else {
+        return res.status(400).json({ message: 'Invalid or expired promo code' });
+      }
+    }
+    const totalAmount = Math.max(0, subtotal + shippingFee - discount);
+
+    if (expectedSubtotal !== undefined && Math.abs(subtotal - expectedSubtotal) > 1) {
       return res.status(400).json({ message: 'Cart prices have changed (e.g. Flash sale expired). Please refresh your cart.' });
     }
     const order = await prisma.$transaction(async (tx) => {
@@ -66,15 +98,23 @@ export const createOrder = async (
         if (!product) {
           throw new Error(`Product not found: ${item.productId}`);
         }
-        await tx.product.update({
+        const stockUpdate = await tx.product.updateMany({
           where: {
             id: product.id,
+            stock: { gte: item.quantity },
           },
           data: {
-            stock: {
-              decrement: item.quantity,
-            },
+            stock: { decrement: item.quantity },
           },
+        });
+        if (stockUpdate.count !== 1) {
+          throw new Error(`Insufficient stock for ${product.name}`);
+        }
+      }
+      if (promoCodeId) {
+        await tx.promoCode.update({
+          where: { id: promoCodeId },
+          data: { usedCount: { increment: 1 } }
         });
       }
       const newOrder = await tx.order.create({
@@ -82,7 +122,11 @@ export const createOrder = async (
           userId: req.user ? req.user.id : null,
           sessionId: !req.user ? sessionId : null,
           totalAmount,
-          shippingAddress: JSON.stringify(finalShippingAddress),
+          subtotal,
+          shippingFee,
+          discount,
+          promoCodeId,
+          shippingAddress: finalShippingAddress, // now saving as Json directly
           paymentMethod,
           paymentStatus: paymentMethod === 'COD' ? 'PENDING' : 'PENDING',
           orderStatus: 'PENDING',
@@ -92,7 +136,9 @@ export const createOrder = async (
           },
         },
         include: {
-          items: true,
+          items: {
+            include: { product: true }
+          },
         },
       });
       let cart;
@@ -125,6 +171,29 @@ export const createOrder = async (
     if (email) {
       await sendOrderConfirmationEmail(email, order, order.trackingNumber || '');
     }
+
+    if (paymentMethod === 'M-PESA' || paymentMethod === 'MPESA' || paymentMethod === 'M-Pesa') {
+      try {
+        const { initiateSTKPush } = require('../services/mpesaService');
+        const phone = shippingAddress.phoneNumber;
+        const response = await initiateSTKPush(phone, totalAmount, order.id);
+        
+        await prisma.paymentTransaction.create({
+          data: {
+            orderId: order.id,
+            amount: totalAmount,
+            provider: 'MPESA',
+            checkoutRequestId: response.CheckoutRequestID,
+            status: 'PENDING',
+          }
+        });
+        console.log(`[M-PESA] STK Push initiated for order ${order.id}. CheckoutRequestID: ${response.CheckoutRequestID}`);
+      } catch (e: any) {
+        console.error('[M-PESA] STK Push failed:', e.message);
+        // We log the failure but still return 201 because the order was saved successfully.
+        // User can retry payment from order tracking page later.
+      }
+    }
     return res.status(201).json(order);
   } catch (error) {
     return next(error);
@@ -153,15 +222,9 @@ export const listOrders = async (
       },
     });
     const formattedOrders = orders.map((order) => {
-      let shippingParsed = {};
-      try {
-        shippingParsed = JSON.parse(order.shippingAddress);
-      } catch (e) {
-        shippingParsed = {};
-      }
       return {
         ...order,
-        shippingAddress: shippingParsed,
+        shippingAddress: order.shippingAddress,
       };
     });
     return res.json(formattedOrders);
@@ -195,15 +258,9 @@ export const getOrderDetails = async (
     if (order.userId !== req.user.id && req.user.role !== 'ADMIN') {
       return res.status(403).json({ message: 'Access denied' });
     }
-    let shippingParsed = {};
-    try {
-      shippingParsed = JSON.parse(order.shippingAddress);
-    } catch (e) {
-      shippingParsed = {};
-    }
     return res.json({
       ...order,
-      shippingAddress: shippingParsed,
+      shippingAddress: order.shippingAddress,
     });
   } catch (error) {
     return next(error);
@@ -238,8 +295,8 @@ export const cancelOrder = async (
         authorized = true;
       } else {
         try {
-          const shippingData = JSON.parse(order.shippingAddress);
-          if (shippingData.guestEmail && shippingData.guestEmail.toLowerCase() === email.toLowerCase()) {
+          const shippingData = order.shippingAddress as any;
+          if (shippingData && shippingData.guestEmail && shippingData.guestEmail.toLowerCase() === email.toLowerCase()) {
             authorized = true;
           }
         } catch (e) {}
@@ -303,8 +360,8 @@ export const returnOrder = async (
         authorized = true;
       } else {
         try {
-          const shippingData = JSON.parse(order.shippingAddress);
-          if (shippingData.guestEmail && shippingData.guestEmail.toLowerCase() === email.toLowerCase()) {
+          const shippingData = order.shippingAddress as any;
+          if (shippingData && shippingData.guestEmail && shippingData.guestEmail.toLowerCase() === email.toLowerCase()) {
             authorized = true;
           }
         } catch (e) {}

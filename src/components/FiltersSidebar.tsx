@@ -1,18 +1,11 @@
 import React, { useState } from 'react';
 import { useCategories, type CategoryNode } from '../hooks/useCategories';
 import { Filter, ChevronDown, ChevronRight, Check } from 'lucide-react';
+import type { FilterState } from '../types';
+
 interface FiltersSidebarProps {
-  selectedCategory: string;
-  setSelectedCategory: (cat: string) => void;
-  selectedSubcategory: string;
-  setSelectedSubcategory: (sub: string) => void;
-  selectedBrand: string;
-  setSelectedBrand: (brand: string) => void;
-  minPrice: string;
-  setMinPrice: (price: string) => void;
-  maxPrice: string;
-  setMaxPrice: (price: string) => void;
-  onApplyFilters: () => void;
+  filters: FilterState;
+  onChange: (filters: FilterState) => void;
 }
 const RecursiveCategoryFilter: React.FC<{
   node: CategoryNode;
@@ -68,18 +61,32 @@ const RecursiveCategoryFilter: React.FC<{
   );
 };
 export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
-  selectedCategory,
-  setSelectedCategory,
-  selectedBrand,
-  setSelectedBrand,
-  minPrice,
-  setMinPrice,
-  maxPrice,
-  setMaxPrice,
-  onApplyFilters
+  filters,
+  onChange
 }) => {
   const { categories, loading } = useCategories();
   const brands = ['HP', 'Dell', 'Lenovo', 'Apple', 'ASUS', 'Acer', 'Samsung', 'MSI', 'Generic'];
+  const cpus = ['Intel Core i3', 'Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'AMD Ryzen 3', 'AMD Ryzen 5', 'AMD Ryzen 7', 'Apple M1', 'Apple M2', 'Apple M3'];
+  const rams = ['4GB', '8GB', '16GB', '32GB', '64GB'];
+  const storages = ['128GB', '256GB', '512GB', '1TB', '2TB'];
+  const conditions = ['New', 'Refurbished', 'Ex-UK'];
+
+  
+  const handleStringArrayToggle = (key: keyof FilterState, value: string) => {
+    const current = filters[key] as string[];
+    const isSelected = current.includes(value);
+    onChange({
+      ...filters,
+      [key]: isSelected ? current.filter(x => x !== value) : [...current, value]
+    });
+  };
+
+  const handleBrandSelect = (brand: string) => {
+    onChange({ ...filters, brand: brand ? [brand] : [] });
+  };
+  
+  const selectedCategory = filters.category;
+  const selectedBrand = filters.brand[0] || '';
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden sticky top-24">
       <div className="p-5 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
@@ -100,23 +107,23 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
             </div>
           ) : (
             <div className="flex flex-col gap-1">
-              <div 
-                className={`py-2 px-3 rounded-lg cursor-pointer transition-colors ${
-                  !selectedCategory ? 'bg-amber-50 text-[#F59E0B] font-bold' : 'text-slate-600 hover:bg-slate-50'
-                }`}
-                onClick={() => setSelectedCategory('')}
-              >
-                All Products
-              </div>
-              {categories.map((cat) => (
-                <RecursiveCategoryFilter
-                  key={cat.id}
-                  node={cat}
-                  level={0}
-                  selectedCategory={selectedCategory}
-                  onSelect={(slug) => setSelectedCategory(slug)}
-                />
-              ))}
+                <div 
+                  className={`py-2 px-3 rounded-lg cursor-pointer transition-colors ${
+                    !selectedCategory ? 'bg-amber-50 text-[#F59E0B] font-bold' : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                  onClick={() => onChange({ ...filters, category: '' })}
+                >
+                  All Products
+                </div>
+                {categories.map((cat) => (
+                  <RecursiveCategoryFilter
+                    key={cat.id}
+                    node={cat}
+                    level={0}
+                    selectedCategory={selectedCategory}
+                    onSelect={(slug) => onChange({ ...filters, category: slug })}
+                  />
+                ))}
             </div>
           )}
         </div>
@@ -134,7 +141,7 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                   name="brand"
                   value={brand}
                   checked={selectedBrand === brand}
-                  onChange={(e) => setSelectedBrand(e.target.value)}
+                  onChange={() => handleBrandSelect(brand)}
                   className="hidden"
                 />
                 <span className={`text-sm ${selectedBrand === brand ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>{brand}</span>
@@ -149,7 +156,7 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                 name="brand"
                 value=""
                 checked={!selectedBrand}
-                onChange={() => setSelectedBrand('')}
+                onChange={() => handleBrandSelect('')}
                 className="hidden"
               />
               <span className={`text-sm ${!selectedBrand ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>All Brands</span>
@@ -164,8 +171,8 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
               <input
                 type="number"
                 placeholder="Min"
-                value={minPrice}
-                onChange={(e) => setMinPrice(e.target.value)}
+                value={filters.minPrice}
+                onChange={(e) => onChange({ ...filters, minPrice: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B]"
               />
             </div>
@@ -173,19 +180,110 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
               <input
                 type="number"
                 placeholder="Max"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
+                value={filters.maxPrice}
+                onChange={(e) => onChange({ ...filters, maxPrice: e.target.value })}
                 className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B]"
               />
             </div>
           </div>
         </div>
-        <button
-          onClick={onApplyFilters}
-          className="w-full bg-[#F59E0B] hover:bg-amber-500 text-white font-bold py-3.5 px-4 rounded-xl transition-colors shadow-sm text-sm uppercase tracking-wide"
-        >
-          Apply Filters
-        </button>
+        
+        {/* CPU */}
+        <div>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-4">Processor (CPU)</h3>
+          <div className="space-y-3">
+            {cpus.map((cpu) => {
+              const isSelected = filters.cpu.includes(cpu);
+              return (
+                <label key={cpu} className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isSelected ? 'bg-[#F59E0B] border-[#F59E0B]' : 'border-slate-300 bg-white group-hover:border-[#F59E0B]'}`}>
+                    {isSelected && <Check className="h-3.5 w-3.5 text-white" />}
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => handleStringArrayToggle('cpu', cpu)}
+                    className="hidden"
+                  />
+                  <span className={`text-sm ${isSelected ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>{cpu}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* RAM */}
+        <div>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-4">Memory (RAM)</h3>
+          <div className="space-y-3">
+            {rams.map((ram) => {
+              const isSelected = filters.ram.includes(ram);
+              return (
+                <label key={ram} className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isSelected ? 'bg-[#F59E0B] border-[#F59E0B]' : 'border-slate-300 bg-white group-hover:border-[#F59E0B]'}`}>
+                    {isSelected && <Check className="h-3.5 w-3.5 text-white" />}
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => handleStringArrayToggle('ram', ram)}
+                    className="hidden"
+                  />
+                  <span className={`text-sm ${isSelected ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>{ram}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Storage */}
+        <div>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-4">Storage</h3>
+          <div className="space-y-3">
+            {storages.map((storage) => {
+              const isSelected = filters.storage.includes(storage);
+              return (
+                <label key={storage} className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isSelected ? 'bg-[#F59E0B] border-[#F59E0B]' : 'border-slate-300 bg-white group-hover:border-[#F59E0B]'}`}>
+                    {isSelected && <Check className="h-3.5 w-3.5 text-white" />}
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => handleStringArrayToggle('storage', storage)}
+                    className="hidden"
+                  />
+                  <span className={`text-sm ${isSelected ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>{storage}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Condition */}
+        <div>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-900 mb-4">Condition</h3>
+          <div className="space-y-3">
+            {conditions.map((cond) => {
+              const isSelected = filters.condition.includes(cond);
+              return (
+                <label key={cond} className="flex items-center gap-3 cursor-pointer group">
+                  <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isSelected ? 'bg-[#F59E0B] border-[#F59E0B]' : 'border-slate-300 bg-white group-hover:border-[#F59E0B]'}`}>
+                    {isSelected && <Check className="h-3.5 w-3.5 text-white" />}
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => handleStringArrayToggle('condition', cond)}
+                    className="hidden"
+                  />
+                  <span className={`text-sm ${isSelected ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>{cond}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
       </div>
     </div>
   );

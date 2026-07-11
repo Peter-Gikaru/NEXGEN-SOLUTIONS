@@ -87,11 +87,11 @@ export const getCart = async (
     }
 
     const formattedItems = cart.items.map((item) => {
-      let imageUrlsParsed = [];
-      try {
-        imageUrlsParsed = JSON.parse(item.product.imageUrls);
-      } catch (e) {
-        imageUrlsParsed = [item.product.imageUrls];
+      let imageUrlsParsed: any = [];
+      if (Array.isArray(item.product.imageUrls)) {
+        imageUrlsParsed = item.product.imageUrls;
+      } else if (typeof item.product.imageUrls === 'string') {
+        try { imageUrlsParsed = JSON.parse(item.product.imageUrls); } catch(e) { imageUrlsParsed = [item.product.imageUrls]; }
       }
 
       const activeFlashSale = item.product.flashSale;
@@ -160,6 +160,9 @@ export const addToCart = async (
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
+    if (quantity <= 0) {
+      return res.status(400).json({ message: 'Quantity must be at least 1' });
+    }
 
     let cart;
     if (req.user) {
@@ -186,11 +189,18 @@ export const addToCart = async (
     });
 
     if (existingItem) {
+      const nextQuantity = existingItem.quantity + quantity;
+      if (nextQuantity > product.stock) {
+        return res.status(400).json({ message: `Only ${product.stock} units available` });
+      }
       const updatedItem = await prisma.cartItem.update({
         where: { id: existingItem.id },
-        data: { quantity: existingItem.quantity + quantity },
+        data: { quantity: nextQuantity },
       });
       return res.json(updatedItem);
+    }
+    if (quantity > product.stock) {
+      return res.status(400).json({ message: `Only ${product.stock} units available` });
     }
 
     const activeFlashSale = product.flashSale;
@@ -228,7 +238,7 @@ export const updateCartItem = async (
 
     const cartItem = await prisma.cartItem.findUnique({
       where: { id },
-      include: { cart: true },
+      include: { cart: true, product: true },
     });
 
     if (!cartItem) {
@@ -248,6 +258,9 @@ export const updateCartItem = async (
         where: { id },
       });
       return res.json({ message: 'Item removed from cart' });
+    }
+    if (quantity > cartItem.product.stock) {
+      return res.status(400).json({ message: `Only ${cartItem.product.stock} units available` });
     }
 
     const updatedItem = await prisma.cartItem.update({

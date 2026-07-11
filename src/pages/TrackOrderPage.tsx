@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { PackageSearch, Mail, Key, Clock, Package, Truck, CheckCircle, ArrowRight, ShieldAlert, X, Loader2 } from 'lucide-react';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 export const TrackOrderPage: React.FC = () => {
+  const navigate = useNavigate();
   const [trackingNumber, setTrackingNumber] = useState('');
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -62,18 +64,8 @@ export const TrackOrderPage: React.FC = () => {
       setIsLoading(false);
     }
   };
-  const handleReturnOrder = async () => {
-    if (!window.confirm('Are you sure you want to request a return for this order?')) return;
-    try {
-      setIsLoading(true);
-      await api.put(`/orders/${orderData.id}/return`, { email });
-      const response = await api.get(`/track`, { params: { trackingNumber, email } });
-      setOrderData(response.data);
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to request return.');
-    } finally {
-      setIsLoading(false);
-    }
+  const handleReturnOrder = () => {
+    navigate(`/return-request?orderId=${orderData.id}`);
   };
   return (
     <div className="flex-1 bg-slate-50 text-slate-900 min-h-[80vh] py-16 px-4 font-sans">
@@ -190,6 +182,38 @@ export const TrackOrderPage: React.FC = () => {
                       </div>
                     );
                   })}
+                </div>
+              </div>
+            )}
+            
+            {orderData.trackingEvents && orderData.trackingEvents.length > 0 && (
+              <div className="mb-12 bg-slate-50 border border-slate-200 p-6 rounded-xl">
+                <h3 className="font-bold text-slate-800 mb-6 text-lg">Delivery Timeline</h3>
+                <div className="space-y-6">
+                  {orderData.trackingEvents.map((event: any, index: number) => (
+                    <div key={event.id} className="relative flex gap-4">
+                      {index !== orderData.trackingEvents.length - 1 && (
+                        <div className="absolute top-8 left-3.5 w-0.5 h-full bg-slate-200"></div>
+                      )}
+                      <div className="w-8 h-8 rounded-full bg-white border-2 border-[#F59E0B] flex items-center justify-center shrink-0 z-10">
+                        <div className="w-3 h-3 bg-[#F59E0B] rounded-full"></div>
+                      </div>
+                      <div className="flex-1 pb-2">
+                        <div className="flex justify-between items-start mb-1">
+                          <h4 className="font-bold text-slate-900">{event.status.replace(/_/g, ' ')}</h4>
+                          <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">
+                            {new Date(event.createdAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-600">{event.description}</p>
+                        {event.location && (
+                          <p className="text-xs font-medium text-slate-500 mt-1 flex items-center gap-1">
+                            <Truck className="w-3 h-3" /> Location: {event.location}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

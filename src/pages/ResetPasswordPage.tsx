@@ -35,8 +35,7 @@ export const ResetPasswordPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
+    <>
         <div className="text-center mb-8">
           <h2 className="text-3xl font-extrabold text-slate-900 mb-2">Set new password</h2>
           <p className="text-sm text-slate-500">Your new password must be different to previously used passwords.</p>
@@ -91,7 +90,6 @@ export const ResetPasswordPage: React.FC = () => {
             </Link>
           </div>
         </form>
-      </div>
-    </div>
+      </>
   );
 };

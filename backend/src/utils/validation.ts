@@ -64,8 +64,10 @@ export const orderSchema = z.object({
     area: z.string().min(2, 'Area is required'),
     detailedAddress: z.string().min(5, 'Detailed address is required'),
   }),
+  expectedSubtotal: z.number().positive().optional(),
   items: z.array(orderItemSchema).min(1, 'Order must contain at least one item'),
   paymentMethod: z.enum(['MPESA', 'CARD', 'COD']),
+  promoCode: z.string().optional(),
 });
 
 export const reviewSchema = z.object({

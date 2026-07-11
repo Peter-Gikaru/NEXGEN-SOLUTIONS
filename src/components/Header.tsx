@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useCompare } from '../context/CompareContext';
 import { useAuth } from '../context/AuthContext';
 import { CategoryNav } from './CategoryNav';
 import api from '../services/api';
@@ -16,13 +17,17 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronRight,
-  Heart
+  Heart,
+  Scale,
+  Package,
+  LogOut as Logout
 } from 'lucide-react';
 import { useCategories } from '../hooks/useCategories';
 export const Header: React.FC = () => {
   const { categories: mainCategories } = useCategories();
   const { cartItems, setIsCartOpen } = useCart();
   const { items: wishlistItems } = useWishlist();
+  const { compareItems } = useCompare();
   const { user, isAuthenticated, logout } = useAuth();
   const [searchParams] = useSearchParams();
   const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
@@ -37,20 +42,7 @@ export const Header: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [didYouMean, setDidYouMean] = useState<string | null>(null);
   const [recommendedProducts, setRecommendedProducts] = useState<any[]>([]);
-  const [topBarIndex, setTopBarIndex] = useState(0);
-  const [topBarFade, setTopBarFade] = useState(true);
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTopBarFade(false);
-      const timer = setTimeout(() => {
-        setTopBarIndex((prev) => (prev === 0 ? 1 : 0));
-        setTopBarFade(true);
-      }, 300);
-      return () => clearTimeout(timer);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
   useEffect(() => {
     const fetchRecommendations = async () => {
       try {
@@ -144,14 +136,13 @@ export const Header: React.FC = () => {
               >
                 <Menu className="h-6 w-6" />
               </button>
-              <Link to="/" className="hover:opacity-90 transition-opacity flex items-center gap-2" aria-label="NexGen Gadgets Home">
-                <img src="/favicon.png" alt="NexGen Logo" className="h-8 w-8 md:h-10 md:w-10 object-contain" />
-                <span className="font-sans text-2xl md:text-3xl font-semibold leading-none tracking-wide text-white">
+              <Link to="/" className="hover:opacity-90 transition-opacity flex items-center" aria-label="NexGen Gadgets Home">
+                <img src="/favicon.png" alt="NexGen Logo" className="h-10 md:h-14 w-auto object-contain" />
+              </Link>
+              <span className="font-sans text-2xl md:text-3xl font-semibold leading-none tracking-wide text-white">
                   NexGen <span className="text-[#F59E0B]">Gadgets</span>
                 </span>
-              </Link>
             </div>
-            {}
             <div className="flex items-center gap-3 md:hidden">
               <Link
                 to="/wishlist"
@@ -328,145 +319,100 @@ export const Header: React.FC = () => {
               </div>
             )}
           </form>
-          {/* Contact Support & Trust Badge (Right on Desktop) - Alternating Carousel Animation */}
-          <div className="hidden md:flex items-center gap-4 shrink-0 text-right justify-end min-w-[280px]">
-            <div className={`transition-all duration-300 ${topBarFade ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform -translate-x-2'}`}>
-              {topBarIndex === 0 ? (
-                <a 
-                  href="tel:+254721420096"
-                  className="flex items-center gap-2 hover:text-[#F59E0B] transition-colors text-[16px] font-semibold text-white"
-                >
-                  <Phone className="h-5 w-5 text-[#F59E0B]" />
-                  <span>Order Now: <strong className="text-white">+254 717 043408</strong></span>
-                </a>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-[16px] text-[#10B981] font-semibold bg-emerald-950/45 px-3 py-1 rounded border border-emerald-800/50">
-                  <CheckCircle2 className="h-5 w-5 text-[#10B981]" />
-                  <span>✓ Free Delivery Within Nairobi</span>
-                </span>
-              )}
+          <div className="hidden md:flex items-center gap-4 shrink-0 text-right justify-end">
+            {/* Help Dropdown */}
+            <div className="relative group ml-4">
+              <div className="flex items-center gap-2 cursor-pointer hover:text-[#F59E0B] transition-colors py-2">
+                <div className="relative border-2 border-white group-hover:border-[#F59E0B] rounded-full w-8 h-8 flex items-center justify-center transition-colors">
+                  <span className="font-bold text-[18px] text-white group-hover:text-[#F59E0B] block mt-[-2px]">?</span>
+                </div>
+                <span className="text-[16px] font-bold flex items-center gap-1 text-white group-hover:text-[#F59E0B]">Help <ChevronDown className="h-4 w-4" /></span>
+              </div>
+              <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded shadow-2xl py-2 z-50 text-slate-800 border border-gray-100 hidden group-hover:block">
+                <a href="tel:+254717043408" className="block px-4 py-3 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px] border-b border-gray-100">Call Us</a>
+                <Link to="/how-to-shop" className="block px-4 py-3 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px] border-b border-gray-100">How to Shop</Link>
+                <a href="mailto:support@nexgen-gadgets.com" className="block px-4 py-3 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px]">Contact Support</a>
+              </div>
             </div>
-            {/* Desktop Wishlist Icon */}
-            <Link
-              to="/wishlist"
-              className="relative p-2.5 rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-colors flex items-center justify-center cursor-pointer text-white ml-2"
-              aria-label="Wishlist"
+
+            {/* Account Dropdown */}
+            <div 
+              className="relative ml-4"
+              onMouseEnter={() => setIsProfileOpen(true)}
+              onMouseLeave={() => setIsProfileOpen(false)}
             >
-              <Heart className="h-5 w-5 text-white" />
-              {wishlistItems.length > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[12px] font-semibold w-5.5 h-5.5 rounded-full flex items-center justify-center shadow">
-                  {wishlistItems.length}
-                </span>
-              )}
-            </Link>
-            {/* Desktop Shopping Cart Icon */}
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative p-2.5 rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-colors flex items-center justify-center cursor-pointer text-white ml-2"
-              aria-label="Open Shopping Cart"
-            >
-              <ShoppingCart className="h-5 w-5 text-white" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 bg-[#F59E0B] text-primary text-[14px] font-semibold w-5.5 h-5.5 rounded-full flex items-center justify-center border border-[#1a1a2e] shadow">
-                  {totalItems}
-                </span>
-              )}
-            </button>
-            {/* Desktop User Account Link/Dropdown */}
-            <div className="relative ml-2">
-              {isAuthenticated ? (
-                <div>
-                  <button
-                    onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className="p-2.5 rounded bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-colors flex items-center gap-1.5 cursor-pointer text-white font-sans text-[14px]"
-                  >
-                    <User className="h-5 w-5 text-white" />
-                    <span className="max-w-[80px] truncate">{user?.name}</span>
-                    <ChevronDown className="h-3.5 w-3.5 text-gray-400" />
-                  </button>
-                  {isProfileOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-800 rounded-lg shadow-xl py-1 z-55 text-left">
-                      <div className="px-4 py-2 border-b border-slate-800 text-xs text-slate-400">
-                        Logged in as: <strong className="text-white">{user?.email}</strong>
-                      </div>
-                      {user?.role === 'ADMIN' && (
-                        <Link
-                          to="/admin"
-                          onClick={() => setIsProfileOpen(false)}
-                          className="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-                        >
-                          Dashboard Portal
-                        </Link>
-                      )}
-                      {user?.role === 'USER' && (
-                        <Link
-                          to="/orders"
-                          onClick={() => setIsProfileOpen(false)}
-                          className="block px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-                        >
-                          My Orders & Returns
-                        </Link>
-                      )}
-                      <button
-                        onClick={async () => {
-                          setIsProfileOpen(false);
-                          await logout();
-                          navigate('/login');
-                        }}
-                        className="w-full text-left block px-4 py-2 text-sm text-red-450 hover:bg-slate-800 hover:text-white"
-                      >
-                        Sign Out
-                      </button>
+              <div className="flex items-center gap-2 cursor-pointer hover:text-[#F59E0B] transition-colors py-2 group">
+                <User className="h-9 w-9 text-white group-hover:text-[#F59E0B]" />
+                <div className="flex flex-col text-left">
+                  <span className="text-[16px] font-bold flex items-center gap-1 text-white group-hover:text-[#F59E0B]">
+                    {isAuthenticated ? `Hi, ${user?.name?.split(' ')[0]}` : 'Account'} 
+                    <ChevronDown className="h-4 w-4" />
+                  </span>
+                </div>
+              </div>
+
+              {isProfileOpen && (
+                <div className="absolute right-0 top-full mt-1 w-64 bg-white rounded shadow-2xl py-3 z-50 text-slate-800 border border-gray-100">
+                  {!isAuthenticated ? (
+                    <div className="px-4 pb-3 mb-2 border-b border-gray-100">
+                      <Link to="/login" className="block w-full text-center bg-[#F59E0B] text-slate-900 font-bold py-3 rounded hover:bg-amber-500 transition-colors shadow-sm text-[16px]">
+                        Sign In
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="px-4 pb-2 mb-2 border-b border-gray-100 text-[14px] font-medium text-slate-500 truncate">
+                      {user?.email}
                     </div>
                   )}
+                  
+                  <Link to={isAuthenticated && user?.role === 'ADMIN' ? '/admin' : '/orders'} className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px]">
+                    <User className="h-5 w-5 text-gray-400" />
+                    {isAuthenticated && user?.role === 'ADMIN' ? 'Admin Dashboard' : 'My Account'}
+                  </Link>
+                  <Link to="/orders" className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px]">
+                    <Package className="h-5 w-5 text-gray-400" />
+                    Orders
+                  </Link>
+                  <Link to="/wishlist" className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px] justify-between">
+                    <div className="flex items-center gap-3">
+                      <Heart className="h-5 w-5 text-gray-400" />
+                      Saved Items
+                    </div>
+                    {wishlistItems.length > 0 && <span className="bg-[#F59E0B] text-white text-[12px] font-bold px-2 py-0.5 rounded-full">{wishlistItems.length}</span>}
+                  </Link>
+                  <Link to="/compare" className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px] justify-between">
+                    <div className="flex items-center gap-3">
+                      <Scale className="h-5 w-5 text-gray-400" />
+                      Compare
+                    </div>
+                    {compareItems.length > 0 && <span className="bg-blue-500 text-white text-[12px] font-bold px-2 py-0.5 rounded-full">{compareItems.length}</span>}
+                  </Link>
+
+                  {isAuthenticated && (
+                    <>
+                      <div className="h-px bg-gray-100 my-2"></div>
+                      <button onClick={async () => { await logout(); navigate('/login'); }} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-red-500 hover:text-red-600 transition-colors font-semibold text-left text-[15px]">
+                        <Logout className="h-5 w-5" />
+                        Logout
+                      </button>
+                    </>
+                  )}
                 </div>
-              ) : (
-                <Link
-                  to="/login"
-                  className="p-2.5 px-4 rounded bg-[#d97706] text-slate-950 font-bold hover:bg-amber-700 transition-colors flex items-center justify-center cursor-pointer text-[14px]"
-                >
-                  Sign In
-                </Link>
               )}
             </div>
-          </div>
-          {/* Mobile Search Bar - stack version */}
-          <form 
-            onSubmit={handleSearchSubmit} 
-            className="flex md:hidden items-center relative w-full"
-          >
-            <input
-              type="text"
-              placeholder="Search laptops..."
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              className="w-full pl-4 pr-12 py-2.5 text-[16px] bg-white text-text-primary rounded border border-gray-300 focus:outline-none focus:border-[#d97706] placeholder-gray-400"
-            />
-            <button
-              type="submit"
-              className="absolute right-0 top-0 bottom-0 px-4.5 bg-[#d97706] text-primary rounded-r flex items-center justify-center hover:bg-amber-700 cursor-pointer transition-colors"
-            >
-              <Search className="h-5 w-5 text-primary" />
+
+            {/* Cart Button */}
+            <button onClick={() => setIsCartOpen(true)} className="flex items-center gap-2 cursor-pointer hover:text-[#F59E0B] transition-colors py-2 group ml-4">
+              <div className="relative">
+                <ShoppingCart className="h-9 w-9 text-white group-hover:text-[#F59E0B]" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-[#F59E0B] text-[#1a1a2e] text-[14px] font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#1a1a2e]">
+                    {totalItems}
+                  </span>
+                )}
+              </div>
+              <span className="text-[16px] font-bold text-white group-hover:text-[#F59E0B]">Cart</span>
             </button>
-          </form>
-          {/* Mobile Alternating support contact / trust badge (stacks bottom) */}
-          <div className="flex md:hidden items-center justify-center h-8 w-full border-t border-slate-800 pt-2.5 mt-0.5">
-            <div className={`transition-all duration-300 ${topBarFade ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform -translate-y-1'}`}>
-              {topBarIndex === 0 ? (
-                <a 
-                  href="tel:+254721420096"
-                  className="flex items-center gap-1.5 hover:text-[#d97706] transition-colors text-[14px] font-semibold text-white"
-                >
-                  <Phone className="h-4 w-4 text-[#d97706]" />
-                  <span>Call: <strong className="text-white">+254 721 420096</strong></span>
-                </a>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 text-[14px] text-[#10B981] font-semibold">
-                  <CheckCircle2 className="h-4 w-4 text-[#10B981]" />
-                  <span>✓ Free Delivery Within Nairobi</span>
-                </span>
-              )}
-            </div>
           </div>
         </div>
       </div>
@@ -638,8 +584,24 @@ export const Header: React.FC = () => {
                   );
                 })}
               </div>
-              {}
-              <div className="mt-8 px-4 py-4 bg-gray-50 border-t border-gray-100 flex flex-col gap-3 shrink-0">
+              
+              <div className="px-4 pt-4 border-t border-gray-150">
+                <Link
+                  to="/compare"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="flex items-center gap-3 text-text-primary hover:text-secondary font-semibold text-[15px] py-2"
+                >
+                  <Scale className="h-5 w-5 text-[#d97706]" />
+                  <span>Compare Laptops</span>
+                  {compareItems.length > 0 && (
+                    <span className="bg-blue-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full ml-auto">
+                      {compareItems.length}
+                    </span>
+                  )}
+                </Link>
+              </div>
+
+              <div className="mt-4 px-4 py-4 bg-gray-50 border-t border-gray-100 flex flex-col gap-3 shrink-0">
                 <span className="text-[13px] font-bold text-gray-400 uppercase tracking-wider">
                   Contact & Support
                 </span>

@@ -79,7 +79,7 @@ const csrfMiddleware = (req: express.Request, res: express.Response, next: expre
     return next();
   }
 
-  // Allow webhooks without CSRF
+  
   if (req.originalUrl === '/api/payments/mpesa-callback') {
     return next();
   }

@@ -49,16 +49,16 @@ export const ReturnRequestPage: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      // 1. Upload images
+      
       const formData = new FormData();
       files.forEach((file) => formData.append('images', file));
       
       const uploadRes = await api.post('/uploads/returns', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      const imageUrls = uploadRes.data.urls; // Assuming backend returns { urls: string[] }
+      const imageUrls = uploadRes.data.urls; 
 
-      // 2. Submit return request
+      
       await api.post('/returns', {
         orderId,
         reason,

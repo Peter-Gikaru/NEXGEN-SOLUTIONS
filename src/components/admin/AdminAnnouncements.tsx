@@ -14,7 +14,7 @@ export const AdminAnnouncements: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    // Load from localStorage on mount
+    
     const saved = localStorage.getItem('nexgen_announcements');
     if (saved) {
       try {
@@ -83,7 +83,7 @@ export const AdminAnnouncements: React.FC = () => {
     // Save to localStorage
     localStorage.setItem('nexgen_announcements', JSON.stringify(announcements));
     
-    // Dispatch custom event to notify AnnouncementBar
+    
     window.dispatchEvent(new Event('announcements_updated'));
     
     setTimeout(() => {

@@ -82,7 +82,7 @@ export const CategoryNav: React.FC = () => {
 
             {isDropdownOpen && (
               <div className="absolute top-full left-0 w-[280px] bg-white border border-slate-200 border-t-0 shadow-2xl rounded-b-xl rounded-tr-xl py-3 z-50 origin-top-left -mt-[1px]">
-                {/* To create a seamless look if the button is white when open, we overlay a small white block over the border */}
+                {}
                 <div className="absolute top-0 left-0 w-full h-[1px] bg-white z-10" style={{ width: 'calc(100% - 2px)' }}></div>
                 <ul className="flex flex-col relative z-20">
                   {categories.map((cat) => (

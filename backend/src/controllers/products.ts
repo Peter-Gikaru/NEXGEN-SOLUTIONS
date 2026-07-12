@@ -41,7 +41,7 @@ export const listProducts = async (
     const whereClause: any = {};
     const userRole = (req as AuthenticatedRequest).user?.role;
     if (req.query.includeInactive === 'true' && userRole === 'ADMIN') {
-      // Allow Admin to see inactive
+      
     } else {
       whereClause.isActive = true;
     }

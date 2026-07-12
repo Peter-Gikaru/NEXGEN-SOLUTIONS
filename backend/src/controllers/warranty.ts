@@ -26,7 +26,7 @@ export const createWarrantyClaim = async (
       return res.status(400).json({ message: 'Only delivered items are eligible for warranty claims' });
     }
 
-    // Check if the product was actually in this order
+    
     const orderItem = await prisma.orderItem.findFirst({
       where: {
         orderId,

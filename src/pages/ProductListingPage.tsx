@@ -304,7 +304,7 @@ export const ProductListingPage: React.FC = () => {
               onChange={handleApplyFilters}
             />
           </div>
-          {/* Products List Area */}
+          {}
           <div className="flex-1 min-w-0">
             {isLoading ? (
               <div className="py-20 text-center text-slate-500">Loading products...</div>

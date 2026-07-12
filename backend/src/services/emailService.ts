@@ -319,3 +319,21 @@ export const sendPromotionalEmail = async (emails: string[], subject: string, ht
     console.error('Error sending promotional email:', error);
   }
 };
+
+export const sendAdminAlertEmail = async (subject: string, text: string) => {
+  const mailOptions = {
+    from: `"NexGen System" <${fromEmail}>`,
+    to: process.env.ADMIN_EMAIL || 'admin@nexgen.com',
+    subject: subject,
+    text: text,
+  };
+  try {
+    if (process.env.SMTP_USER && process.env.SMTP_USER !== 'mock_user') {
+      await transporter.sendMail(mailOptions);
+    } else {
+      console.log(`[MOCK EMAIL] Admin Alert: ${subject} - ${text}`);
+    }
+  } catch (error) {
+    console.error('Error sending admin alert email:', error);
+  }
+};

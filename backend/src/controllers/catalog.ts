@@ -16,7 +16,7 @@ export const exportFacebookCatalog = async (req: Request, res: Response, next: N
       include: { category: true }
     });
 
-    const FRONTEND_URL = process.env.FRONTEND_URL || 'https:
+    const FRONTEND_URL = process.env.FRONTEND_URL || 'https://yourdomain.co.ke';
 
     const headers = [
       'id', 'title', 'description', 'availability', 'condition', 

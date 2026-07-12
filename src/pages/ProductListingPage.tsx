@@ -7,6 +7,7 @@ import { ChevronDown, SlidersHorizontal, X } from 'lucide-react';
 import { SEO } from '../components/SEO';
 import type { FilterState } from '../types';
 import { buildBreadcrumbs } from '../lib/structured-data';
+import { Loader } from '../components/Loader';
 
 export const ProductListingPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -304,10 +305,10 @@ export const ProductListingPage: React.FC = () => {
               onChange={handleApplyFilters}
             />
           </div>
-          {/* Products List Area */}
+          {}
           <div className="flex-1 min-w-0">
             {isLoading ? (
-              <div className="py-20 text-center text-slate-500">Loading products...</div>
+              <Loader text="Fetching top laptops for you..." />
             ) : processedProducts.length === 0 ? (
               <div className="bg-white border border-gray-200 text-text-[#1a1a2e] rounded p-12 text-center flex flex-col items-center justify-center min-h-[350px]">
                 <div className="bg-gray-50 p-6 rounded-full border border-gray-150 mb-4">

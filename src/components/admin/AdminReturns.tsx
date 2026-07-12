@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { Loader } from '../Loader';
 
 export const AdminReturns: React.FC = () => {
   const [returns, setReturns] = useState<any[]>([]);
@@ -31,7 +32,7 @@ export const AdminReturns: React.FC = () => {
     }
   };
 
-  if (loading) return <div>Loading returns...</div>;
+  if (loading) return <Loader text="Fetching returns..." />;
 
   return (
     <div>

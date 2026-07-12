@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Save, AlertCircle, Volume2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Loader } from '../Loader';
 
 interface Announcement {
   id: string;
@@ -14,7 +15,7 @@ export const AdminAnnouncements: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    // Load from localStorage on mount
+    
     const saved = localStorage.getItem('nexgen_announcements');
     if (saved) {
       try {
@@ -83,7 +84,7 @@ export const AdminAnnouncements: React.FC = () => {
     // Save to localStorage
     localStorage.setItem('nexgen_announcements', JSON.stringify(announcements));
     
-    // Dispatch custom event to notify AnnouncementBar
+    
     window.dispatchEvent(new Event('announcements_updated'));
     
     setTimeout(() => {
@@ -93,7 +94,7 @@ export const AdminAnnouncements: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-500">Loading...</div>;
+    return <Loader text="Fetching announcements..." />;
   }
 
   return (

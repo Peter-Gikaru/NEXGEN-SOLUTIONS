@@ -2,11 +2,11 @@ import cron from 'node-cron';
 import prisma from '../config/db';
 
 export const initCronJobs = () => {
-  // Run every 10 minutes
+  
   cron.schedule('*/10 * * * *', async () => {
     console.log('[CRON] Running unpaid orders timeout check...');
     try {
-      // Find orders that are PENDING and older than 30 minutes
+      
       const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
       
       const expiredOrders = await prisma.order.findMany({
@@ -27,7 +27,7 @@ export const initCronJobs = () => {
         
         for (const order of expiredOrders) {
           await prisma.$transaction(async (tx) => {
-            // Cancel order
+            
             await tx.order.update({
               where: { id: order.id },
               data: {
@@ -37,7 +37,7 @@ export const initCronJobs = () => {
               }
             });
 
-            // Restock items
+            
             for (const item of order.items) {
               await tx.product.update({
                 where: { id: item.productId },
@@ -47,7 +47,7 @@ export const initCronJobs = () => {
               });
             }
 
-            // Log event
+            
             await tx.trackingEvent.create({
               data: {
                 orderId: order.id,
@@ -63,7 +63,7 @@ export const initCronJobs = () => {
     }
   });
 
-  // Run every hour for abandoned carts
+  
   cron.schedule('0 * * * *', async () => {
     console.log('[CRON] Running abandoned cart check...');
     try {
@@ -84,7 +84,7 @@ export const initCronJobs = () => {
         console.log(`[CRON] Found ${abandonedCarts.length} abandoned carts.`);
         for (const cart of abandonedCarts) {
           if (cart.user?.email) {
-            // TODO: Integrate Brevo API here to send actual email
+            
             console.log(`[CRON] Sending abandoned cart email to ${cart.user.email}`);
             await prisma.cart.update({
               where: { id: cart.id },
@@ -98,7 +98,7 @@ export const initCronJobs = () => {
     }
   });
 
-  // Run daily at noon for price drop alerts
+  
   cron.schedule('0 12 * * *', async () => {
     console.log('[CRON] Running price drop alerts check...');
     try {
@@ -108,7 +108,7 @@ export const initCronJobs = () => {
       });
 
       const triggeredAlerts = alerts.filter(alert => {
-        if (!alert.targetPrice) return true; // Notify on any drop
+        if (!alert.targetPrice) return true; 
         return alert.product.price <= alert.targetPrice;
       });
 
@@ -116,7 +116,7 @@ export const initCronJobs = () => {
         console.log(`[CRON] Triggering ${triggeredAlerts.length} price drop alerts.`);
         for (const alert of triggeredAlerts) {
           if (alert.user?.email) {
-            // TODO: Send Brevo Email
+            
             console.log(`[CRON] Sending price drop alert for ${alert.product.name} to ${alert.user.email}`);
             await prisma.priceDropAlert.update({
               where: { id: alert.id },
@@ -130,7 +130,7 @@ export const initCronJobs = () => {
     }
   });
 
-  // Run daily at 10 AM for "Review Your Product" emails (7 days post-delivery)
+  
   cron.schedule('0 10 * * *', async () => {
     console.log('[CRON] Running post-purchase review check...');
     try {
@@ -140,7 +140,7 @@ export const initCronJobs = () => {
       const deliveredOrders = await prisma.order.findMany({
         where: {
           orderStatus: 'DELIVERED',
-          updatedAt: { lt: sevenDaysAgo, gt: eightDaysAgo }, // roughly the 7th day
+          updatedAt: { lt: sevenDaysAgo, gt: eightDaysAgo }, 
           userId: { not: null }
         },
         include: { user: true, items: { include: { product: true } } }
@@ -150,7 +150,7 @@ export const initCronJobs = () => {
         console.log(`[CRON] Sending review requests for ${deliveredOrders.length} orders.`);
         for (const order of deliveredOrders) {
           if (order.user?.email) {
-            // TODO: Send Brevo Email
+            
             console.log(`[CRON] Sending "Review your purchase" email to ${order.user.email} for order ${order.id}`);
           }
         }

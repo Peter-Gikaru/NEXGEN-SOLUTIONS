@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import { Tag } from 'lucide-react';
+import { Loader } from '../Loader';
 
 export const AdminCoupons: React.FC = () => {
   const [coupons, setCoupons] = useState<any[]>([]);
@@ -50,7 +51,7 @@ export const AdminCoupons: React.FC = () => {
     }
   };
 
-  if (loading) return <div>Loading coupons...</div>;
+  if (loading) return <Loader text="Fetching coupons..." />;
 
   return (
     <div>

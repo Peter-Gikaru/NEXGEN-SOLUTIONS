@@ -26,6 +26,7 @@ import adminLogRoutes from './routes/adminLogs';
 import newsletterRoutes from './routes/newsletter';
 import returnRoutes from './routes/returns';
 import warrantyRoutes from './routes/warranty';
+import livechatRoutes from './routes/livechat';
 import { initCronJobs } from './services/cron';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -79,7 +80,7 @@ const csrfMiddleware = (req: express.Request, res: express.Response, next: expre
     return next();
   }
 
-  // Allow webhooks without CSRF
+  
   if (req.originalUrl === '/api/payments/mpesa-callback') {
     return next();
   }
@@ -125,9 +126,25 @@ app.use('/api/admin/logs', adminLogRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/returns', returnRoutes);
 app.use('/api/warranty', warrantyRoutes);
+app.use('/api/livechat', livechatRoutes);
+
+import { Server as SocketIOServer } from 'socket.io';
+import { setupSocket } from './services/socket';
+import http from 'http';
 
 app.use(errorHandler);
 initCronJobs();
-app.listen(port, () => {
+
+const server = http.createServer(app);
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: allowedOrigins,
+    credentials: true
+  }
+});
+
+setupSocket(io);
+
+server.listen(port, () => {
   console.log(`Server running on port ${port} with JWT_SECRET configured.`);
 });

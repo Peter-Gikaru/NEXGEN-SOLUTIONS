@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Key, Eye, EyeOff, ArrowRight, ArrowLeft, AlertCircle, Lock, Mail } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import api from '../services/api';
 import { GoogleLogin } from '@react-oauth/google';
 import { startAuthentication } from '@simplewebauthn/browser';
@@ -167,6 +167,7 @@ export const LoginPage: React.FC = () => {
           </Link>
         </div>
         <div className="text-center mb-8">
+          <img src="/favicon.png" alt="NexGen Logo" className="h-12 w-auto mx-auto mb-4 object-contain lg:hidden" />
           <h2 className="font-sans text-3xl font-extrabold tracking-tight text-slate-900">
             Welcome <span className="text-[#F59E0B]">Back</span>
           </h2>

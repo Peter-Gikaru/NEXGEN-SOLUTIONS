@@ -82,7 +82,11 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
   };
 
   const handleBrandSelect = (brand: string) => {
-    onChange({ ...filters, brand: brand ? [brand] : [] });
+    if (brand && selectedBrand === brand) {
+      onChange({ ...filters, brand: [] });
+    } else {
+      onChange({ ...filters, brand: brand ? [brand] : [] });
+    }
   };
   
   const selectedCategory = filters.category;

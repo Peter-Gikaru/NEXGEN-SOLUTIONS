@@ -143,6 +143,7 @@ export const WishlistPage: React.FC = () => {
                   stockStatus={product.stock > 0 ? 'in_stock' : 'out_of_stock'}
                   stockCount={product.stock}
                   isVerified={true}
+                  warranty={product.warranty}
                 />
               ))}
             </div>
@@ -154,3 +155,4 @@ export const WishlistPage: React.FC = () => {
     </div>
   );
 };
+

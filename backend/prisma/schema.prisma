@@ -39,6 +39,8 @@ model User {
   returnRequests         ReturnRequest[]
   warrantyClaims         WarrantyClaim[]
   priceDropAlerts        PriceDropAlert[]
+  auditLogs              AuditLog[]
+  securityAlerts         SecurityAlert[]
 }
 
 model Address {
@@ -80,6 +82,7 @@ model Product {
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   variants        Json?
+  warranty        String           @default("1 Year")
   threeDModelUrl  String?
   isActive        Boolean          @default(true)
   cartItems       CartItem[]
@@ -225,6 +228,7 @@ model ShippingZone {
   regionName    String   @unique
   fee           Float
   estimatedDays String
+  counties      Json     @default("[]")
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -325,4 +329,51 @@ model PriceDropAlert {
   product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?  // nullable for guests
+  sessionId String?  // for guests
+  action    String
+  details   String
+  ipAddress String?
+  userAgent String?
+  severity  String   @default("INFO") // INFO, WARNING, CRITICAL
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model SecurityAlert {
+  id          String   @id @default(uuid())
+  type        String   // e.g. "MULTIPLE_FAILED_LOGINS", "SUSPICIOUS_CART_ACTIVITY"
+  description String
+  severity    String   @default("HIGH") // HIGH, CRITICAL
+  ipAddress   String?
+  userId      String?
+  isResolved  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VisitorSession {
+  id        String   @id @default(uuid())
+  visitorId String   @unique 
+  ipAddress String?
+  userAgent String?
+  status    String   @default("ONLINE") 
+  lastSeen  DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  messages  ChatMessage[]
+}
+
+model ChatMessage {
+  id               String         @id @default(uuid())
+  visitorSessionId String
+  sender           String         
+  content          String
+  read             Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  visitorSession   VisitorSession @relation(fields: [visitorSessionId], references: [id], onDelete: Cascade)
 }

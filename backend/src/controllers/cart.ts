@@ -1,6 +1,8 @@
 import { Response, NextFunction } from 'express';
 import prisma from '../config/db';
 import { AuthenticatedRequest } from '../middleware/auth';
+import { logAction } from '../services/audit';
+
 
 export const getCart = async (
   req: AuthenticatedRequest,
@@ -214,6 +216,8 @@ export const addToCart = async (
         priceAtAddition: finalPrice,
       },
     });
+
+    await logAction('CART_ADD', `Added ${quantity}x ${product.name} to cart`, 'INFO', req.user?.id, sessionId, req.ip, req.headers['user-agent']);
 
     return res.status(201).json(newItem);
   } catch (error) {

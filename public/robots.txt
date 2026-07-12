@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://yourdomain.co.ke/api/seo/sitemap.xml
+Sitemap: https://nexgen-gadgets.com/api/seo/sitemap.xml

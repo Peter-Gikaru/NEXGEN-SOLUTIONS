@@ -18,7 +18,7 @@ export const RecentlyViewed: React.FC = () => {
 
   useEffect(() => {
     const loadProducts = () => {
-      // Check if functional cookies are allowed (default to true if no consent yet)
+      
       const consentStr = localStorage.getItem('nexgen_cookie_consent');
       if (consentStr) {
         try {
@@ -35,13 +35,17 @@ export const RecentlyViewed: React.FC = () => {
       if (rvStr) {
         try {
           const parsed = JSON.parse(rvStr);
-          // Filter out stale or invalid products
-          const validProducts = parsed.filter((p: any) => p && p.id && p.name && p.price);
-          setProducts(validProducts);
           
-          // If we filtered out bad data, clean up local storage
-          if (validProducts.length !== parsed.length) {
-            localStorage.setItem(storageKey, JSON.stringify(validProducts));
+          const validProducts = parsed.filter((p: any) => p && p.id && p.name && p.price);
+          
+          
+          const uniqueProducts = Array.from(new Map(validProducts.map((item: any) => [item.name.toLowerCase().trim(), item])).values()) as ViewedProduct[];
+          
+          setProducts(uniqueProducts);
+          
+          
+          if (uniqueProducts.length !== parsed.length) {
+            localStorage.setItem(storageKey, JSON.stringify(uniqueProducts));
           }
         } catch (e) {
           console.error('Failed to parse recently viewed', e);
@@ -51,7 +55,7 @@ export const RecentlyViewed: React.FC = () => {
 
     loadProducts();
 
-    // Listen for cookie consent changes
+    
     const handleConsentUpdate = () => loadProducts();
     window.addEventListener('cookie_consent_updated', handleConsentUpdate);
     

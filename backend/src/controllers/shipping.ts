@@ -15,12 +15,13 @@ export const listShippingZones = async (req: Request, res: Response, next: NextF
 
 export const createShippingZone = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const { regionName, fee, estimatedDays } = req.body;
+    const { regionName, fee, estimatedDays, counties } = req.body;
     const zone = await prisma.shippingZone.create({
       data: {
         regionName,
         fee: parseFloat(fee),
         estimatedDays,
+        counties: counties || [],
       },
     });
     return res.status(201).json(zone);
@@ -32,7 +33,7 @@ export const createShippingZone = async (req: AuthenticatedRequest, res: Respons
 export const updateShippingZone = async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { regionName, fee, estimatedDays } = req.body;
+    const { regionName, fee, estimatedDays, counties } = req.body;
     
     const zone = await prisma.shippingZone.update({
       where: { id },
@@ -40,6 +41,7 @@ export const updateShippingZone = async (req: AuthenticatedRequest, res: Respons
         regionName,
         fee: fee !== undefined ? parseFloat(fee) : undefined,
         estimatedDays,
+        counties: counties !== undefined ? counties : undefined,
       },
     });
     return res.json(zone);

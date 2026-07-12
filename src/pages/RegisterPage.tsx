@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User as UserIcon, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
+import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { GoogleLogin } from '@react-oauth/google';
 
 const isGoogleEnabled = import.meta.env.VITE_GOOGLE_CLIENT_ID && import.meta.env.VITE_GOOGLE_CLIENT_ID !== 'your_google_client_id.apps.googleusercontent.com';
@@ -16,6 +16,8 @@ export const RegisterPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const role = 'USER';
   const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -25,6 +27,10 @@ export const RegisterPage: React.FC = () => {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
     if (!passwordRegex.test(password)) {
       toast.error('Password does not meet the security requirements.');
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match.');
       return;
     }
     
@@ -62,6 +68,7 @@ export const RegisterPage: React.FC = () => {
   return (
     <>
         <div className="text-center mb-8">
+          <img src="/favicon.png" alt="NexGen Logo" className="h-12 w-auto mx-auto mb-4 object-contain lg:hidden" />
           <h2 className="font-sans text-3xl font-extrabold tracking-tight text-slate-900">
             Create <span className="text-[#F59E0B]">Account</span>
           </h2>
@@ -78,7 +85,9 @@ export const RegisterPage: React.FC = () => {
               Full Name
             </label>
             <div className="relative">
-              <User className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
+              <svg className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
               <input
                 id="name"
                 type="text"
@@ -132,11 +141,36 @@ export const RegisterPage: React.FC = () => {
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </div>
+            <div className="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-3">
+              <p className="text-xs font-bold text-slate-700 mb-2">Your password must contain:</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] font-medium">
+                <div className={`flex items-center gap-1.5 ${password.length >= 8 ? 'text-emerald-600' : 'text-slate-500'}`}>
+                  <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border ${password.length >= 8 ? 'bg-emerald-100 border-emerald-500 text-emerald-600' : 'border-slate-300'}`}>
+                    {password.length >= 8 && <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                  </div>
+                  At least 8 characters
+                </div>
+                <div className={`flex items-center gap-1.5 ${/[A-Z]/.test(password) && /[a-z]/.test(password) ? 'text-emerald-600' : 'text-slate-500'}`}>
+                  <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border ${/[A-Z]/.test(password) && /[a-z]/.test(password) ? 'bg-emerald-100 border-emerald-500 text-emerald-600' : 'border-slate-300'}`}>
+                    {/[A-Z]/.test(password) && /[a-z]/.test(password) && <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                  </div>
+                  Upper & lowercase letters
+                </div>
+                <div className={`flex items-center gap-1.5 ${/\d/.test(password) ? 'text-emerald-600' : 'text-slate-500'}`}>
+                  <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border ${/\d/.test(password) ? 'bg-emerald-100 border-emerald-500 text-emerald-600' : 'border-slate-300'}`}>
+                    {/\d/.test(password) && <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                  </div>
+                  At least 1 number
+                </div>
+                <div className={`flex items-center gap-1.5 ${/[@$!%*?&#]/.test(password) ? 'text-emerald-600' : 'text-slate-500'}`}>
+                  <div className={`w-3.5 h-3.5 rounded-full flex items-center justify-center border ${/[@$!%*?&#]/.test(password) ? 'bg-emerald-100 border-emerald-500 text-emerald-600' : 'border-slate-300'}`}>
+                    {/[@$!%*?&#]/.test(password) && <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                  </div>
+                  At least 1 special char
+                </div>
+              </div>
+            </div>
           </div>
-            <p className="text-[10px] text-slate-400 mt-1.5 leading-relaxed">
-              Must be at least 8 characters and include uppercase, lowercase, number, and special character.
-            </p>
-          
 
 
           <div>

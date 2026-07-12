@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { Loader } from '../Loader';
 
 export const AdminWarranties: React.FC = () => {
   const [warranties, setWarranties] = useState<any[]>([]);
@@ -31,7 +32,7 @@ export const AdminWarranties: React.FC = () => {
     }
   };
 
-  if (loading) return <div>Loading warranties...</div>;
+  if (loading) return <Loader text="Fetching warranties..." />;
 
   return (
     <div>

@@ -58,15 +58,18 @@ export const CheckoutPage: React.FC = () => {
   const selectedZone = shippingZones.find(z => z.id === selectedZoneId);
   const zoneFee = selectedZone ? selectedZone.fee : 500; 
   const deliveryFee = subtotal >= 50000 ? 0 : zoneFee;
-  const total = subtotal + deliveryFee;
+  const [requireEtims, setRequireEtims] = useState(false);
+  const vatAmount = requireEtims ? Math.round(subtotal * 0.16) : 0;
+  const total = subtotal + deliveryFee + vatAmount;
 
   const [promoCode, setPromoCode] = useState('');
 
   useEffect(() => {
-    if (city && !city.toLowerCase().includes('nairobi') && paymentMethod === 'COD') {
+    const isNairobi = selectedZone?.regionName?.toLowerCase() === 'nairobi';
+    if (!isNairobi && paymentMethod === 'COD') {
       setPaymentMethod('MPESA');
     }
-  }, [city, paymentMethod]);
+  }, [selectedZoneId, paymentMethod, selectedZone]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (checkoutItems.length === 0) return;
@@ -77,14 +80,17 @@ export const CheckoutPage: React.FC = () => {
         city,
         area,
         detailedAddress,
+        requireEtims,
       },
       guestName: !isAuthenticated ? guestName : undefined,
       guestEmail: !isAuthenticated ? guestEmail : undefined,
-      items: checkoutItems.map((item: any) => ({
+      items: checkoutItems.map(item => ({
         productId: item.product.id,
-        quantity: item.quantity
+        quantity: item.quantity,
+        price: item.product.price,
+        variant: item.variant
       })),
-      expectedSubtotal: subtotal,
+      expectedSubtotal: subtotal + vatAmount,
       paymentMethod,
       promoCode: promoCode ? promoCode : undefined,
     };
@@ -270,15 +276,22 @@ export const CheckoutPage: React.FC = () => {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-3">
                   <div>
-                    <label className="block text-slate-700 text-sm font-bold uppercase tracking-wider mb-2">Area / Estate</label>
-                    <input 
-                      type="text"
+                    <label className="block text-slate-700 text-sm font-bold uppercase tracking-wider mb-2">County</label>
+                    <select
                       required
-                      placeholder="e.g. Westlands / Kilimani"
                       value={area}
                       onChange={(e) => setArea(e.target.value)}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/50 focus:border-[#F59E0B] text-slate-900 transition-all placeholder:text-slate-400"
-                    />
+                      className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/50 focus:border-[#F59E0B] text-slate-900 transition-all cursor-pointer"
+                    >
+                      <option value="">Select a county</option>
+                      {selectedZone?.counties && Array.isArray(selectedZone.counties) ? (
+                        selectedZone.counties.map((county: string) => (
+                          <option key={county} value={county}>{county}</option>
+                        ))
+                      ) : (
+                        <option value={selectedZone?.regionName || ''}>{selectedZone?.regionName || 'Default'}</option>
+                      )}
+                    </select>
                   </div>
                   <div>
                     <label className="block text-slate-700 text-sm font-bold uppercase tracking-wider mb-2">Detailed Address</label>
@@ -332,22 +345,61 @@ export const CheckoutPage: React.FC = () => {
                     </div>
                   </div>
                 </label>
-                <label className={`border-2 ${paymentMethod === 'MPESA' ? 'border-blue-500 bg-blue-50' : 'border-slate-200 bg-slate-50'} p-5 rounded-xl flex items-center justify-between cursor-pointer shadow-sm hover:bg-blue-100/50 transition-colors`}>
-                  <div className="flex items-center gap-4">
+                <div className="space-y-4">
+                  <label 
+                    className={`flex items-start gap-4 p-5 rounded-xl border-2 cursor-pointer transition-all ${
+                      paymentMethod === 'MPESA' 
+                        ? 'border-[#F59E0B] bg-amber-50 shadow-md' 
+                        : 'border-slate-200 bg-white hover:border-[#F59E0B]/50'
+                    }`}
+                  >
                     <input 
                       type="radio" 
-                      name="payment" 
+                      name="paymentMethod" 
                       value="MPESA" 
                       checked={paymentMethod === 'MPESA'}
-                      onChange={() => setPaymentMethod('MPESA')}
-                      className="accent-blue-600 w-5 h-5 cursor-pointer"
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="mt-1 w-5 h-5 text-[#F59E0B] focus:ring-[#F59E0B] border-slate-300"
                     />
-                    <div>
-                      <span className="block font-bold text-slate-900 text-base">Safaricom M-Pesa</span>
-                      <span className="text-sm text-slate-600 font-medium mt-1">Secure instant STK push</span>
+                    <div className="flex-1">
+                      <div className="font-bold text-slate-900 text-lg flex items-center justify-between">
+                        Cash on Order (M-Pesa)
+                        <Smartphone className="h-6 w-6 text-green-600" />
+                      </div>
+                      <p className="text-slate-500 text-sm mt-1 leading-relaxed">
+                        Pay securely upfront via M-Pesa. A payment prompt will be sent directly to your phone.
+                      </p>
                     </div>
-                  </div>
-                </label>
+                  </label>
+
+                  {selectedZone?.regionName?.toLowerCase() === 'nairobi' && (
+                    <label 
+                      className={`flex items-start gap-4 p-5 rounded-xl border-2 cursor-pointer transition-all ${
+                        paymentMethod === 'COD' 
+                          ? 'border-[#F59E0B] bg-amber-50 shadow-md' 
+                          : 'border-slate-200 bg-white hover:border-[#F59E0B]/50'
+                      }`}
+                    >
+                      <input 
+                        type="radio" 
+                        name="paymentMethod" 
+                        value="COD" 
+                        checked={paymentMethod === 'COD'}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="mt-1 w-5 h-5 text-[#F59E0B] focus:ring-[#F59E0B] border-slate-300"
+                      />
+                      <div className="flex-1">
+                        <div className="font-bold text-slate-900 text-lg flex items-center justify-between">
+                          Cash on Delivery (Nairobi Only)
+                          <Truck className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <p className="text-slate-500 text-sm mt-1 leading-relaxed">
+                          Pay when the product arrives at your doorstep. Available exclusively for Nairobi residents.
+                        </p>
+                      </div>
+                    </label>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -359,14 +411,15 @@ export const CheckoutPage: React.FC = () => {
               </h2>
               <div className="max-h-80 overflow-y-auto space-y-4 pr-2 mb-4 scrollbar-thin">
                 {checkoutItems.map((item: any) => (
-                  <div key={item.product.id} className="flex gap-4 justify-between items-center text-base border-b border-slate-100 pb-4">
+                  <div key={`${item.product.id}-${item.variant || 'base'}`} className="flex gap-4 justify-between items-center text-base border-b border-slate-100 pb-4">
                     <div className="flex gap-3 items-center min-w-0">
                       <div className="w-14 h-14 bg-slate-50 border border-slate-200 rounded-lg flex items-center justify-center p-1.5 shrink-0">
                         <img src={item.product.image} className="max-w-full max-h-full object-contain mix-blend-multiply" alt="" />
                       </div>
                       <div className="min-w-0">
                         <span className="block text-slate-900 font-bold truncate text-base">{item.product.title}</span>
-                        <span className="text-sm font-semibold text-slate-500">Qty: {item.quantity}</span>
+                        {item.variant && <span className="block text-sm font-semibold text-[#F59E0B] truncate mt-0.5">{item.variant}</span>}
+                        <span className="text-sm font-semibold text-slate-500 mt-1 block">Qty: {item.quantity}</span>
                       </div>
                     </div>
                     <span className="text-base font-black text-slate-900 shrink-0">KES {(item.product.price * item.quantity).toLocaleString()}</span>
@@ -383,10 +436,33 @@ export const CheckoutPage: React.FC = () => {
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/50 focus:border-[#F59E0B] text-slate-900 transition-all uppercase placeholder:normal-case placeholder:text-slate-400"
                   />
                 </div>
+                
+                <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-6 mb-2">
+                  <label className="flex items-start gap-3 cursor-pointer select-none">
+                    <div className="flex items-center h-5 mt-0.5">
+                      <input 
+                        type="checkbox" 
+                        checked={requireEtims}
+                        onChange={(e) => setRequireEtims(e.target.checked)}
+                        className="w-4 h-4 text-blue-600 bg-white border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-slate-800">Request official eTIMS Receipt</span>
+                      <span className="text-xs text-slate-500 font-medium mt-0.5">Adds 16% VAT to your order total. Required for corporate accounting.</span>
+                    </div>
+                  </label>
+                </div>
                 <div className="flex justify-between font-semibold text-slate-600">
                   <span>Subtotal</span>
                   <span className="text-slate-900">KES {subtotal.toLocaleString()}</span>
                 </div>
+                {requireEtims && (
+                  <div className="flex justify-between font-semibold text-slate-600 mt-2">
+                    <span>VAT (16%)</span>
+                    <span className="text-slate-900">KES {vatAmount.toLocaleString()}</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-semibold text-slate-600">
                   <span>Delivery</span>
                   <span className="flex items-center gap-1">

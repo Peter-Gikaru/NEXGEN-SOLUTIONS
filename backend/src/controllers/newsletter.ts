@@ -4,7 +4,7 @@ import { sendPromotionalEmail } from '../services/emailService';
 
 const prisma = new PrismaClient();
 
-// POST /api/newsletter/subscribe
+
 export const subscribe = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email } = req.body;
@@ -12,14 +12,14 @@ export const subscribe = async (req: Request, res: Response, next: NextFunction)
       return res.status(400).json({ message: 'Email is required.' });
     }
 
-    // @ts-ignore - bypassing cache issue during dev restart
+    
     const existing = await prisma.newsletterSubscriber.findUnique({ where: { email } });
     if (existing) {
-      // Return 200 so the frontend doesn't show a scary error for duplicate subscriptions
+      
       return res.status(200).json({ message: 'Already subscribed!' });
     }
 
-    // @ts-ignore
+    
     await prisma.newsletterSubscriber.create({
       data: { email }
     });
@@ -30,7 +30,7 @@ export const subscribe = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-// POST /api/newsletter/send-promotion
+
 export const sendPromotion = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { subject, content } = req.body;
@@ -38,8 +38,8 @@ export const sendPromotion = async (req: Request, res: Response, next: NextFunct
       return res.status(400).json({ message: 'Subject and content are required.' });
     }
 
-    // Get all subscribers
-    // @ts-ignore
+    
+    
     const subscribers = await prisma.newsletterSubscriber.findMany({
       select: { email: true }
     });
@@ -50,7 +50,7 @@ export const sendPromotion = async (req: Request, res: Response, next: NextFunct
 
     const emails = subscribers.map((s: any) => s.email);
 
-    // Send in batches of 50 to avoid SMTP connection limits
+    
     const batchSize = 50;
     for (let i = 0; i < emails.length; i += batchSize) {
       const batch = emails.slice(i, i + batchSize);

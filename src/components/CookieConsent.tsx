@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Check, Cookie, Settings } from 'lucide-react';
 
 interface CookieSettings {
-  essential: boolean; // Always true
+  essential: boolean; 
   functional: boolean;
   analytics: boolean;
   marketing: boolean;
@@ -21,7 +21,7 @@ export const CookieConsent: React.FC = () => {
   useEffect(() => {
     const savedConsent = localStorage.getItem('nexgen_cookie_consent');
     if (!savedConsent) {
-      // Small delay so it animates in nicely
+      
       const timer = setTimeout(() => setIsVisible(true), 1000);
       return () => clearTimeout(timer);
     } else {
@@ -52,10 +52,10 @@ export const CookieConsent: React.FC = () => {
   };
 
   const applyCookieSettings = (prefs: CookieSettings) => {
-    // In a real production app, this function would:
-    // 1. Initialize Google Analytics if prefs.analytics === true
-    // 2. Initialize Facebook Pixel if prefs.marketing === true
-    // 3. Clear existing cookies if they were previously accepted but now rejected
+    
+    
+    
+    
     if (!prefs.analytics) {
       console.log('Analytics cookies disabled by user.');
     }
@@ -63,7 +63,7 @@ export const CookieConsent: React.FC = () => {
       console.log('Marketing cookies disabled by user.');
     }
     
-    // Dispatch a custom event so other components (like RecentlyViewed) know functional cookies are enabled/disabled
+    
     window.dispatchEvent(new CustomEvent('cookie_consent_updated', { detail: prefs }));
   };
 
@@ -71,12 +71,12 @@ export const CookieConsent: React.FC = () => {
 
   return (
     <>
-      {/* Dimmed Background when Settings Modal is open */}
+      {}
       {showSettings && (
         <div className="fixed inset-0 bg-black/60 z-[9998] transition-opacity duration-300" />
       )}
 
-      {/* Settings Modal */}
+      {}
       {showSettings ? (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-fade-in">
@@ -99,7 +99,7 @@ export const CookieConsent: React.FC = () => {
                 You can customize your preferences below.
               </p>
 
-              {/* Essential */}
+              {}
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-bold text-gray-900 flex items-center gap-2">
@@ -114,7 +114,7 @@ export const CookieConsent: React.FC = () => {
                 </p>
               </div>
 
-              {/* Functional */}
+              {}
               <div className="border border-gray-200 rounded-lg p-4 transition-colors hover:border-[#F59E0B]/50">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-bold text-gray-900">Functional Cookies</h3>
@@ -134,7 +134,7 @@ export const CookieConsent: React.FC = () => {
                 </p>
               </div>
 
-              {/* Analytics */}
+              {}
               <div className="border border-gray-200 rounded-lg p-4 transition-colors hover:border-[#F59E0B]/50">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-bold text-gray-900">Analytics Cookies</h3>
@@ -154,7 +154,7 @@ export const CookieConsent: React.FC = () => {
                 </p>
               </div>
 
-              {/* Marketing */}
+              {}
               <div className="border border-gray-200 rounded-lg p-4 transition-colors hover:border-[#F59E0B]/50">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-bold text-gray-900">Marketing & Advertising Cookies</h3>
@@ -192,8 +192,7 @@ export const CookieConsent: React.FC = () => {
           </div>
         </div>
       ) : (
-        /* Floating Banner */
-        <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-8 md:w-[450px] bg-white border border-gray-200 rounded-xl shadow-2xl z-[9999] animate-slide-up overflow-hidden">
+                <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-8 md:w-[450px] bg-white border border-gray-200 rounded-xl shadow-2xl z-[9999] animate-slide-up overflow-hidden">
           <div className="p-5">
             <div className="flex items-start gap-4">
               <div className="bg-amber-100 p-2.5 rounded-full shrink-0 mt-1">

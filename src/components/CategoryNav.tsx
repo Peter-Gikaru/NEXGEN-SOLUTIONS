@@ -70,7 +70,7 @@ export const CategoryNav: React.FC = () => {
             onMouseEnter={() => setIsDropdownOpen(true)}
             onMouseLeave={() => setIsDropdownOpen(false)}
           >
-            <button className={`flex items-center gap-3 px-6 h-12 font-bold uppercase tracking-wide text-sm transition-colors rounded-t-lg ${
+            <button className={`flex items-center gap-3 px-6 h-12 font-bold uppercase tracking-wide text-sm transition-colors rounded-t-lg relative z-[60] ${
               isDropdownOpen 
                 ? 'bg-white border-t border-l border-r border-slate-200 text-[#1a1a2e]' 
                 : 'bg-[#F59E0B] text-white hover:bg-amber-500'
@@ -78,12 +78,15 @@ export const CategoryNav: React.FC = () => {
               <Menu className="h-5 w-5" />
               <span>All Categories</span>
               <ChevronDown className={`h-4 w-4 ml-2 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+              
+              {}
+              {isDropdownOpen && (
+                <div className="absolute -bottom-[1px] left-[1px] right-[1px] h-[2px] bg-white z-10"></div>
+              )}
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute top-full left-0 w-[280px] bg-white border border-slate-200 border-t-0 shadow-2xl rounded-b-xl rounded-tr-xl py-3 z-50 origin-top-left -mt-[1px]">
-                {/* To create a seamless look if the button is white when open, we overlay a small white block over the border */}
-                <div className="absolute top-0 left-0 w-full h-[1px] bg-white z-10" style={{ width: 'calc(100% - 2px)' }}></div>
+              <div className="absolute top-full left-0 w-[280px] bg-white border border-slate-200 shadow-2xl rounded-b-xl rounded-tr-xl py-3 z-50 origin-top-left">
                 <ul className="flex flex-col relative z-20">
                   {categories.map((cat) => (
                     <RecursiveMenuItem 
@@ -101,10 +104,21 @@ export const CategoryNav: React.FC = () => {
             )}
           </div>
 
-          <nav className="flex items-center gap-8 font-sans font-bold text-sm text-slate-700 h-full">
-            <Link to="/" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase">HOME</Link>
-            <Link to="/products" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase">ALL PRODUCTS</Link>
-            <Link to="/track" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase">TRACK ORDER</Link>
+          <nav className="flex items-center gap-8 font-sans font-bold text-sm text-slate-700 h-full overflow-x-auto whitespace-nowrap hide-scrollbar">
+            <Link to="/" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase shrink-0">HOME</Link>
+            <Link to="/products" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase shrink-0">ALL PRODUCTS</Link>
+            
+            {categories.slice(0, 5).map(cat => (
+              <Link 
+                key={cat.id} 
+                to={`/products?category=${encodeURIComponent(cat.slug)}`} 
+                className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase shrink-0"
+              >
+                {cat.name}
+              </Link>
+            ))}
+
+            <Link to="/track" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase shrink-0">TRACK ORDER</Link>
           </nav>
 
 

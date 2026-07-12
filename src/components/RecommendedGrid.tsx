@@ -51,6 +51,7 @@ export const RecommendedGrid: React.FC = () => {
               stockStatus={product.stockStatus}
               stockCount={product.stockCount}
               isVerified={product.isVerified}
+                  warranty={product.warranty}
             />
           </div>
         ))}
@@ -58,3 +59,4 @@ export const RecommendedGrid: React.FC = () => {
     </section>
   );
 };
+

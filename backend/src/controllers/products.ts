@@ -41,7 +41,7 @@ export const listProducts = async (
     const whereClause: any = {};
     const userRole = (req as AuthenticatedRequest).user?.role;
     if (req.query.includeInactive === 'true' && userRole === 'ADMIN') {
-      // Allow Admin to see inactive
+      
     } else {
       whereClause.isActive = true;
     }
@@ -78,11 +78,47 @@ export const listProducts = async (
     const { cpu, ram, storage, condition, generation } = req.query;
     if (cpu || ram || storage || condition || generation) {
       if (!whereClause.AND) whereClause.AND = [];
-      if (cpu) whereClause.AND.push({ specs: { path: ['cpu'], equals: cpu as string } });
-      if (ram) whereClause.AND.push({ specs: { path: ['ram'], equals: ram as string } });
-      if (storage) whereClause.AND.push({ specs: { path: ['storage'], equals: storage as string } });
-      if (condition) whereClause.AND.push({ specs: { path: ['condition'], equals: condition as string } });
-      if (generation) whereClause.AND.push({ specs: { path: ['generation'], equals: generation as string } });
+      if (cpu) {
+        whereClause.AND.push({
+          OR: [
+            { specs: { path: ['cpu'], equals: cpu as string } },
+            { specs: { path: ['Processor'], equals: cpu as string } },
+            { specs: { path: ['processor'], equals: cpu as string } }
+          ]
+        });
+      }
+      if (ram) {
+        whereClause.AND.push({
+          OR: [
+            { specs: { path: ['ram'], equals: ram as string } },
+            { specs: { path: ['RAM'], equals: ram as string } }
+          ]
+        });
+      }
+      if (storage) {
+        whereClause.AND.push({
+          OR: [
+            { specs: { path: ['storage'], equals: storage as string } },
+            { specs: { path: ['Storage'], equals: storage as string } }
+          ]
+        });
+      }
+      if (condition) {
+        whereClause.AND.push({
+          OR: [
+            { specs: { path: ['condition'], equals: condition as string } },
+            { specs: { path: ['Condition'], equals: condition as string } }
+          ]
+        });
+      }
+      if (generation) {
+        whereClause.AND.push({
+          OR: [
+            { specs: { path: ['generation'], equals: generation as string } },
+            { specs: { path: ['Generation'], equals: generation as string } }
+          ]
+        });
+      }
     }
 
     let orderByClause: any = { createdAt: 'desc' };
@@ -251,7 +287,7 @@ export const createProduct = async (
   next: NextFunction
 ) => {
   try {
-    const { name, description, brand, price, compareAtPrice, stock, categoryId, specs, imageUrls, threeDModelUrl } = req.body;
+    const { name, description, brand, price, compareAtPrice, stock, categoryId, specs, imageUrls, threeDModelUrl, warranty } = req.body;
     let slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     const existing = await prisma.product.findUnique({ where: { slug } });
     if (existing) {
@@ -270,6 +306,7 @@ export const createProduct = async (
         specs: typeof specs === 'string' ? JSON.parse(specs) : specs,
         imageUrls: Array.isArray(imageUrls) ? imageUrls : (typeof imageUrls === 'string' ? imageUrls.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
         threeDModelUrl,
+        warranty: warranty || "1 Year",
       }
     });
     await logAdminAction(req.user!.id, 'CREATE_PRODUCT', `Created product: ${product.name} (${product.id})`, req.ip);
@@ -285,7 +322,7 @@ export const updateProduct = async (
 ) => {
   try {
     const { id } = req.params;
-    const { name, description, brand, price, compareAtPrice, stock, categoryId, specs, imageUrls, isActive, variants } = req.body;
+    const { name, description, brand, price, compareAtPrice, stock, categoryId, specs, imageUrls, isActive, variants, warranty } = req.body;
     const existing = await prisma.product.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ message: 'Product not found' });
     const updateData: any = {};
@@ -300,6 +337,7 @@ export const updateProduct = async (
     if (imageUrls) updateData.imageUrls = Array.isArray(imageUrls) ? imageUrls : (typeof imageUrls === 'string' ? imageUrls.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
     if (isActive !== undefined) updateData.isActive = Boolean(isActive);
     if (variants !== undefined) updateData.variants = typeof variants === 'string' ? JSON.parse(variants) : variants;
+    if (warranty !== undefined) updateData.warranty = warranty;
     const product = await prisma.product.update({
       where: { id },
       data: updateData
@@ -384,81 +422,143 @@ export const createBulkProducts = async (
       return res.status(400).json({ message: 'No valid products array found in request body' });
     }
     const errors: any[] = [];
-    const createdProducts = [];
+    const createdProducts: any[] = [];
     let rowNumber = 1;
-    for (const row of results) {
-      row._rowNumber = ++rowNumber;
-      try {
-        if (!row.name || !row.price || !row.categoryName) {
-          throw new Error('Missing required fields (name, price, categoryName)');
-        }
-        let cat = await prisma.category.findUnique({ where: { name: row.categoryName } });
-        if (!cat) {
-          cat = await prisma.category.findFirst({ where: { name: { equals: row.categoryName } } });
-        }
-        if (!cat) {
-            const newSlug = row.categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-            cat = await prisma.category.create({
+    
+    
+    const categoryCache = new Map<string, string>();
+    const subcategoryCache = new Map<string, string>();
+    const allCategories = await prisma.category.findMany();
+    for (const cat of allCategories) {
+      if (cat.parentId) {
+        subcategoryCache.set(`${cat.parentId}-${cat.name.toLowerCase()}`, cat.id);
+      } else {
+        categoryCache.set(cat.name.toLowerCase(), cat.id);
+      }
+    }
+
+    
+    const BATCH_SIZE = 20;
+    for (let i = 0; i < results.length; i += BATCH_SIZE) {
+      const batch = results.slice(i, i + BATCH_SIZE);
+      const batchPromises = batch.map(async (row: any, index: number) => {
+        const currentRowNumber = i + index + 2; 
+        try {
+          if (!row.name || !row.price || !row.categoryName) {
+            throw new Error('Missing required fields (name, price, categoryName)');
+          }
+
+          
+          const productName = row.name.toLowerCase();
+          
+          
+          const categoryRules = [
+            { category: 'Laptops', keywords: ['laptop', 'macbook', 'notebook', 'chromebook', 'thinkpad', 'elitebook'] },
+            { category: 'Mobile Phones', keywords: ['phone', 'iphone', 'galaxy', 'smartphone', 'pixel', 'mobile'] },
+            { category: 'Printers', keywords: ['printer', 'laserjet', 'deskjet', 'inkjet', 'epson'] },
+            { category: 'Monitors', keywords: ['monitor', 'display', 'screen'] },
+            { category: 'UPS', keywords: ['ups', 'uninterruptible power supply', 'apc', 'mecer'] },
+            { category: 'Smart Watches', keywords: ['watch', 'apple watch', 'smartwatch'] },
+            { category: 'Accessories', keywords: ['mouse', 'keyboard', 'cable', 'adapter', 'charger', 'headset', 'headphones', 'earbuds', 'case'] },
+            { category: 'Networking', keywords: ['router', 'switch', 'access point', 'wifi'] },
+          ];
+
+          let targetCategoryName = null;
+          
+          
+          for (const rule of categoryRules) {
+            if (rule.keywords.some(kw => productName.includes(kw))) {
+              targetCategoryName = rule.category;
+              break;
+            }
+          }
+
+          
+          if (!targetCategoryName) {
+            targetCategoryName = row.categoryName || 'Uncategorized';
+          }
+
+          const catNameLower = targetCategoryName.toLowerCase();
+          let finalCategoryId = categoryCache.get(catNameLower);
+          
+          if (!finalCategoryId) {
+            const newSlug = catNameLower.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            const newCat = await prisma.category.create({
               data: {
-                name: row.categoryName,
+                name: targetCategoryName,
                 slug: newSlug,
-                description: `Auto-generated category for ${row.categoryName}`
+                description: `Auto-generated category for ${targetCategoryName}`
               }
             });
-        }
-        let finalCategoryId = cat.id;
+            finalCategoryId = newCat.id;
+            categoryCache.set(catNameLower, finalCategoryId);
+          }
+
           if (row.subcategoryName) {
-            let subCat = await prisma.category.findFirst({
-              where: { 
-                name: { equals: row.subcategoryName },
-                parentId: cat.id
-              }
-            });
-            if (!subCat) {
-              const subSlug = row.subcategoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            const subCatNameLower = row.subcategoryName.toLowerCase();
+            const cacheKey = `${finalCategoryId}-${subCatNameLower}`;
+            let subCatId = subcategoryCache.get(cacheKey);
+            
+            if (!subCatId) {
+              const subSlug = subCatNameLower.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
               let uniqueSubSlug = subSlug;
               let counter = 1;
               while (await prisma.category.findUnique({ where: { slug: uniqueSubSlug } })) {
                 uniqueSubSlug = `${subSlug}-${counter}`;
                 counter++;
               }
-              subCat = await prisma.category.create({
+              const newSubCat = await prisma.category.create({
                 data: {
                   name: row.subcategoryName,
                   slug: uniqueSubSlug,
                   description: `Auto-generated subcategory for ${row.subcategoryName}`,
-                  parentId: cat.id
+                  parentId: finalCategoryId
                 }
               });
+              subCatId = newSubCat.id;
+              subcategoryCache.set(cacheKey, subCatId);
             }
-            finalCategoryId = subCat.id;
+            finalCategoryId = subCatId;
           }
-          const categoryId = finalCategoryId;
-        let slug = row.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
-        const existing = await prisma.product.findUnique({ where: { slug } });
-        if (existing) {
-          slug = `${slug}-${Date.now().toString().slice(-4)}`;
+
+          let slug = row.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+          const existing = await prisma.product.findUnique({ where: { slug } });
+          if (existing) {
+            slug = `${slug}-${Date.now().toString().slice(-4)}`;
+          }
+
+          const product = await prisma.product.create({
+            data: {
+              name: row.name,
+              slug,
+              description: row.description || '',
+              brand: row.brand || 'Generic',
+              price: parseFloat(row.price),
+              compareAtPrice: row.compareAtPrice ? parseFloat(row.compareAtPrice) : null,
+              stock: parseInt(row.stock) || 0,
+              categoryId: finalCategoryId,
+              imageUrls: typeof row.imageUrls === 'string' ? row.imageUrls.split(',').map((s: string) => s.trim()).filter(Boolean) : (Array.isArray(row.imageUrls) ? row.imageUrls : []),
+              specs: typeof row.specs === 'string' ? JSON.parse(row.specs) : (row.specs || {}),
+              variants: typeof row.variants === 'string' ? JSON.parse(row.variants) : (row.variants || []),
+              warranty: row.warranty || "1 Year",
+            }
+          });
+          return { success: true, product };
+        } catch (err: any) {
+          return { success: false, row: currentRowNumber, data: row, error: err.message };
         }
-        const product = await prisma.product.create({
-          data: {
-            name: row.name,
-            slug,
-            description: row.description || '',
-            brand: row.brand || 'Generic',
-            price: parseFloat(row.price),
-            compareAtPrice: row.compareAtPrice ? parseFloat(row.compareAtPrice) : null,
-            stock: parseInt(row.stock) || 0,
-            categoryId,
-            imageUrls: typeof row.imageUrls === 'string' ? row.imageUrls.split(',').map((s: string) => s.trim()).filter(Boolean) : (Array.isArray(row.imageUrls) ? row.imageUrls : []),
-            specs: typeof row.specs === 'string' ? JSON.parse(row.specs) : (row.specs || {}),
-            variants: typeof row.variants === 'string' ? JSON.parse(row.variants) : (row.variants || []),
-          }
-        });
-        createdProducts.push(product);
-      } catch (err: any) {
-        errors.push({ row: row._rowNumber, data: row, error: err.message });
-      }
+      });
+
+      const batchResults = await Promise.all(batchPromises);
+      batchResults.forEach(res => {
+        if (res.success) {
+          createdProducts.push(res.product);
+        } else {
+          errors.push({ row: res.row, data: res.data, error: res.error });
+        }
+      });
     }
+
     await logAdminAction(req.user!.id, 'BULK_UPLOAD_PRODUCTS', `Uploaded ${createdProducts.length} products. Errors: ${errors.length}`, req.ip);
     res.json({
       message: 'Bulk upload completed',

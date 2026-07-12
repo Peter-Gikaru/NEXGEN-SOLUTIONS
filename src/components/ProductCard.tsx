@@ -25,6 +25,7 @@ interface ProductCardProps {
   stockCount?: number;
   isVerified: boolean;
   condition?: string;
+  warranty?: string;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = React.memo(({
@@ -40,7 +41,8 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
   stockStatus,
   stockCount,
   isVerified,
-  condition
+  condition,
+  warranty,
 }) => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
@@ -169,7 +171,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
   return (
     <div 
       onClick={handleClick}
-      className="group bg-white border border-border-gray text-dark-primary rounded relative transition-all duration-300 hover:scale-[1.02] hover:shadow-xl flex flex-col h-full cursor-pointer overflow-hidden text-left"
+      className="group bg-white border border-border-gray text-dark-primary rounded relative transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:z-50 flex flex-col h-full cursor-pointer text-left"
     >
       {discount > 0 && (
         <span className="absolute top-3 left-3 z-10 bg-danger text-white text-sm font-semibold px-2 py-0.5 rounded shadow-sm select-none">
@@ -186,7 +188,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
         </span>
       )}
 
-      <div className="w-full aspect-square bg-white p-4 flex items-center justify-center relative border-b border-border-gray select-none group/image">
+      <div className="w-full aspect-square bg-white p-4 flex items-center justify-center relative border-b border-border-gray select-none group/image rounded-t">
         <img
           src={getImageUrl(image)}
           alt={title}
@@ -231,33 +233,61 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
             <span className="text-base text-text-secondary line-through">{formatPrice(originalPrice)}</span>
           )}
         </div>
+        
+        <div className="text-[10px] text-slate-500 -mt-1 select-none" title="Optional 16% VAT can be requested at checkout for an official eTIMS receipt">
+          * Price excludes 16% VAT (optional for eTIMS)
+        </div>
 
-        <div className="text-sm font-semibold mt-auto select-none">
+        <div className="text-sm font-semibold mt-auto select-none flex justify-between items-center">
           <span className="text-accent">In Stock</span>
+          {warranty && warranty.toLowerCase() !== 'none' && (
+            <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full flex items-center gap-1 font-medium"><ShieldCheck className="h-3 w-3" /> {warranty}</span>
+          )}
         </div>
       </div>
 
-      <div className="p-3.5 border-t border-border-gray bg-bg-gray mt-auto z-10 select-none flex flex-col gap-2">
-        <button
-          onClick={handleBuyNow}
-          className="w-full bg-[#1a1a2e] text-white py-2.5 lg:py-2 rounded text-base lg:text-sm font-bold flex items-center justify-center gap-2 shadow hover:bg-slate-800 transition-all lg:hidden lg:group-hover:flex"
-        >
-          Buy Now
-        </button>
-
-        <button
-          onClick={handleWhatsAppOrder}
-          className="w-full bg-[#25D366] text-white py-2.5 lg:py-2 rounded text-base lg:text-sm font-bold flex items-center justify-center gap-2 shadow hover:bg-[#1ebd59] transition-all lg:hidden lg:group-hover:flex"
-        >
-          <WhatsAppIcon size={18} /> Quick Order
-        </button>
-
+      <div className="p-3.5 border-t border-border-gray bg-bg-gray mt-auto z-20 select-none flex flex-col relative rounded-b">
+        {}
         <button
           onClick={handleAddToCart}
-          className="w-full bg-secondary text-dark-primary py-2.5 rounded text-base font-semibold uppercase tracking-wider hover:bg-amber-500 hover:text-white transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+          className="w-full bg-secondary text-dark-primary py-2.5 rounded text-base font-semibold uppercase tracking-wider hover:bg-amber-500 hover:text-white transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-sm relative z-10"
         >
           <ShoppingCart className="h-5 w-5" /> Add to Cart
         </button>
+
+        {}
+        <div className="flex flex-col gap-2 mt-2 lg:hidden relative z-10">
+          <button
+            onClick={handleBuyNow}
+            className="w-full bg-[#1a1a2e] text-white py-2.5 rounded text-base font-bold flex items-center justify-center gap-2 shadow hover:bg-slate-800 transition-all"
+          >
+            Buy Now
+          </button>
+
+          <button
+            onClick={handleWhatsAppOrder}
+            className="w-full bg-[#25D366] text-white py-2.5 rounded text-base font-bold flex items-center justify-center gap-2 shadow hover:bg-[#1ebd59] transition-all"
+          >
+            <WhatsAppIcon size={18} /> Quick Order
+          </button>
+        </div>
+
+        {}
+        <div className="hidden lg:flex flex-col gap-2 absolute top-[100%] left-[-1px] w-[calc(100%+2px)] bg-bg-gray p-3.5 pt-2 border-x border-b border-border-gray rounded-b opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 shadow-xl z-0 transform -translate-y-2 group-hover:translate-y-0">
+          <button
+            onClick={handleBuyNow}
+            className="w-full bg-[#1a1a2e] text-white py-2 rounded text-sm font-bold flex items-center justify-center gap-2 shadow hover:bg-slate-800 transition-all pointer-events-auto"
+          >
+            Buy Now
+          </button>
+
+          <button
+            onClick={handleWhatsAppOrder}
+            className="w-full bg-[#25D366] text-white py-2 rounded text-sm font-bold flex items-center justify-center gap-2 shadow hover:bg-[#1ebd59] transition-all pointer-events-auto"
+          >
+            <WhatsAppIcon size={18} /> Quick Order
+          </button>
+        </div>
       </div>
     </div>
   );

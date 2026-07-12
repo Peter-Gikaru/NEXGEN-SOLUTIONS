@@ -9,7 +9,7 @@ async function main() {
     if (p.imageUrls && p.imageUrls.startsWith('[')) {
       try {
         const arr = JSON.parse(p.imageUrls);
-        const cleanStr = arr.join(','); // Join array items with comma
+        const cleanStr = arr.join(','); 
         await prisma.product.update({
           where: { id: p.id },
           data: { imageUrls: cleanStr }

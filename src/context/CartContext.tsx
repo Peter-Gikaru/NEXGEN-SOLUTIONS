@@ -7,7 +7,6 @@ export interface CartItem {
   product: Product;
   quantity: number;
   backendItemId?: string;
-  variant?: string;
 }
 
 export interface ToastMessage {
@@ -17,9 +16,9 @@ export interface ToastMessage {
 
 interface CartContextType {
   cartItems: CartItem[];
-  addToCart: (product: Product, quantity?: number, variant?: string) => void;
-  removeFromCart: (productId: string, variant?: string) => void;
-  updateQuantity: (productId: string, quantity: number, variant?: string) => void;
+  addToCart: (product: Product, quantity?: number) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   isCartOpen: boolean;
   setIsCartOpen: (open: boolean) => void;
@@ -55,23 +54,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const fetchCart = useCallback(async () => {
     try {
       const response = await api.get('/cart');
-      const backendItems = response.data.items.map((item: any) => {
-        let finalPrice = item.product.price;
-        if (item.variant && item.product.variants) {
-          const parsedVariants = typeof item.product.variants === 'string' ? JSON.parse(item.product.variants) : item.product.variants;
-          const matchedVariant = parsedVariants.find((v: any) => v.name === item.variant);
-          if (matchedVariant) {
-            finalPrice += (matchedVariant.priceOffset || 0);
-          }
-        }
-
-        return {
-          product: {
-            id: item.product.id,
-            title: item.product.name,
-            category: item.product.category?.name || 'Laptops',
-            brand: item.product.brand,
-            price: finalPrice,
+      const backendItems = response.data.items.map((item: any) => ({
+        product: {
+          id: item.product.id,
+          title: item.product.name,
+          category: item.product.category?.name || 'Laptops',
+          brand: item.product.brand,
+          price: item.product.price,
           originalPrice: item.product.compareAtPrice || item.product.price,
           rating: item.product.rating || 5,
           reviewCount: item.product.reviewCount || 0,
@@ -86,9 +75,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         },
         quantity: item.quantity,
         backendItemId: item.id,
-        variant: item.variant,
-      };
-      });
+      }));
       setCartItems(backendItems);
     } catch (error) {
       console.error('Failed to fetch cart:', error);
@@ -134,10 +121,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [isAuthenticated, isAuthLoading, fetchCart]);
 
   const addToCart = useCallback(
-    async (product: Product, quantity: number = 1, variant?: string) => {
+    async (product: Product, quantity: number = 1) => {
       if (isAuthenticated) {
         try {
-          await api.post('/cart', { productId: product.id, quantity, variant });
+          await api.post('/cart', { productId: product.id, quantity });
           await fetchCart();
           addToast(`${product.title.split(' - ')[0]} added to cart!`);
         } catch (err) {
@@ -146,16 +133,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         setCartItems((prevItems) => {
-          const existingItem = prevItems.find((item) => item.product.id === product.id && item.variant === variant);
+          const existingItemIndex = prevItems.findIndex((item) => item.product.id === product.id);
           let updated: CartItem[];
-          if (existingItem) {
-            updated = prevItems.map((item) =>
-              item.product.id === product.id && item.variant === variant
-                ? { ...item, quantity: item.quantity + quantity }
-                : item
-            );
+          if (existingItemIndex > -1) {
+            updated = [...prevItems];
+            updated[existingItemIndex] = {
+              ...updated[existingItemIndex],
+              quantity: updated[existingItemIndex].quantity + quantity,
+            };
           } else {
-            updated = [...prevItems, { product, quantity, variant }];
+            updated = [...prevItems, { product, quantity }];
           }
           localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(updated));
           return updated;
@@ -167,8 +154,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 
   const removeFromCart = useCallback(
-    async (productId: string, variant?: string) => {
-      const itemToRemove = cartItems.find((item) => item.product.id === productId && item.variant === variant);
+    async (productId: string) => {
+      const itemToRemove = cartItems.find((item) => item.product.id === productId);
       if (isAuthenticated) {
         try {
           if (itemToRemove?.backendItemId) {
@@ -183,7 +170,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } else {
         setCartItems((prevItems) => {
-          const updated = prevItems.filter((item) => !(item.product.id === productId && item.variant === variant));
+          const updated = prevItems.filter((item) => item.product.id !== productId);
           localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(updated));
           return updated;
         });
@@ -196,13 +183,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 
   const updateQuantity = useCallback(
-    async (productId: string, quantity: number, variant?: string) => {
+    async (productId: string, quantity: number) => {
       if (quantity <= 0) {
-        await removeFromCart(productId, variant);
+        await removeFromCart(productId);
         return;
       }
 
-      const itemToUpdate = cartItems.find((item) => item.product.id === productId && item.variant === variant);
+      const itemToUpdate = cartItems.find((item) => item.product.id === productId);
       if (isAuthenticated) {
         try {
           if (itemToUpdate?.backendItemId) {
@@ -215,7 +202,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         setCartItems((prevItems) => {
           const updated = prevItems.map((item) =>
-            item.product.id === productId && item.variant === variant ? { ...item, quantity } : item
+            item.product.id === productId ? { ...item, quantity } : item
           );
           localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(updated));
           return updated;

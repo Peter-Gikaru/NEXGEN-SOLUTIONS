@@ -9,7 +9,6 @@ export interface Product {
   rating: number;
   reviewCount: number;
   image: string;
-  imageUrls?: string[];
   discount: number;
   stockStatus: 'in_stock' | 'low_stock' | 'out_of_stock';
   stockCount?: number;
@@ -23,7 +22,6 @@ export interface Product {
     whatsInBox?: string[];
     [key: string]: any;
   };
-  warranty?: string;
 }
 
 export interface FilterState {

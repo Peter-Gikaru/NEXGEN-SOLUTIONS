@@ -16,9 +16,7 @@ import {
   AlertTriangle,
   Scale,
   Truck,
-  Search,
-  CheckCircle,
-  AlertCircle
+  Search
 } from 'lucide-react';
 import type { Product } from '../types';
 import { WhatsAppIcon } from '../components/WhatsAppIcon';
@@ -57,7 +55,6 @@ interface ProductDetails {
   reviews: Review[];
   rating: number;
   variants: { id: string; name: string; priceOffset: number; stock: number }[] | null;
-  warranty?: string;
 }
 
 export const ProductDetailPage: React.FC = () => {
@@ -72,7 +69,7 @@ export const ProductDetailPage: React.FC = () => {
   const [product, setProduct] = useState<ProductDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews' | 'warranty'>('description');
+  const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description');
   const [mainImage, setMainImage] = useState('');
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
@@ -128,7 +125,7 @@ export const ProductDetailPage: React.FC = () => {
         });
         if (rvArr.length > 5) rvArr.pop();
         localStorage.setItem(storageKey, JSON.stringify(rvArr));
-        setRecentlyViewed(rvArr.filter((p: any) => p.id !== data.id)); // Setting other recently viewed
+        setRecentlyViewed(rvArr.filter((p: any) => p.id !== data.id));
       } else {
         setRecentlyViewed([]);
       }
@@ -149,7 +146,7 @@ export const ProductDetailPage: React.FC = () => {
       }
 
       try {
-        const zoneRes = await api.get('/shipping');
+        const zoneRes = await api.get('/shipping/zones');
         setShippingZones(zoneRes.data);
       } catch (e) {
         console.error('Failed to fetch shipping zones', e);
@@ -171,12 +168,11 @@ export const ProductDetailPage: React.FC = () => {
   const handleAddToCart = () => {
     if (!product) return;
     
-    const currentPrice = product.price + (selectedVariant?.priceOffset || 0);
     const productItem: Product = {
       id: product.id,
       slug: product.slug,
       title: product.name,
-      price: currentPrice,
+      price: product.price,
       originalPrice: product.compareAtPrice || product.price,
       image: product.imageUrls[0] || '',
       rating: product.rating,
@@ -191,19 +187,18 @@ export const ProductDetailPage: React.FC = () => {
       variant: selectedVariant?.name || undefined
     };
 
-    addToCart(productItem, quantity, selectedVariant?.name);
+    addToCart(productItem, quantity);
     addToast('Added to Cart');
   };
 
   const handleBuyNow = () => {
     if (!product) return;
     
-    const currentPrice = product.price + (selectedVariant?.priceOffset || 0);
     const productItem: Product = {
       id: product.id,
       slug: product.slug,
       title: product.name,
-      price: currentPrice,
+      price: product.price,
       originalPrice: product.compareAtPrice || product.price,
       image: product.imageUrls[0] || '',
       rating: product.rating,
@@ -225,8 +220,7 @@ export const ProductDetailPage: React.FC = () => {
     if (!product) return;
     const phoneNumber = "254717043408";
     const currentPrice = product.price + (selectedVariant?.priceOffset || 0);
-    const variantStr = selectedVariant ? ` (${selectedVariant.name})` : '';
-    const message = `Hello NexGen Gadgets, I am interested in ordering the ${product.name}${variantStr} which costs KES ${currentPrice.toLocaleString()}. Please assist me with the order process.`;
+    const message = `Hello NexGen Gadgets, I am interested in ordering the ${product.name} which costs KES ${currentPrice.toLocaleString()}. Please assist me with the order process.`;
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -474,10 +468,6 @@ export const ProductDetailPage: React.FC = () => {
               )}
             </div>
             
-            <div className="text-xs text-slate-500 mb-4 select-none" title="Optional 16% VAT can be requested at checkout for an official eTIMS receipt">
-              * Price excludes 16% VAT (optional for eTIMS)
-            </div>
-            
             {isAuthenticated && (
               <div className="text-xs text-[#F59E0B] font-bold">
                 ✨ Earn {Math.floor(((product.price) + (selectedVariant?.priceOffset || 0)) / 100)} loyalty points
@@ -512,12 +502,6 @@ export const ProductDetailPage: React.FC = () => {
                 <span className="text-sm font-semibold text-slate-500 w-24">Availability:</span>
                 <span className="bg-emerald-50 text-accent border border-emerald-100 px-2.5 py-0.5 rounded text-xs font-bold">In Stock</span>
               </div>
-              {product.warranty && product.warranty.toLowerCase() !== 'none' && (
-                <div className="flex items-center gap-3 mt-2">
-                  <span className="text-sm font-semibold text-slate-500 w-24">Warranty:</span>
-                  <span className="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-0.5 rounded text-xs font-bold flex items-center gap-1.5"><ShieldCheck className="h-4 w-4" /> {product.warranty}</span>
-                </div>
-              )}
 
               <div className="bg-slate-50 border border-gray-200 rounded-xl p-4 mt-2">
                 <h4 className="font-bold text-[#1a1a2e] text-sm mb-3 flex items-center gap-2">
@@ -676,16 +660,6 @@ export const ProductDetailPage: React.FC = () => {
               Specifications
             </button>
             <button
-              onClick={() => setActiveTab('warranty')}
-              className={`px-6 py-4 text-sm font-semibold border-b-2 transition-colors cursor-pointer ${
-                activeTab === 'warranty'
-                  ? 'border-[#F59E0B] text-[#F59E0B] bg-white'
-                  : 'border-transparent text-gray-500 hover:text-[#1a1a2e]'
-              }`}
-            >
-              Warranty Info
-            </button>
-            <button
               onClick={() => setActiveTab('reviews')}
               className={`px-6 py-4 text-sm font-semibold border-b-2 transition-colors cursor-pointer ${
                 activeTab === 'reviews'
@@ -733,49 +707,6 @@ export const ProductDetailPage: React.FC = () => {
                     </ul>
                   </div>
                 )}
-              </div>
-            )}
-
-            {activeTab === 'warranty' && (
-              <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-slate-100 font-sans">
-                <div className="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
-                  <div className="p-3 bg-amber-50 rounded-xl text-[#F59E0B]">
-                    <ShieldCheck className="h-8 w-8" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900">Warranty Coverage</h3>
-                    <p className="text-slate-600 font-medium mt-1">Duration: <span className="text-[#F59E0B] font-bold">{product.warranty || '1 Year'}</span></p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div>
-                    <h4 className="font-bold text-emerald-600 flex items-center gap-2 mb-4">
-                      <CheckCircle className="h-5 w-5" /> What is Covered
-                    </h4>
-                    <ul className="space-y-3 text-slate-600 text-sm leading-relaxed">
-                      <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" /> Manufacturer defects in materials and workmanship.</li>
-                      <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" /> Internal hardware failures (e.g., Motherboard, RAM, CPU under normal use).</li>
-                      <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" /> Battery defects resulting in rapid degradation within the first 6 months.</li>
-                      <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 shrink-0" /> Free diagnosis and labor for authorized repairs during the warranty period.</li>
-                    </ul>
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-red-500 flex items-center gap-2 mb-4">
-                      <AlertCircle className="h-5 w-5" /> What is NOT Covered
-                    </h4>
-                    <ul className="space-y-3 text-slate-600 text-sm leading-relaxed">
-                      <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" /> Accidental physical damage (e.g., dropped devices, cracked screens).</li>
-                      <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" /> Liquid or electrical surge damage (unless surge protector was provided by us).</li>
-                      <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" /> Software issues, viruses, or unauthorized OS modifications.</li>
-                      <li className="flex items-start gap-2"><div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-1.5 shrink-0" /> Voided if the device is opened or tampered with by an unauthorized technician.</li>
-                    </ul>
-                  </div>
-                </div>
-                
-                <div className="mt-8 p-4 bg-slate-50 rounded-xl border border-slate-200 text-sm text-slate-500">
-                  <span className="font-bold text-slate-700">Important Note:</span> Original proof of purchase and packaging must be retained and presented when making a warranty claim. Devices must be returned to NexGen Gadgets service center.
-                </div>
               </div>
             )}
 
@@ -959,7 +890,7 @@ export const ProductDetailPage: React.FC = () => {
         </div>
       )}
 
-      {}
+      {/* Sticky Mobile CTA */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-40 flex gap-3">
         <button
           onClick={handleBuyNow}

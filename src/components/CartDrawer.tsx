@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight } from 'lucide-react';
 import { formatPrice } from '../utils/format';
-import { getImageUrl } from '../utils/getImageUrl';
 
 export const CartDrawer: React.FC = () => {
   const { 
@@ -79,24 +79,23 @@ export const CartDrawer: React.FC = () => {
               </div>
             ) : (
               cartItems.map((item) => (
-                <div key={`${item.product.id}-${item.variant || 'base'}`} className="flex gap-3.5 pb-4 border-b border-gray-150 items-start bg-white">
+                <div key={item.product.id} className="flex gap-3.5 pb-4 border-b border-gray-150 items-start bg-white">
                   <div className="w-20 h-20 bg-white border border-gray-200 rounded shrink-0 p-1 flex items-center justify-center">
-                    <img src={getImageUrl(item.product.imageUrls?.[0] || item.product.image)} alt={item.product.title} className="w-full h-full object-contain" loading="lazy" />
+                    <img src={item.product.image} alt={item.product.title} className="w-full h-full object-contain" loading="lazy" />
                   </div>
                   <div className="flex-1 min-w-0 text-left">
                     <h4 className="text-base font-semibold text-text-primary line-clamp-2 leading-snug">{item.product.title}</h4>
-                    {item.variant && <p className="text-sm font-semibold text-[#F59E0B] mt-0.5">{item.variant}</p>}
                     <p className="text-sm text-text-secondary uppercase mt-0.5">{item.product.brand} | {item.product.category}</p>
                     <div className="flex items-center justify-between mt-2.5">
                       <span className="text-base font-semibold text-dark-primary">{formatPrice(item.product.price)}</span>
                       <div className="flex items-center border border-gray-300 rounded bg-bg-gray">
-                        <button onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.variant)} className="px-2.5 py-1 hover:bg-gray-200 text-text-primary transition-colors cursor-pointer" aria-label="Decrease quantity"><Minus className="h-3.5 w-3.5" /></button>
+                        <button onClick={() => updateQuantity(item.product.id, item.quantity - 1)} className="px-2.5 py-1 hover:bg-gray-200 text-text-primary transition-colors cursor-pointer" aria-label="Decrease quantity"><Minus className="h-3.5 w-3.5" /></button>
                         <span className="px-2.5 text-sm font-semibold text-text-primary select-none min-w-[20px] text-center">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.product.id, item.quantity + 1, item.variant)} className="px-2.5 py-1 hover:bg-gray-200 text-text-primary transition-colors cursor-pointer" aria-label="Increase quantity"><Plus className="h-3.5 w-3.5" /></button>
+                        <button onClick={() => updateQuantity(item.product.id, item.quantity + 1)} className="px-2.5 py-1 hover:bg-gray-200 text-text-primary transition-colors cursor-pointer" aria-label="Increase quantity"><Plus className="h-3.5 w-3.5" /></button>
                       </div>
                     </div>
                   </div>
-                  <button onClick={() => removeFromCart(item.product.id, item.variant)} className="text-text-secondary hover:text-danger p-1 cursor-pointer transition-colors shrink-0" aria-label="Remove item"><Trash2 className="h-5 w-5" /></button>
+                  <button onClick={() => removeFromCart(item.product.id)} className="text-text-secondary hover:text-danger p-1 cursor-pointer transition-colors shrink-0" aria-label="Remove item"><Trash2 className="h-5 w-5" /></button>
                 </div>
               ))
             )}
@@ -109,7 +108,7 @@ export const CartDrawer: React.FC = () => {
                 <div className="flex flex-col gap-3">
                   <div className="flex gap-3 items-center bg-white p-2 border border-amber-100 rounded-lg shadow-sm">
                     <div className="w-12 h-12 bg-slate-100 rounded shrink-0 flex items-center justify-center p-1">
-                      <img src="https://images.unsplash.com/photo-1615563821034-722c262ba94a?q=60" alt="Sleeve" className="w-full h-full object-contain mix-blend-multiply" />
+                      <img src="https://images.unsplash.com/photo-1615563821034-722c262ba94a?auto=format&fit=crop&q=60" alt="Sleeve" className="w-full h-full object-contain mix-blend-multiply" />
                     </div>
                     <div className="flex-1">
                       <p className="text-xs font-bold text-slate-800 line-clamp-1">Waterproof Laptop Sleeve (14-16")</p>
@@ -124,7 +123,7 @@ export const CartDrawer: React.FC = () => {
                   
                   <div className="flex gap-3 items-center bg-white p-2 border border-amber-100 rounded-lg shadow-sm">
                     <div className="w-12 h-12 bg-slate-100 rounded shrink-0 flex items-center justify-center p-1">
-                      <img src="https://images.unsplash.com/photo-1527814050087-379381547384?q=60" alt="Mouse" className="w-full h-full object-contain mix-blend-multiply" />
+                      <img src="https://images.unsplash.com/photo-1527814050087-379381547384?auto=format&fit=crop&q=60" alt="Mouse" className="w-full h-full object-contain mix-blend-multiply" />
                     </div>
                     <div className="flex-1">
                       <p className="text-xs font-bold text-slate-800 line-clamp-1">Wireless Ergonomic Mouse</p>

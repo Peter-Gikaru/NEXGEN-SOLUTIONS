@@ -42,7 +42,7 @@ export const Footer: React.FC = () => {
   };
   return (
     <footer className="w-full bg-[#1a1a2e] text-white border-t border-slate-800 mt-12 pb-20 md:pb-8 select-none">
-      {}
+      {/* Newsletter Banner */}
       <div className="border-b border-slate-800 bg-slate-900/50 py-8">
         <div className="max-w-[1600px] mx-auto px-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
@@ -70,9 +70,9 @@ export const Footer: React.FC = () => {
           </form>
         </div>
       </div>
-      {}
+      {/* Main Footer Links */}
       <div className="max-w-[1600px] mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-left">
-        {}
+        {/* Col 1: Customer Service */}
         <div>
           <h4 className="text-[18px] font-semibold font-sans text-[#F59E0B] mb-4">Customer Service</h4>
           <ul className="space-y-2.5 text-[16px] text-gray-300">
@@ -83,7 +83,7 @@ export const Footer: React.FC = () => {
             <li><Link to="/faq" className="hover:text-[#F59E0B] transition-colors">Report a Product / Dispute</Link></li>
           </ul>
         </div>
-        {}
+        {/* Col 2: Information */}
         <div>
           <h4 className="text-[18px] font-semibold font-sans text-[#F59E0B] mb-4">Information</h4>
           <ul className="space-y-2.5 text-[16px] text-gray-300">
@@ -95,7 +95,7 @@ export const Footer: React.FC = () => {
             <li><Link to="/" className="hover:text-[#F59E0B] transition-colors flex items-center gap-2"><ArrowRight className="h-3 w-3" /> Official Laptop Stores</Link></li>
           </ul>
         </div>
-        {}
+        {/* Col 3: My Account */}
         <div>
           <h4 className="text-[18px] font-semibold font-sans text-[#F59E0B] mb-4">My Account</h4>
           <ul className="space-y-2.5 text-[16px] text-gray-300">
@@ -106,7 +106,7 @@ export const Footer: React.FC = () => {
             <li><Link to="/orders" className="hover:text-[#F59E0B] transition-colors">Address Book</Link></li>
           </ul>
         </div>
-        {}
+        {/* Col 4: Follow Us */}
         <div>
           <h4 className="text-[18px] font-semibold font-sans text-[#F59E0B] mb-4">Follow Us</h4>
           <div className="flex items-center gap-3.5 mb-6">
@@ -140,14 +140,14 @@ export const Footer: React.FC = () => {
           </div>
         </div>
       </div>
-      {}
+      {/* Payment Badges & Copyright Row */}
       <div className="border-t border-slate-850 bg-slate-950 py-8 text-center">
         <div className="max-w-[1600px] mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
-          {}
+          {/* Payment Badges */}
           <div className="flex items-center flex-wrap gap-3">
             <span className="text-[14px] uppercase font-semibold text-gray-400 tracking-wider">Accepted Payments:</span>
             <div className="flex gap-2.5 items-center">
-              {}
+              {/* M-PESA */}
               <span className="flex items-center shadow-md shrink-0" title="M-PESA">
                 <svg className="h-7 w-16 rounded" viewBox="0 0 100 36">
                   <rect width="100" height="36" rx="4" fill="#388e3c" />
@@ -155,7 +155,7 @@ export const Footer: React.FC = () => {
                   <text x="32" y="24" fontFamily="sans-serif" fontWeight="950" fontSize="16" fill="#e53935">PESA</text>
                 </svg>
               </span>
-              {}
+              {/* Visa */}
               <span className="flex items-center shadow-md shrink-0" title="Visa">
                 <svg className="h-7 w-16 rounded" viewBox="0 0 100 36">
                   <rect width="100" height="36" rx="4" fill="#1a1f71" />

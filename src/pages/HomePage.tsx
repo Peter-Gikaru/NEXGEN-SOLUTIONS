@@ -434,6 +434,7 @@ export const HomePage: React.FC = () => {
                   if (f.maxPrice !== maxPrice) setMaxPrice(f.maxPrice);
                   if (f.brand !== selectedBrands) setSelectedBrands(f.brand || []);
                 }}
+                onApplyFilters={() => {}}
               />
             </div>
           </div>

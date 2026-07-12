@@ -18,7 +18,7 @@ async function main() {
       urls = JSON.parse(p.imageUrls);
     } catch(e) {}
     
-    
+    // If any url starts with data/ or it's empty, replace it
     if (urls.length === 0 || urls.some((u:string) => u.startsWith('data/'))) {
       const randomImage = placeholderImages[Math.floor(Math.random() * placeholderImages.length)];
       await prisma.product.update({

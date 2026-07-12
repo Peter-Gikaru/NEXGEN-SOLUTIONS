@@ -20,8 +20,7 @@ import {
   Heart,
   Scale,
   Package,
-  LogOut as Logout,
-  Settings
+  LogOut as Logout
 } from 'lucide-react';
 import { useCategories } from '../hooks/useCategories';
 export const Header: React.FC = () => {
@@ -391,10 +390,6 @@ export const Header: React.FC = () => {
 
                   {isAuthenticated && (
                     <>
-                      <Link to="/settings" className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px]">
-                        <Settings className="h-5 w-5 text-gray-400" />
-                        Account Settings
-                      </Link>
                       <div className="h-px bg-gray-100 my-2"></div>
                       <button onClick={async () => { await logout(); navigate('/login'); }} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-red-500 hover:text-red-600 transition-colors font-semibold text-left text-[15px]">
                         <Logout className="h-5 w-5" />
@@ -406,7 +401,7 @@ export const Header: React.FC = () => {
               )}
             </div>
 
-            {}
+            {/* Cart Button */}
             <button onClick={() => setIsCartOpen(true)} className="flex items-center gap-2 cursor-pointer hover:text-[#F59E0B] transition-colors py-2 group ml-4">
               <div className="relative">
                 <ShoppingCart className="h-9 w-9 text-white group-hover:text-[#F59E0B]" />
@@ -421,9 +416,9 @@ export const Header: React.FC = () => {
           </div>
         </div>
       </div>
-      {}
+      {/* Category Navigation Bar */}
       <CategoryNav />
-      {}
+      {/* Mobile Search Modal Overlay */}
       {isMobileSearchOpen && (
         <div className="fixed inset-0 z-50 bg-[#1a1a2e]/90 flex flex-col p-4 md:hidden">
           <div className="flex justify-end mb-4">
@@ -452,7 +447,7 @@ export const Header: React.FC = () => {
           </form>
         </div>
       )}
-      {}
+      {/* Mobile Bottom Navigation Bar (Jumia/Kilimall Style) */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 bg-[#1a1a2e] border-t border-slate-800 flex md:hidden justify-around items-center py-2 shadow-2xl select-none">
         <Link to="/" className="flex flex-col items-center justify-center text-gray-400 hover:text-[#F59E0B] transition-colors">
           <Home className="h-5.5 w-5.5" />
@@ -504,17 +499,17 @@ export const Header: React.FC = () => {
           </span>
         </button>
       </nav>
-      {}
+      {/* Mobile Side Navigation Drawer */}
       {isMobileMenuOpen && (
         <div className="fixed inset-0 z-50 overflow-hidden md:hidden">
-          {}
+          {/* Backdrop */}
           <div 
             className="absolute inset-0 bg-black/60 transition-opacity duration-300"
             onClick={() => setIsMobileMenuOpen(false)}
           ></div>
-          {}
+          {/* Drawer Content */}
           <div className="absolute inset-y-0 left-0 w-full max-w-xs bg-white h-full flex flex-col shadow-2xl animate-slide-in-left overflow-y-auto">
-            {}
+            {/* Header */}
             <div className="bg-[#1a1a2e] text-white px-4 py-4 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2">
                 <img src="/favicon.png" alt="NexGen Logo" className="h-8 w-8 object-contain" />
@@ -534,7 +529,7 @@ export const Header: React.FC = () => {
                 <X className="h-6 w-6" />
               </button>
             </div>
-            {}
+            {/* Categories List (Accordion) */}
             <div className="flex-1 py-4 flex flex-col text-left">
               <h3 className="px-4 text-[14px] font-bold text-gray-400 uppercase tracking-wider mb-2 select-none">
                 All Categories
@@ -568,7 +563,7 @@ export const Header: React.FC = () => {
                             : <ChevronRight className="h-4 w-4 text-gray-400 shrink-0" />
                         )}
                       </div>
-                      {}
+                      {/* Accordion Subcategories */}
                       {hasSub && isExpanded && cat.children && (
                         <div className="bg-gray-50/50 pl-11 pr-4 py-2 flex flex-col gap-2 border-t border-dashed border-gray-100">
                           {cat.children.map((sub: any) => (

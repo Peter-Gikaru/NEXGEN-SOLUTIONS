@@ -16,7 +16,6 @@ import {
   Key
 } from 'lucide-react';
 import { startRegistration } from '@simplewebauthn/browser';
-import { Loader } from '../components/Loader';
 interface OrderItem {
   id: string;
   productId: string;
@@ -194,7 +193,7 @@ export const CustomerDashboardPage: React.FC = () => {
       <div className="flex-1 min-h-screen bg-slate-50 flex items-center justify-center font-sans">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#F59E0B] mx-auto mb-4"></div>
-          <Loader text="Fetching your orders..." />
+          <p className="text-gray-600 text-sm">Loading your orders...</p>
         </div>
       </div>
     );
@@ -476,21 +475,12 @@ export const CustomerDashboardPage: React.FC = () => {
                               <p className="text-xs text-gray-500 uppercase mt-0.5">{item.product.brand}</p>
                               <p className="text-xs text-gray-400 mt-1">Quantity: {item.quantity}</p>
                               {selectedOrder.orderStatus === 'DELIVERED' && (
-                                <div className="mt-2 flex items-center gap-3">
-                                  <button
-                                    onClick={() => navigate(`/warranty-claim?orderId=${selectedOrder.id}&productId=${item.product.id}`)}
-                                    className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
-                                  >
-                                    Claim Warranty
-                                  </button>
-                                  <span className="text-gray-300">|</span>
-                                  <button
-                                    onClick={() => navigate(`/return-request?orderId=${selectedOrder.id}&productId=${item.product.id}`)}
-                                    className="text-xs font-bold text-red-600 hover:text-red-800 transition-colors cursor-pointer"
-                                  >
-                                    Request Return
-                                  </button>
-                                </div>
+                                <button
+                                  onClick={() => navigate(`/warranty-claim?orderId=${selectedOrder.id}&productId=${item.product.id}`)}
+                                  className="mt-1 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors cursor-pointer"
+                                >
+                                  Claim Warranty
+                                </button>
                               )}
                             </div>
                             <span className="font-bold text-sm text-[#1a1a2e] shrink-0">{formatPrice(item.price * item.quantity)}</span>

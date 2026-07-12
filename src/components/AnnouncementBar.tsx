@@ -37,7 +37,7 @@ export const AnnouncementBar: React.FC = () => {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.length > 0) {
           setAnnouncements(parsed);
-          setCurrentIndex(0); 
+          setCurrentIndex(0); // Reset index on load
           return;
         }
       } catch (e) {

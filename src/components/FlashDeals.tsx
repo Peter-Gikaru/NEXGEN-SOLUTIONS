@@ -87,7 +87,6 @@ export const FlashDeals: React.FC = () => {
               stockStatus={product.stockStatus}
               stockCount={product.stockCount}
               isVerified={product.isVerified}
-                  warranty={product.warranty}
             />
           </div>
         ))}
@@ -97,4 +96,3 @@ export const FlashDeals: React.FC = () => {
   );
 };
 export default FlashDeals;
-

@@ -31,18 +31,12 @@ import {
   Mail,
   RotateCcw,
   ShieldCheck,
-  Megaphone,
-  MessageSquare,
-  Check
+  Megaphone
 } from 'lucide-react';
 import AdminNewsletter from '../components/admin/AdminNewsletter';
 import AdminReturns from '../components/admin/AdminReturns';
 import AdminWarranties from '../components/admin/AdminWarranties';
 import AdminCoupons from '../components/admin/AdminCoupons';
-import AdminLiveChat from '../components/admin/AdminLiveChat';
-import AdminShippingQueue from '../components/admin/AdminShippingQueue';
-import AdminSecurity from '../components/admin/AdminSecurity';
-import { AdminAnalytics } from '../components/admin/AdminAnalytics';
 const RecursiveCategoryItem = ({ 
   category, 
   level = 0,
@@ -182,7 +176,7 @@ interface Order {
 export const AdminDashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'stats' | 'orders' | 'users' | 'addProduct' | 'productsList' | 'categories' | 'flashSales' | 'shippingZones' | 'adminLogs' | 'announcements' | 'newsletter' | 'returns' | 'warranties' | 'coupons' | 'livechat' | 'shippingQueue' | 'securityCenter' | 'analytics'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'orders' | 'users' | 'addProduct' | 'productsList' | 'categories' | 'flashSales' | 'shippingZones' | 'adminLogs' | 'announcements' | 'newsletter' | 'returns' | 'warranties' | 'coupons'>('stats');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [stats, setStats] = useState<Stats>({ totalSales: 0, totalOrders: 0, totalUsers: 0 });
   const [lowStock, setLowStock] = useState<LowStock[]>([]);
@@ -196,8 +190,6 @@ export const AdminDashboardPage: React.FC = () => {
   const [flashSales, setFlashSales] = useState<any[]>([]);
   const [editingProduct, setEditingProduct] = useState<any | null>(null);
   const [shippingZones, setShippingZones] = useState<any[]>([]);
-  const [editingShippingZoneId, setEditingShippingZoneId] = useState<string | null>(null);
-  const [editShippingZoneForm, setEditShippingZoneForm] = useState({ regionName: '', fee: 0, estimatedDays: '' });
   const [newShippingZoneForm, setNewShippingZoneForm] = useState({ regionName: '', fee: 0, estimatedDays: '' });
   const [flashSaleForm, setFlashSaleForm] = useState({
     productId: '',
@@ -796,39 +788,6 @@ export const AdminDashboardPage: React.FC = () => {
                 <span>Dashboard</span>
               </button>
               <button
-                onClick={() => { setActiveTab('analytics'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                  activeTab === 'analytics'
-                    ? 'bg-[#F59E0B] text-white font-bold shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
-                }`}
-              >
-                <TrendingUp className="h-5 w-5" />
-                <span>Full Analytics</span>
-              </button>
-              <button
-                onClick={() => { setActiveTab('livechat'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                  activeTab === 'livechat'
-                    ? 'bg-[#F59E0B] text-white font-bold shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
-                }`}
-              >
-                <MessageSquare className="h-5 w-5" />
-                <span>Live Chat</span>
-              </button>
-              <button
-                onClick={() => { setActiveTab('securityCenter'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                  activeTab === 'securityCenter'
-                    ? 'bg-[#F59E0B] text-white font-bold shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
-                }`}
-              >
-                <ShieldCheck className="h-5 w-5" />
-                <span>Security Center</span>
-              </button>
-              <button
                 onClick={() => { setActiveTab('adminLogs'); setIsSidebarOpen(false); }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
                   activeTab === 'adminLogs'
@@ -898,19 +857,6 @@ export const AdminDashboardPage: React.FC = () => {
             >
               <MapPin className="h-4.5 w-4.5" />
               <span>Shipping Zones</span>
-            </button>
-          )}
-          {user?.role === 'ADMIN' && (
-            <button
-              onClick={() => { setActiveTab('shippingQueue'); setIsSidebarOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                activeTab === 'shippingQueue'
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-slate-800 hover:text-white'
-              }`}
-            >
-              <MapPin className="h-4.5 w-4.5" />
-              <span>Shipping Queue</span>
             </button>
           )}
           <button
@@ -1050,18 +996,6 @@ export const AdminDashboardPage: React.FC = () => {
             )}
             {activeTab === 'coupons' && (
               <AdminCoupons />
-            )}
-            {activeTab === 'livechat' && (
-              <AdminLiveChat />
-            )}
-            {activeTab === 'shippingQueue' && (
-              <AdminShippingQueue />
-            )}
-            {activeTab === 'securityCenter' && (
-              <AdminSecurity />
-            )}
-            {activeTab === 'analytics' && (
-              <AdminAnalytics />
             )}
             {activeTab === 'stats' && (
               <>
@@ -2077,68 +2011,26 @@ export const AdminDashboardPage: React.FC = () => {
                       <tbody>
                         {shippingZones.map((zone) => (
                           <tr key={zone.id} className="border-b border-slate-100 hover:bg-slate-50">
-                            {editingShippingZoneId === zone.id ? (
-                              <>
-                                <td className="py-4 px-2">
-                                  <input type="text" className="w-full border border-slate-300 rounded px-2 py-1 text-sm" value={editShippingZoneForm.regionName} onChange={e => setEditShippingZoneForm(prev => ({...prev, regionName: e.target.value}))} />
-                                </td>
-                                <td className="py-4 px-2">
-                                  <input type="number" min="0" className="w-full border border-slate-300 rounded px-2 py-1 text-sm" value={editShippingZoneForm.fee} onChange={e => setEditShippingZoneForm(prev => ({...prev, fee: Number(e.target.value)}))} />
-                                </td>
-                                <td className="py-4 px-2">
-                                  <input type="text" className="w-full border border-slate-300 rounded px-2 py-1 text-sm" value={editShippingZoneForm.estimatedDays} onChange={e => setEditShippingZoneForm(prev => ({...prev, estimatedDays: e.target.value}))} />
-                                </td>
-                                <td className="py-4 px-2 text-right whitespace-nowrap">
-                                  <button onClick={async () => {
-                                    try {
-                                      const res = await api.put(`/shipping/${zone.id}`, editShippingZoneForm);
-                                      setShippingZones(prev => prev.map(z => z.id === zone.id ? res.data : z).sort((a,b) => a.regionName.localeCompare(b.regionName)));
-                                      setEditingShippingZoneId(null);
-                                      toast.success('Updated successfully');
-                                    } catch (err: any) {
-                                      toast.error(err.response?.data?.message || 'Error updating');
-                                    }
-                                  }} className="text-green-600 hover:bg-green-50 p-2 rounded-full cursor-pointer mr-2 inline-flex" title="Save changes">
-                                    <Check className="h-5 w-5" />
-                                  </button>
-                                  <button onClick={() => setEditingShippingZoneId(null)} className="text-slate-500 hover:bg-slate-50 p-2 rounded-full cursor-pointer inline-flex" title="Cancel">
-                                    <X className="h-5 w-5" />
-                                  </button>
-                                </td>
-                              </>
-                            ) : (
-                              <>
-                                <td className="py-4 px-2 font-bold text-slate-900">{zone.regionName}</td>
-                                <td className="py-4 px-2 text-slate-600">{zone.fee.toLocaleString()}</td>
-                                <td className="py-4 px-2 text-slate-600">{zone.estimatedDays}</td>
-                                <td className="py-4 px-2 text-right whitespace-nowrap">
-                                  <button
-                                    onClick={() => {
-                                      setEditingShippingZoneId(zone.id);
-                                      setEditShippingZoneForm({ regionName: zone.regionName, fee: zone.fee, estimatedDays: zone.estimatedDays });
-                                    }}
-                                    className="text-blue-500 hover:bg-blue-50 p-2 rounded-full cursor-pointer mr-2 inline-flex" title="Edit"
-                                  >
-                                    <Edit className="h-5 w-5" />
-                                  </button>
-                                  <button
-                                    onClick={async () => {
-                                      if (!window.confirm(`Delete ${zone.regionName}?`)) return;
-                                      try {
-                                        await api.delete(`/shipping/${zone.id}`);
-                                        setShippingZones(prev => prev.filter(z => z.id !== zone.id));
-                                        toast.success('Deleted');
-                                      } catch (err) {
-                                        toast.error('Error deleting');
-                                      }
-                                    }}
-                                    className="text-red-500 hover:bg-red-50 p-2 rounded-full cursor-pointer inline-flex" title="Delete"
-                                  >
-                                    <Trash2 className="h-5 w-5" />
-                                  </button>
-                                </td>
-                              </>
-                            )}
+                            <td className="py-4 px-2 font-bold text-slate-900">{zone.regionName}</td>
+                            <td className="py-4 px-2 text-slate-600">{zone.fee.toLocaleString()}</td>
+                            <td className="py-4 px-2 text-slate-600">{zone.estimatedDays}</td>
+                            <td className="py-4 px-2 text-right">
+                              <button
+                                onClick={async () => {
+                                  if (!window.confirm(`Delete ${zone.regionName}?`)) return;
+                                  try {
+                                    await api.delete(`/shipping/${zone.id}`);
+                                    setShippingZones(prev => prev.filter(z => z.id !== zone.id));
+                                    toast.success('Deleted');
+                                  } catch (err) {
+                                    toast.error('Error deleting');
+                                  }
+                                }}
+                                className="text-red-500 hover:bg-red-50 p-2 rounded-full cursor-pointer"
+                              >
+                                <Trash2 className="h-5 w-5" />
+                              </button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>

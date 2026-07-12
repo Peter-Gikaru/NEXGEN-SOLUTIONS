@@ -319,21 +319,3 @@ export const sendPromotionalEmail = async (emails: string[], subject: string, ht
     console.error('Error sending promotional email:', error);
   }
 };
-
-export const sendAdminAlertEmail = async (subject: string, text: string) => {
-  try {
-    await transporter.sendMail({
-      from: `"NexGen System" <${fromEmail}>`,
-      to: process.env.ADMIN_EMAIL || 'admin@nexgen.com',
-      subject: subject,
-      text: text,
-      html: generateEmailLayout(`
-        <h2>${subject}</h2>
-        <p>${text}</p>
-      `)
-    });
-    console.log('Admin alert email sent');
-  } catch (error) {
-    console.error('Failed to send admin alert email:', error);
-  }
-};

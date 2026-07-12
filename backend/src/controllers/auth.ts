@@ -9,7 +9,6 @@ import crypto from 'crypto';
 import { sendPasswordResetEmail, sendWelcomeEmail, sendPasswordChangedAlertEmail } from '../services/emailService';
 import axios from 'axios';
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
-import { logAction } from '../services/audit';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const generateToken = (user: { id: string; email: string; role: string }) => {
@@ -63,7 +62,6 @@ export const register = async (
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     });
-    await logAction('REGISTER_SUCCESS', `User registered: ${email}`, 'INFO', user.id, undefined, req.ip, req.headers['user-agent']);
     return res.status(201).json(user);
   } catch (error) {
     return next(error);
@@ -81,7 +79,6 @@ export const login = async (
     });
     if (!user) {
       logger.warn(`SECURITY ALERT: Failed login attempt for non-existent email: ${email} from IP: ${req.ip}`);
-      await logAction('LOGIN_FAILED', `Failed login for non-existent email: ${email}`, 'WARNING', undefined, undefined, req.ip, req.headers['user-agent']);
       return res.status(401).json({ message: 'Invalid email or password' });
     }
     if (user.status === 'SUSPENDED') {
@@ -110,10 +107,8 @@ export const login = async (
       if (newAttempts >= 5) {
         updates.lockedUntil = new Date(Date.now() + 15 * 60 * 1000);
         logger.warn(`SECURITY ALERT: Account LOCKED due to brute force: ${email} from IP: ${req.ip}`);
-        await logAction('LOGIN_FAILED', `Account LOCKED due to brute force: ${email}`, 'CRITICAL', user.id, undefined, req.ip, req.headers['user-agent']);
       } else {
         logger.warn(`SECURITY ALERT: Failed login attempt (wrong password) for email: ${email} from IP: ${req.ip}`);
-        await logAction('LOGIN_FAILED', `Invalid password for: ${email}`, 'WARNING', user.id, undefined, req.ip, req.headers['user-agent']);
       }
       await prisma.user.update({
         where: { id: user.id },
@@ -134,7 +129,6 @@ export const login = async (
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     });
-    await logAction('LOGIN_SUCCESS', `User logged in: ${user.email}`, 'INFO', user.id, undefined, req.ip, req.headers['user-agent']);
     return res.json({
       id: user.id,
       email: user.email,
@@ -206,7 +200,6 @@ export const logout = async (req: Request, res: Response) => {
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
   });
-  await logAction('LOGOUT', `User logged out`, 'INFO', undefined, undefined, req.ip, req.headers['user-agent']);
   return res.json({ message: 'Logged out successfully' });
 };
 export const getProfile = async (
@@ -252,38 +245,7 @@ export const updateAddress = async (
       where: { id: req.user.id },
       data: { defaultAddress: JSON.stringify(address) }
     });
-    await logAction('UPDATE_ADDRESS', 'User updated their default shipping address', 'INFO', req.user.id, undefined, req.ip, req.headers['user-agent']);
     return res.json({ message: 'Address updated successfully' });
-  } catch (error) {
-    return next(error);
-  }
-};
-
-export const updateProfile = async (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
-    const { name } = req.body;
-    const user = await prisma.user.update({
-      where: { id: req.user.id },
-      data: { name },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        requiresPasswordChange: true,
-        defaultAddress: true,
-      }
-    });
-    await logAction('UPDATE_PROFILE', 'User updated their profile details', 'INFO', req.user.id, undefined, req.ip, req.headers['user-agent']);
-    return res.json({
-      ...user,
-      defaultAddress: user.defaultAddress ? JSON.parse(user.defaultAddress) : null,
-    });
   } catch (error) {
     return next(error);
   }

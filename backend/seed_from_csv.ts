@@ -8,10 +8,10 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding products from CSV...');
 
-  
+  // Fetch all categories to map them
   const categories = await prisma.category.findMany();
   
-  
+  // Create a default Laptops category fallback if mapping fails
   let fallbackCategory = categories.find(c => c.name.toLowerCase() === 'laptops');
   if (!fallbackCategory) {
     fallbackCategory = await prisma.category.create({
@@ -29,7 +29,7 @@ async function main() {
       console.log(`Found ${results.length} products to import.`);
       
       for (const row of results) {
-        
+        // Find best matching category by name
         const catName = (row.categoryName || '').toLowerCase();
         let matchedCategory = categories.find(c => c.name.toLowerCase() === catName || catName.includes(c.name.toLowerCase()));
         
@@ -63,11 +63,11 @@ async function main() {
         let imageUrls = '[]';
         try {
            if (row.imageUrls) {
-               
+               // If it's a JSON array, parse it, otherwise wrap it
                if (row.imageUrls.startsWith('[')) {
                    imageUrls = row.imageUrls;
                } else {
-                   
+                   // Split by comma if multiple, or just array
                    imageUrls = JSON.stringify(row.imageUrls.split(',').map((u:string) => u.trim()));
                }
            } else {

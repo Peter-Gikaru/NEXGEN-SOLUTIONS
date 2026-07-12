@@ -16,9 +16,6 @@ import {
   createAdminCoupon,
   updateAdminCoupon
 } from '../controllers/admin';
-import { getAuditLogs, getSecurityAlerts, resolveSecurityAlert } from '../controllers/security';
-import { exportFacebookCatalog } from '../controllers/catalog';
-import { getFullAnalytics } from '../controllers/analytics';
 import { authenticateJWT, authorizeRoles } from '../middleware/auth';
 
 const router = Router();
@@ -45,12 +42,5 @@ router.get('/coupons', authorizeRoles('ADMIN'), getAdminCoupons);
 router.post('/coupons', authorizeRoles('ADMIN'), createAdminCoupon);
 router.put('/coupons/:id', authorizeRoles('ADMIN'), updateAdminCoupon);
 
-router.get('/security/logs', authorizeRoles('ADMIN'), getAuditLogs);
-router.get('/security/alerts', authorizeRoles('ADMIN'), getSecurityAlerts);
-router.put('/security/alerts/:id/resolve', authorizeRoles('ADMIN'), resolveSecurityAlert);
-
-router.get('/catalog/facebook', authorizeRoles('ADMIN'), exportFacebookCatalog);
-
-router.get('/analytics/full', authorizeRoles('ADMIN'), getFullAnalytics);
-
 export default router;
+

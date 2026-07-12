@@ -55,7 +55,7 @@ export const createOrder = async (
         quantity: item.quantity,
       });
     }
-    let shippingFee = 500; 
+    let shippingFee = 500; // default if zone not found
     if (subtotal >= 50000) {
       shippingFee = 0;
     } else if (shippingAddress.city) {
@@ -126,7 +126,7 @@ export const createOrder = async (
           shippingFee,
           discount,
           promoCodeId,
-          shippingAddress: finalShippingAddress, 
+          shippingAddress: finalShippingAddress, // now saving as Json directly
           paymentMethod,
           paymentStatus: paymentMethod === 'COD' ? 'PENDING' : 'PENDING',
           orderStatus: 'PENDING',
@@ -190,8 +190,8 @@ export const createOrder = async (
         console.log(`[M-PESA] STK Push initiated for order ${order.id}. CheckoutRequestID: ${response.CheckoutRequestID}`);
       } catch (e: any) {
         console.error('[M-PESA] STK Push failed:', e.message);
-        
-        
+        // We log the failure but still return 201 because the order was saved successfully.
+        // User can retry payment from order tracking page later.
       }
     }
     return res.status(201).json(order);

@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { DisableCopy } from './components/DisableCopy';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -37,65 +36,20 @@ import { CookieConsent } from './components/CookieConsent';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { ForceChangePasswordPage } from './pages/ForceChangePasswordPage';
-import { SettingsPage } from './pages/SettingsPage';
 
 import { Link } from 'react-router-dom';
 
 const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="min-h-screen flex bg-slate-50 font-sans antialiased">
-      <div className="hidden lg:flex flex-col justify-between w-5/12 bg-[#0A1128] text-white p-12 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0A1128] via-[#101C42] to-[#1a2f6c] opacity-90"></div>
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-[#F59E0B] rounded-full mix-blend-multiply filter blur-[100px] opacity-20"></div>
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-[#3b82f6] rounded-full mix-blend-multiply filter blur-[100px] opacity-20"></div>
-        
-        <div className="relative z-10">
-          <Link to="/" className="inline-block hover:opacity-90 transition-opacity">
-            <img src="/favicon.png" alt="NexGen Logo" className="h-16 w-auto object-contain drop-shadow-sm" />
-          </Link>
-          
-          <div className="mt-24 space-y-8">
-            <h2 className="text-4xl font-extrabold leading-tight">
-              Premium tech, <br/>
-              <span className="text-[#F59E0B]">unmatched service.</span>
-            </h2>
-            
-            <div className="space-y-6 mt-8">
-              <div className="flex items-center gap-4">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
-                  <span className="text-[#F59E0B] font-bold">✓</span>
-                </div>
-                <p className="text-slate-300 font-medium text-lg">1 Year comprehensive warranty</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
-                  <span className="text-[#F59E0B] font-bold">✓</span>
-                </div>
-                <p className="text-slate-300 font-medium text-lg">Fast, reliable nationwide delivery</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
-                  <span className="text-[#F59E0B] font-bold">✓</span>
-                </div>
-                <p className="text-slate-300 font-medium text-lg">24/7 Priority customer support</p>
-              </div>
+    <div className="min-h-screen flex flex-col font-sans bg-slate-50 antialiased overflow-x-hidden">
+      <div className="flex-1 flex justify-center items-center py-12 px-4">
+        <div className="w-full max-w-[540px]">
+          <div className="w-full bg-white border border-slate-200/60 rounded-[24px] p-8 sm:p-12 shadow-xl shadow-slate-200/40">
+            <div className="flex justify-center mb-8">
+              <Link to="/" className="flex justify-center hover:opacity-90 transition-opacity">
+                <img src="/favicon.png" alt="NexGen Logo" className="h-20 md:h-24 w-auto object-contain drop-shadow-sm" />
+              </Link>
             </div>
-          </div>
-        </div>
-        
-        <div className="relative z-10">
-          <p className="text-slate-400 text-sm font-medium">
-            © {new Date().getFullYear()} NexGen Gadgets. All rights reserved.
-          </p>
-        </div>
-      </div>
-
-      <div className="flex-1 flex justify-center items-center p-6 sm:p-12 relative overflow-y-auto">
-        <Link to="/" className="lg:hidden absolute top-8 left-8 hover:opacity-90 transition-opacity z-20">
-          <img src="/favicon.png" alt="NexGen Logo" className="h-12 w-auto object-contain drop-shadow-sm" />
-        </Link>
-        <div className="w-full max-w-[480px]">
-          <div className="w-full bg-white sm:border border-slate-200/60 sm:rounded-[24px] p-6 sm:p-10 sm:shadow-xl shadow-slate-200/40">
             {children}
           </div>
         </div>
@@ -110,7 +64,6 @@ const AdminLayout: React.FC = () => {
     <div className="h-screen w-full font-sans antialiased bg-slate-50 flex flex-col overflow-hidden">
       <Routes>
         <Route path="/" element={<AdminDashboardPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
       </Routes>
       <Toaster position="top-center" />
@@ -143,7 +96,6 @@ const CustomerLayout: React.FC = () => {
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="/terms" element={<TermsOfUsePage />} />
           <Route path="/how-to-shop" element={<HowToShopPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
@@ -193,7 +145,6 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <AuthProvider>
-      <DisableCopy />
       <CartProvider>
         <WishlistProvider>
           <Router>

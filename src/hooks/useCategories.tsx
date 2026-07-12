@@ -78,12 +78,7 @@ export const useCategories = (forceRefetch = false) => {
       if (!fetchPromise || forceRefetch) {
         fetchPromise = fetchCategories();
       }
-      fetchPromise.then(mapped => {
-        setCategories(mapped);
-        setLoading(false);
-      }).catch(() => {
-        setLoading(false);
-      });
+      fetchPromise.then(mapped => setCategories(mapped));
     } else {
       setCategories(cachedCategories);
       setLoading(false);

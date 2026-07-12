@@ -137,7 +137,6 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, onShopNowCli
                   stockStatus={product.stockStatus}
                   stockCount={product.stockCount}
                   isVerified={product.isVerified}
-                  warranty={product.warranty}
                 />
               ))}
             </div>
@@ -148,4 +147,3 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, onShopNowCli
   );
 };
 export default ProductGrid;
-

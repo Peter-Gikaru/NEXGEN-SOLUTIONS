@@ -118,8 +118,6 @@ export const WarrantyClaimPage: React.FC = () => {
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
-                minLength={20}
-                maxLength={1000}
                 rows={4}
                 placeholder="Please describe the issue in detail..."
                 className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 focus:outline-none focus:border-[#F59E0B] text-slate-900 resize-none"

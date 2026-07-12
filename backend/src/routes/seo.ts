@@ -2,7 +2,7 @@ import express from 'express';
 import { PrismaClient } from '@prisma/client';
 const router = express.Router();
 const prisma = new PrismaClient();
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://nexgen-gadgets.com';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://yourdomain.co.ke';
 router.get('/sitemap.xml', async (req, res) => {
   try {
     const products = await prisma.product.findMany({

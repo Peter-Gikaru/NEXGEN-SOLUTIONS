@@ -54,11 +54,11 @@ export const PrivacyPolicyPage: React.FC = () => {
                 1. Introduction
               </h2>
               <p>
-                This Privacy notice explains how data is collected, used, shared, and safeguarded when you use the NexGen eCommerce Platform ("the Platform", "we", "our" or "us").
+                This Privacy notice explains how data is collected, used, shared, and safeguarded when you use the NexGen eCommerce Platform ("the Platform", "we", "our" or "us"). This policy is designed to comply with the <strong>General Data Protection Regulation (GDPR)</strong> and the <strong>Kenyan Data Protection Act of 2019</strong>.
               </p>
               <h3 className="text-lg font-bold text-slate-800 mt-4 mb-2">1.1 Scope & Key Parties</h3>
               <p>
-                This notice applies to all users of the NexGen Platform, including customers, guest shoppers, and administrators. By using the Platform, you consent to the data practices described in this notice. For the purpose of data governance on this Platform:
+                This notice applies to all users of the NexGen Platform, including customers, guest shoppers, and administrators. By continuing to use the Platform, you consent to the data practices described in this notice. For the purpose of data governance on this Platform:
               </p>
               <ul className="list-disc pl-5 mt-2 space-y-2">
                 <li><strong>NexGen (Data Controller):</strong> As the Data Controller, NexGen hosts the platform and determines how your personal data is collected and used to fulfill your orders.</li>
@@ -76,6 +76,7 @@ export const PrivacyPolicyPage: React.FC = () => {
               <ul className="list-disc pl-5 mt-2 space-y-2">
                 <li><strong>Identity Data:</strong> Full name and contact preferences.</li>
                 <li><strong>Contact Data:</strong> Email address, phone number, and billing/shipping address.</li>
+                <li><strong>Checkout & Cart Data:</strong> Contact information entered during the checkout process (such as your email address) may be captured and stored even if the checkout process is not completed. This allows us to offer cart recovery services and send promotional updates.</li>
                 <li><strong>Financial Data:</strong> Selected payment methods. (Note: We do not store full credit card numbers or raw M-PESA PINs on our servers).</li>
               </ul>
 

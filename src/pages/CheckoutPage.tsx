@@ -224,6 +224,15 @@ export const CheckoutPage: React.FC = () => {
                         placeholder="e.g. john@example.com"
                         value={guestEmail}
                         onChange={(e) => setGuestEmail(e.target.value)}
+                        onBlur={async () => {
+                          if (guestEmail && guestEmail.includes('@')) {
+                            try {
+                              await api.post('/cart/guest-email', { email: guestEmail });
+                            } catch (e) {
+                              console.error('Failed to save guest email', e);
+                            }
+                          }
+                        }}
                         className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#F59E0B]/50 focus:border-[#F59E0B] text-slate-900 transition-all placeholder:text-slate-400"
                       />
                     </div>

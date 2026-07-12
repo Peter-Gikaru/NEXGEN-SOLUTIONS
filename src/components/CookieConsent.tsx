@@ -203,7 +203,7 @@ export const CookieConsent: React.FC = () => {
                 <h3 className="font-bold text-gray-900 text-lg mb-1">Your Privacy Matters</h3>
                 <p className="text-sm text-gray-600 leading-relaxed mb-4">
                   We use cookies to ensure your cart works, remember your preferences, and provide targeted offers. 
-                  By clicking "Accept All", you consent to our use of cookies.
+                  By continuing to use this web app, you agree to our <a href="/terms" className="text-[#F59E0B] hover:underline">Terms of Use</a> and <a href="/privacy" className="text-[#F59E0B] hover:underline">Privacy Policy</a>.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center gap-3 w-full">
                   <button 

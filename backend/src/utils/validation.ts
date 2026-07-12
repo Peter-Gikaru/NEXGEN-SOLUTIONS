@@ -86,8 +86,8 @@ export const promoCodeSchema = z.object({
   expiryDate: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: 'Invalid expiry date',
   }),
+  isForAbandonedCart: z.boolean().optional(),
 });
-
 export const flashSaleSchema = z.object({
   productId: z.string().uuid(),
   salePrice: z.number().positive(),

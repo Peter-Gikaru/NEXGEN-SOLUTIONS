@@ -36,23 +36,73 @@ import { CookieConsent } from './components/CookieConsent';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { ForceChangePasswordPage } from './pages/ForceChangePasswordPage';
+import { LiveChatWidget } from './components/LiveChatWidget';
 
 import { Link } from 'react-router-dom';
 
 const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-slate-50 antialiased overflow-x-hidden">
-      <div className="flex-1 flex justify-center items-center py-12 px-4">
-        <div className="w-full max-w-[540px]">
-          <div className="w-full bg-white border border-slate-200/60 rounded-[24px] p-8 sm:p-12 shadow-xl shadow-slate-200/40">
-            <div className="flex justify-center mb-8">
-              <Link to="/" className="flex justify-center hover:opacity-90 transition-opacity">
-                <img src="/favicon.png" alt="NexGen Logo" className="h-20 md:h-24 w-auto object-contain drop-shadow-sm" />
-              </Link>
+    <div className="min-h-screen flex font-sans antialiased bg-[#021024] overflow-hidden">
+      <div className="flex-1 w-full flex flex-col lg:flex-row items-center justify-center p-6 lg:p-12 gap-12 lg:gap-24">
+        
+        {/* Left Side: Text and Value Props */}
+        <div className="hidden lg:block w-full max-w-xl text-white space-y-8">
+          <Link to="/" className="inline-block mb-4">
+            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white hover:bg-red-700 transition-colors shadow-lg shadow-red-500/20">
+              <span className="font-bold text-xl tracking-tighter">NX</span>
             </div>
+          </Link>
+          
+          <h1 className="text-3xl lg:text-4xl font-bold leading-tight text-white tracking-tight">
+            Start your premium shopping experience today to test out the NexGen platform with <span className="text-white">no strings attached:</span>
+          </h1>
+          
+          <ul className="space-y-3 text-base text-slate-300 mt-6 font-medium">
+            <li className="flex items-center gap-3">
+              <span className="text-blue-500 text-xl font-bold">✓</span> No credit card required to browse
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="text-blue-500 text-xl font-bold">✓</span> Free express shipping available
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="text-blue-500 text-xl font-bold">✓</span> Access to all premium tech products across our platform
+            </li>
+          </ul>
+
+          <h2 className="text-2xl font-bold pt-8 text-white tracking-tight">Get up and running</h2>
+          <ul className="space-y-3 text-base text-slate-300 font-medium">
+            <li className="flex items-center gap-3">
+              <span className="text-blue-500 text-xl font-bold">✓</span> Verify your email address & phone number
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="text-blue-500 text-xl font-bold">✓</span> Tell us what gadgets you love
+            </li>
+            <li className="flex items-center gap-3">
+              <span className="text-blue-500 text-xl font-bold">✓</span> Start shopping!
+            </li>
+          </ul>
+          
+          <p className="text-xs text-slate-500 pt-8 max-w-md font-medium leading-relaxed">
+            *Free shipping and member discounts may be limited by time, location, and usage caps, and are subject to change without notice.
+          </p>
+        </div>
+
+        {/* Right Side: Form Card */}
+        <div className="w-full max-w-[500px]">
+          {/* Mobile Logo Fallback */}
+          <div className="flex lg:hidden justify-center mb-8">
+            <Link to="/">
+              <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg shadow-red-500/20">
+                <span className="font-bold text-xl tracking-tighter">NX</span>
+              </div>
+            </Link>
+          </div>
+
+          <div className="bg-white rounded-xl p-8 sm:p-10 shadow-2xl">
             {children}
           </div>
         </div>
+
       </div>
       <Toaster position="top-center" />
     </div>
@@ -103,6 +153,7 @@ const CustomerLayout: React.FC = () => {
       <Footer />
       <FollowUsSidebar />
       <SupportWidget />
+      <LiveChatWidget />
       <InstallPWA />
       <CookieConsent />
       <CartDrawer />
@@ -136,7 +187,7 @@ const AppContent: React.FC = () => {
       />
       <Route 
         path="/*" 
-        element={user?.role === 'ADMIN' ? <Navigate to="/admin" replace /> : <CustomerLayout />} 
+        element={<CustomerLayout />} 
       />
     </Routes>
   );

@@ -1,5 +1,6 @@
 import cron from 'node-cron';
 import prisma from '../config/db';
+import { sendAbandonedCartEmail } from './emailService';
 
 export const initCronJobs = () => {
   
@@ -74,7 +75,10 @@ export const initCronJobs = () => {
         where: {
           updatedAt: { lt: twoHoursAgo, gt: twentyFourHoursAgo },
           abandonedEmailSent: false,
-          userId: { not: null },
+          OR: [
+            { userId: { not: null } },
+            { guestEmail: { not: null } }
+          ],
           items: { some: {} }
         },
         include: { user: true, items: { include: { product: true } } }
@@ -82,10 +86,17 @@ export const initCronJobs = () => {
 
       if (abandonedCarts.length > 0) {
         console.log(`[CRON] Found ${abandonedCarts.length} abandoned carts.`);
+
+        const activePromo = await prisma.promoCode.findFirst({
+          where: { active: true, isForAbandonedCart: true }
+        });
+
         for (const cart of abandonedCarts) {
-          if (cart.user?.email) {
+          const emailAddress = cart.user?.email || cart.guestEmail;
+          if (emailAddress) {
+            console.log(`[CRON] Sending abandoned cart email to ${emailAddress}`);
+            await sendAbandonedCartEmail(emailAddress, cart.items, activePromo || undefined);
             
-            console.log(`[CRON] Sending abandoned cart email to ${cart.user.email}`);
             await prisma.cart.update({
               where: { id: cart.id },
               data: { abandonedEmailSent: true }

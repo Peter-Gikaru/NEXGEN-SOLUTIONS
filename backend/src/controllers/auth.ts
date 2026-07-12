@@ -6,7 +6,7 @@ import { AuthenticatedRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { OAuth2Client } from 'google-auth-library';
 import crypto from 'crypto';
-import { sendPasswordResetEmail, sendWelcomeEmail, sendPasswordChangedAlertEmail } from '../services/emailService';
+import { sendPasswordResetEmail, sendWelcomeEmail, sendPasswordChangedAlertEmail, sendAdminAlertEmail } from '../services/emailService';
 import axios from 'axios';
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
 
@@ -56,6 +56,11 @@ export const register = async (
       },
     });
     sendWelcomeEmail(email, name).catch(console.error);
+    sendAdminAlertEmail(
+      'New User Registration',
+      `A new user has just registered on the platform.\n\nName: ${name}\nEmail: ${email}\nDate: ${new Date().toLocaleString()}`
+    ).catch(console.error);
+    
     const token = generateToken(user);
     res.cookie('token', token, {
       httpOnly: true,
@@ -281,6 +286,10 @@ export const googleLogin = async (
         },
       });
       sendWelcomeEmail(email, name || 'Google User').catch(console.error);
+      sendAdminAlertEmail(
+        'New User Registration',
+        `A new user has just registered on the platform via Google.\n\nName: ${name || 'Google User'}\nEmail: ${email}\nDate: ${new Date().toLocaleString()}`
+      ).catch(console.error);
     } else if (!user.googleId) {
       user = await prisma.user.update({
         where: { id: user.id },
@@ -437,6 +446,10 @@ export const facebookLogin = async (
         },
       });
       sendWelcomeEmail(userEmail, name || 'Facebook User').catch(console.error);
+      sendAdminAlertEmail(
+        'New User Registration',
+        `A new user has just registered on the platform via Facebook.\n\nName: ${name || 'Facebook User'}\nEmail: ${userEmail}\nDate: ${new Date().toLocaleString()}`
+      ).catch(console.error);
     } else if (!user.facebookId) {
       user = await prisma.user.update({
         where: { id: user.id },

@@ -351,3 +351,41 @@ export const clearCart = async (
     return next(error);
   }
 };
+
+export const saveGuestEmail = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const sessionId = req.headers['x-session-id'] as string;
+    const { email } = req.body;
+    
+    if (req.user) {
+      return res.json({ message: 'User is logged in, guest email not needed' });
+    }
+
+    if (!sessionId || !email) {
+      return res.status(400).json({ message: 'Session ID and email are required' });
+    }
+
+    let cart = await prisma.cart.findUnique({
+      where: { sessionId },
+    });
+
+    if (cart) {
+      await prisma.cart.update({
+        where: { id: cart.id },
+        data: { guestEmail: email }
+      });
+    } else {
+      await prisma.cart.create({
+        data: { sessionId, guestEmail: email }
+      });
+    }
+
+    return res.json({ message: 'Guest email saved for cart recovery' });
+  } catch (error) {
+    return next(error);
+  }
+};

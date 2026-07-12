@@ -54,10 +54,10 @@ export const TermsOfUsePage: React.FC = () => {
                 1. Acceptance of Terms
               </h2>
               <p>
-                By accessing or using the NexGen Gadgets Platform as a customer, you acknowledge & accept these Terms of Use.
+                By accessing or continuing to use the NexGen Gadgets Platform as a customer or guest, you acknowledge & accept these Terms of Use. This agreement is compliant with the General Data Protection Regulation (GDPR) and the Kenyan Data Protection Act of 2019.
               </p>
               <p className="font-bold text-indigo-800 bg-indigo-50 p-4 rounded-lg mt-4 border border-indigo-100">
-                Important: By submitting an order, you confirm all information provided is truthful, accurate, and complete. Fraudulent activity results in immediate ban and legal action.
+                Important: By interacting with the checkout process, you agree that any contact information entered (such as your email address) may be collected and used for cart recovery communications and marketing, even if the order is not finalized.
               </p>
             </section>
 

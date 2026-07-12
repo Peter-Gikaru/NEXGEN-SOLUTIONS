@@ -100,6 +100,7 @@ model Cart {
   id                 String     @id @default(uuid())
   userId             String?    @unique
   sessionId          String?    @unique
+  guestEmail         String?
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   abandonedEmailSent Boolean    @default(false)
@@ -175,16 +176,17 @@ model Review {
 }
 
 model PromoCode {
-  id            String   @id @default(uuid())
-  code          String   @unique
-  discountType  String
-  discountValue Float
-  maxUses       Int      @default(100)
-  usedCount     Int      @default(0)
-  expiryDate    DateTime
-  active        Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  orders        Order[]
+  id                 String   @id @default(uuid())
+  code               String   @unique
+  discountType       String
+  discountValue      Float
+  maxUses            Int      @default(100)
+  usedCount          Int      @default(0)
+  expiryDate         DateTime
+  active             Boolean  @default(true)
+  isForAbandonedCart Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  orders             Order[]
 }
 
 model FlashSale {

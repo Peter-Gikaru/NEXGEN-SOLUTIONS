@@ -45,7 +45,7 @@ export const createPromo = async (
   next: NextFunction
 ) => {
   try {
-    const { code, discountType, discountValue, maxUses, expiryDate } = req.body;
+    const { code, discountType, discountValue, maxUses, expiryDate, isForAbandonedCart } = req.body;
 
     const existingPromo = await prisma.promoCode.findUnique({
       where: { code },
@@ -63,10 +63,45 @@ export const createPromo = async (
         maxUses: maxUses || 100,
         expiryDate: new Date(expiryDate),
         active: true,
+        isForAbandonedCart: isForAbandonedCart || false,
       },
     });
 
     return res.status(201).json(promo);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const updatePromo = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { code, discountType, discountValue, maxUses, expiryDate, active, isForAbandonedCart } = req.body;
+
+    const updated = await prisma.promoCode.update({
+      where: { id },
+      data: {
+        code,
+        discountType,
+        discountValue: Number(discountValue),
+        maxUses: Number(maxUses),
+        expiryDate: new Date(expiryDate),
+        active,
+        isForAbandonedCart,
+      }
+    });
+
+    return res.json(updated);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const deletePromo = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    await prisma.promoCode.delete({ where: { id } });
+    return res.json({ message: 'Promo deleted' });
   } catch (error) {
     return next(error);
   }

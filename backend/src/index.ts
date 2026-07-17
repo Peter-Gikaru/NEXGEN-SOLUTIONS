@@ -26,6 +26,7 @@ import adminLogRoutes from './routes/adminLogs';
 import newsletterRoutes from './routes/newsletter';
 import returnRoutes from './routes/returns';
 import warrantyRoutes from './routes/warranty';
+import livechatRoutes from './routes/livechat';
 import { initCronJobs } from './services/cron';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -125,9 +126,26 @@ app.use('/api/admin/logs', adminLogRoutes);
 app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/returns', returnRoutes);
 app.use('/api/warranty', warrantyRoutes);
+app.use('/api/livechat', livechatRoutes);
+
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import { setupSocket } from './services/socket';
 
 app.use(errorHandler);
 initCronJobs();
-app.listen(port, () => {
+
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
+
+setupSocket(io);
+
+httpServer.listen(port, () => {
   console.log(`Server running on port ${port} with JWT_SECRET configured.`);
 });

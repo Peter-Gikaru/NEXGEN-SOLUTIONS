@@ -398,14 +398,14 @@ export const ProductDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
           
           <div className="flex flex-col gap-4">
-              <div className="w-full h-auto min-h-[300px] max-h-[600px] bg-black border border-slate-800 rounded-2xl p-2 md:p-4 flex items-center justify-center relative select-none overflow-hidden group">
+              <div className="w-full h-auto min-h-[300px] max-h-[600px] flex items-center justify-center relative select-none overflow-hidden group">
                 <img 
                   src={getImageUrl(mainImage)} 
                   alt={product.name} 
                   className="max-h-[600px] w-auto object-contain drop-shadow-md transition-transform duration-500 ease-out hover:scale-105"
                   crossOrigin="anonymous"
                 />
-            </div>
+              </div>
             {product.imageUrls.length > 1 && (
               <div className="flex gap-3 overflow-x-auto py-1">
                 {product.imageUrls.map((img, index) => (

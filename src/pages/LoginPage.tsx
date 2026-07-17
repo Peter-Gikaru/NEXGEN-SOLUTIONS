@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Key, Eye, EyeOff, ArrowRight, ArrowLeft, AlertCircle, Lock, Mail } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import api from '../services/api';
 import { GoogleLogin } from '@react-oauth/google';
 import { startAuthentication } from '@simplewebauthn/browser';
@@ -160,12 +160,6 @@ export const LoginPage: React.FC = () => {
 
   return (
     <>
-        <div className="mb-6 flex justify-center">
-          <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-[#F59E0B] transition-colors bg-white px-4 py-2 rounded-full shadow-sm border border-slate-100 hover:shadow">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Link>
-        </div>
         <div className="text-center mb-8">
           <h2 className="font-sans text-3xl font-extrabold tracking-tight text-slate-900">
             Welcome <span className="text-[#F59E0B]">Back</span>
@@ -183,7 +177,7 @@ export const LoginPage: React.FC = () => {
               Email Address
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
+              <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
               <input
                 id="email"
                 type="email"
@@ -206,7 +200,7 @@ export const LoginPage: React.FC = () => {
               </Link>
             </div>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
+              <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
@@ -219,7 +213,7 @@ export const LoginPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 transition-colors"
+                className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-600 transition-colors"
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
@@ -242,19 +236,28 @@ export const LoginPage: React.FC = () => {
               <div className="w-full border-t border-slate-200"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-3 bg-white text-slate-400 font-medium">Or continue with</span>
+              <span className="px-3 bg-white text-slate-500 font-medium">Or continue with</span>
             </div>
           </div>
 
           <div className="mt-6 flex flex-col items-center gap-3">
-            {isGoogleEnabled && (
+            {isGoogleEnabled ? (
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => toast.error('Google Login Failed')}
-                theme="outline"
+                theme="filled_black"
                 shape="rectangular"
                 text="signin_with"
               />
+            ) : (
+              <button
+                type="button"
+                onClick={() => toast.error('Google Login is not configured in .env')}
+                className="w-full max-w-[280px] bg-white text-slate-900 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-slate-100 transition-colors shadow-sm text-sm border border-slate-200"
+              >
+                <img src="https://www.google.com/favicon.ico" className="w-5 h-5" alt="Google" />
+                <span>Continue with Google</span>
+              </button>
             )}
             
             <button
@@ -284,26 +287,32 @@ export const LoginPage: React.FC = () => {
         <div className="mt-8 text-center pt-6">
           <p className="text-slate-500 text-sm font-medium">
             Don't have an account?{' '}
-            <Link to="/register" className="text-[#F59E0B] hover:text-amber-600 hover:underline font-bold transition-colors">
+            <Link to="/register" className="text-[#F59E0B] hover:text-amber-500 hover:underline font-bold transition-colors">
               Create secure account
             </Link>
           </p>
+          <div className="mt-8 flex justify-center">
+            <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors py-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Home
+            </Link>
+          </div>
         </div>
       {isRestoreModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-xl max-w-md w-full p-6 text-white">
+          <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-xl max-w-md w-full p-6 text-slate-900">
             <div className="flex items-center gap-3 mb-4 text-[#F59E0B]">
               <AlertCircle className="h-6 w-6" />
               <h3 className="text-lg font-bold">Restore Account</h3>
             </div>
-            <p className="text-sm text-slate-300 mb-6 leading-relaxed">
+            <p className="text-sm text-slate-700 mb-6 leading-relaxed">
               Your account was recently scheduled for deletion but is still within the 7-day grace period. 
               Would you like to cancel the deletion and fully restore your account?
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setIsRestoreModalOpen(false)}
-                className="px-4 py-2 text-sm font-bold text-slate-400 hover:text-white transition-colors cursor-pointer"
+                className="px-4 py-2 text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
               >
                 No, Keep Deleted
               </button>

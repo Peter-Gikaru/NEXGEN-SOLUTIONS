@@ -375,10 +375,28 @@ export const exportOrders = async (
       include: { user: true },
       orderBy: { createdAt: 'desc' }
     });
+    
+    const sanitizeCsvCell = (val: any): string => {
+      if (val === null || val === undefined) return '';
+      let str = String(val);
+      if (/^[=\+\-\@\t\r]/.test(str)) {
+        str = `'${str}`;
+      }
+      return `"${str.replace(/"/g, '""')}"`;
+    };
+
     const csvHeaders = "Order ID,Date,User Email,Total Amount,Payment Method,Payment Status,Order Status\n";
     const csvRows = orders.map(o => {
-      return `"${o.id}","${o.createdAt.toISOString()}","${o.user?.email || 'Guest'}","${o.totalAmount}","${o.paymentMethod}","${o.paymentStatus}","${o.orderStatus}"`;
+      const id = sanitizeCsvCell(o.id);
+      const date = sanitizeCsvCell(o.createdAt.toISOString());
+      const email = sanitizeCsvCell(o.user?.email || 'Guest');
+      const amount = sanitizeCsvCell(o.totalAmount);
+      const method = sanitizeCsvCell(o.paymentMethod);
+      const status = sanitizeCsvCell(o.paymentStatus);
+      const orderStatus = sanitizeCsvCell(o.orderStatus);
+      return `${id},${date},${email},${amount},${method},${status},${orderStatus}`;
     }).join("\n");
+    
     const csvContent = csvHeaders + csvRows;
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="orders_export.csv"');

@@ -8,10 +8,12 @@ import {
   saveGuestEmail,
 } from '../controllers/cart';
 import { optionalAuthenticateJWT } from '../middleware/auth';
+import { validateSession } from '../middleware/session';
 
 const router = Router();
 
 router.use(optionalAuthenticateJWT);
+router.use(validateSession);
 
 router.get('/', getCart);
 router.post('/', addToCart);

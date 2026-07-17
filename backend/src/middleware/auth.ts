@@ -24,7 +24,7 @@ export const authenticateJWT = async (
 
   try {
     if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET is not defined");
-    const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] }) as {
       id: string;
       email: string;
       role: string;
@@ -61,7 +61,7 @@ export const optionalAuthenticateJWT = async (
 
   try {
     if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET is not defined");
-    const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] }) as {
       id: string;
       email: string;
       role: string;

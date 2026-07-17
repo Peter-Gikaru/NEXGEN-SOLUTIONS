@@ -21,10 +21,17 @@ export const InstallPWA: React.FC = () => {
       setShowPrompt(true);
     };
 
+    const handleAppInstalled = () => {
+      setShowPrompt(false);
+      setDeferredPrompt(null);
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
@@ -40,28 +47,31 @@ export const InstallPWA: React.FC = () => {
     setDeferredPrompt(null);
   };
 
-  if (!showPrompt) return null;
+  // Check if already running in standalone (installed app) mode
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
+
+  if (isStandalone || !showPrompt) return null;
 
   return (
-    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-sm">
-      <div className="bg-[#1a1a2e] text-white p-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-slate-700 animate-slide-up">
-        <div className="bg-[#F59E0B] p-2 rounded-xl text-[#1a1a2e]">
-          <Download className="w-6 h-6" />
+    <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-md">
+      <div className="bg-[#1a1a2e] text-white p-5 rounded-2xl shadow-2xl flex items-center gap-4 border border-slate-700 animate-slide-up">
+        <div className="bg-[#F59E0B] p-2.5 rounded-xl text-[#1a1a2e] shrink-0">
+          <Download className="w-7 h-7" />
         </div>
         <div className="flex-1">
-          <h3 className="font-bold text-sm">Install NexGen App</h3>
-          <p className="text-xs text-slate-300">Add to home screen for a better experience</p>
+          <h3 className="font-extrabold text-base sm:text-lg leading-tight text-white mb-0.5">Install NexGen App</h3>
+          <p className="text-sm text-slate-200 leading-normal">Add to home screen for a better experience</p>
         </div>
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 shrink-0">
           <button 
             onClick={handleInstallClick}
-            className="bg-[#F59E0B] hover:bg-amber-500 text-[#1a1a2e] text-xs font-bold px-3 py-1.5 rounded-lg transition-colors"
+            className="bg-[#F59E0B] hover:bg-amber-500 text-[#1a1a2e] text-sm font-black px-4 py-2.5 rounded-xl transition-colors cursor-pointer shadow-lg"
           >
             Install
           </button>
           <button 
             onClick={() => setShowPrompt(false)}
-            className="text-slate-400 hover:text-white text-xs transition-colors"
+            className="text-slate-400 hover:text-white text-sm font-bold transition-colors cursor-pointer py-1 text-center"
           >
             Not now
           </button>

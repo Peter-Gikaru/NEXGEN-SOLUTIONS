@@ -7,6 +7,7 @@ import { logger } from '../utils/logger';
 import { OAuth2Client } from 'google-auth-library';
 import crypto from 'crypto';
 import { sendPasswordResetEmail, sendWelcomeEmail, sendPasswordChangedAlertEmail, sendAdminAlertEmail } from '../services/emailService';
+import { logAction } from '../services/audit';
 import axios from 'axios';
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
 
@@ -61,6 +62,7 @@ export const register = async (
       `A new user has just registered on the platform.\n\nName: ${name}\nEmail: ${email}\nDate: ${new Date().toLocaleString()}`
     ).catch(console.error);
     
+    await logAction('USER_REGISTER', `User ${user.email} registered successfully`, 'INFO', user.id, undefined, req.ip, req.headers['user-agent'] as string);
     const token = generateToken(user);
     res.cookie('token', token, {
       httpOnly: true,
@@ -84,14 +86,17 @@ export const login = async (
     });
     if (!user) {
       logger.warn(`SECURITY ALERT: Failed login attempt for non-existent email: ${email} from IP: ${req.ip}`);
+      await logAction('LOGIN_FAILED', `Failed login attempt for non-existent email: ${email}`, 'WARNING', undefined, undefined, req.ip, req.headers['user-agent'] as string);
       return res.status(401).json({ message: 'Invalid email or password' });
     }
     if (user.status === 'SUSPENDED') {
       logger.warn(`SECURITY ALERT: Attempted login to SUSPENDED account: ${email} from IP: ${req.ip}`);
+      await logAction('LOGIN_FAILED', `Attempted login to SUSPENDED account: ${email}`, 'WARNING', user.id, undefined, req.ip, req.headers['user-agent'] as string);
       return res.status(403).json({ message: 'Your account has been suspended' });
     }
     if (user.lockedUntil && user.lockedUntil > new Date()) {
       logger.warn(`SECURITY ALERT: Attempted login to LOCKED account: ${email} from IP: ${req.ip}`);
+      await logAction('LOGIN_FAILED', `Attempted login to LOCKED account: ${email}`, 'WARNING', user.id, undefined, req.ip, req.headers['user-agent'] as string);
       return res.status(403).json({ message: 'Too many incorrect attempts. Your account has been temporarily locked for 15 minutes.' });
     }
     if (user.deletedAt) {
@@ -112,8 +117,10 @@ export const login = async (
       if (newAttempts >= 5) {
         updates.lockedUntil = new Date(Date.now() + 15 * 60 * 1000);
         logger.warn(`SECURITY ALERT: Account LOCKED due to brute force: ${email} from IP: ${req.ip}`);
+        await logAction('LOGIN_FAILED', `Account LOCKED due to brute force: ${email}`, 'CRITICAL', user.id, undefined, req.ip, req.headers['user-agent'] as string);
       } else {
         logger.warn(`SECURITY ALERT: Failed login attempt (wrong password) for email: ${email} from IP: ${req.ip}`);
+        await logAction('LOGIN_FAILED', `Failed login attempt (wrong password) for email: ${email}`, 'WARNING', user.id, undefined, req.ip, req.headers['user-agent'] as string);
       }
       await prisma.user.update({
         where: { id: user.id },
@@ -128,6 +135,7 @@ export const login = async (
       });
     }
     logger.info(`User logged in successfully: ${user.email} (Role: ${user.role})`);
+    await logAction('USER_LOGIN', `User ${user.email} logged in successfully`, 'INFO', user.id, undefined, req.ip, req.headers['user-agent'] as string);
     const token = generateToken(user);
     res.cookie('token', token, {
       httpOnly: true,
@@ -299,6 +307,7 @@ export const googleLogin = async (
     if (user.status === 'SUSPENDED') {
       return res.status(403).json({ message: 'Your account has been suspended' });
     }
+    await logAction('USER_LOGIN', `User ${user.email} logged in via Google`, 'INFO', user.id, undefined, req.ip, req.headers['user-agent'] as string);
     const token = generateToken(user);
     res.cookie('token', token, {
       httpOnly: true,
@@ -343,6 +352,7 @@ export const forgotPassword = async (
     }
     const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
     await sendPasswordResetEmail(user.email, resetUrl);
+    await logAction('PASSWORD_RESET_REQUEST', `Password reset requested for email: ${user.email}`, 'INFO', user.id, undefined, req.ip, req.headers['user-agent'] as string);
     return res.json({ message: 'If an account exists, a reset link has been sent.' });
   } catch (error) {
     return next(error);

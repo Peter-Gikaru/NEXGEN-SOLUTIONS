@@ -12,9 +12,10 @@ const api = axios.create({
     'X-Requested-With': 'XMLHttpRequest',
   },
 });
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 let sessionId = localStorage.getItem('nexgen_session_id');
-if (!sessionId) {
-  sessionId = 'session_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+if (!sessionId || !UUID_REGEX.test(sessionId)) {
+  sessionId = crypto.randomUUID();
   localStorage.setItem('nexgen_session_id', sessionId);
 }
 function getCookie(name: string) {

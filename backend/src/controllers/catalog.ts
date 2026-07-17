@@ -3,8 +3,12 @@ import prisma from '../config/db';
 
 const escapeCsv = (str: string | null | undefined) => {
   if (!str) return '';
-  const escaped = String(str).replace(/"/g, '""');
-  if (escaped.includes(',') || escaped.includes('\n') || escaped.includes('"')) {
+  let val = String(str);
+  if (/^[=\+\-\@\t\r]/.test(val)) {
+    val = `'${val}`;
+  }
+  const escaped = val.replace(/"/g, '""');
+  if (escaped.includes(',') || escaped.includes('\n') || escaped.includes('"') || /^[=\+\-\@\t\r]/.test(String(str))) {
     return `"${escaped}"`;
   }
   return escaped;

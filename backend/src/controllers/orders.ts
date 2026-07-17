@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import prisma from '../config/db';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { sendOrderConfirmationEmail } from '../services/emailService';
+import { logAction } from '../services/audit';
 export const createOrder = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -194,6 +195,7 @@ export const createOrder = async (
         
       }
     }
+    await logAction('ORDER_CREATE', `Created order #${order.id.substring(0, 8).toUpperCase()} with total KES ${order.totalAmount}`, 'INFO', req.user?.id, sessionId, req.ip, req.headers['user-agent'] as string);
     return res.status(201).json(order);
   } catch (error) {
     return next(error);

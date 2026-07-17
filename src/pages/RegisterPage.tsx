@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { User as UserIcon, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
+import { User, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { GoogleLogin } from '@react-oauth/google';
 
 const isGoogleEnabled = import.meta.env.VITE_GOOGLE_CLIENT_ID && import.meta.env.VITE_GOOGLE_CLIENT_ID !== 'your_google_client_id.apps.googleusercontent.com';
@@ -14,13 +14,20 @@ export const RegisterPage: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const role = 'USER';
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match.');
+      return;
+    }
     
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
     if (!passwordRegex.test(password)) {
@@ -78,7 +85,7 @@ export const RegisterPage: React.FC = () => {
               Full Name
             </label>
             <div className="relative">
-              <User className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
+              <User className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
               <input
                 id="name"
                 type="text"
@@ -96,7 +103,7 @@ export const RegisterPage: React.FC = () => {
               Email Address
             </label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
+              <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
               <input
                 id="email"
                 type="email"
@@ -114,7 +121,7 @@ export const RegisterPage: React.FC = () => {
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
+              <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
@@ -127,13 +134,13 @@ export const RegisterPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 transition-colors"
+                className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-600 transition-colors"
               >
                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </div>
           </div>
-            <p className="text-[10px] text-slate-400 mt-1.5 leading-relaxed">
+            <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
               Must be at least 8 characters and include uppercase, lowercase, number, and special character.
             </p>
           
@@ -144,7 +151,7 @@ export const RegisterPage: React.FC = () => {
               Confirm Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
+              <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
               <input
                 id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
@@ -157,7 +164,7 @@ export const RegisterPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 transition-colors"
+                className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-600 transition-colors"
               >
                 {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>

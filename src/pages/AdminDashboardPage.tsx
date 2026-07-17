@@ -370,13 +370,24 @@ export const AdminDashboardPage: React.FC = () => {
     if (!file) {
       setBulkFile(null);
       setParsedBulkData([]);
-        setPreviewPage(1);
+      setPreviewPage(1);
+      return;
+    }
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (file.size > MAX_FILE_SIZE) {
+      toast.error('File is too large. Maximum allowed size is 5MB.');
+      e.target.value = '';
       return;
     }
     setBulkFile(file);
     const parseData = async (data: any[]) => {
       if (data.length === 0) {
          toast.error('The file is empty.');
+         return;
+      }
+      if (data.length > 500) {
+         toast.error('File contains too many products. Maximum allowed is 500 products per upload.');
+         setParsedBulkData([]);
          return;
       }
       const firstRow = data[0];
@@ -388,9 +399,9 @@ export const AdminDashboardPage: React.FC = () => {
       if (!hasPrice) missing.push('Price');
       if (!hasCategory) missing.push('Category');
       if (missing.length > 0) {
-         toast.error(`Missing required columns: ${missing.join(', ')}`);
-         setParsedBulkData([]);
-         return;
+          toast.error(`Missing required columns: ${missing.join(', ')}`);
+          setParsedBulkData([]);
+          return;
       }
       const mapped = data.map((row: any) => {
         const imageUrlsStr = row['Product Images'] || row.imageUrls || '';
@@ -407,12 +418,27 @@ export const AdminDashboardPage: React.FC = () => {
           let parsedSpecs = {};
           try {
              const specRaw = row['Specs (JSON Format)'] || row.specs;
-             parsedSpecs = typeof specRaw === 'string' && specRaw.trim() ? JSON.parse(specRaw) : (specRaw || {});
+             const rawSpecs = typeof specRaw === 'string' && specRaw.trim() ? JSON.parse(specRaw) : (specRaw || {});
+             if (rawSpecs && typeof rawSpecs === 'object') {
+               parsedSpecs = Object.fromEntries(
+                 Object.entries(rawSpecs).filter(([key]) => !['__proto__', 'constructor', 'prototype'].includes(key))
+               );
+             }
           } catch(e) {}
           let parsedVariants = [];
           try {
              const varRaw = row.variants || row.Variants;
-             parsedVariants = typeof varRaw === 'string' && varRaw.trim() ? JSON.parse(varRaw) : (varRaw || []);
+             const rawVariants = typeof varRaw === 'string' && varRaw.trim() ? JSON.parse(varRaw) : (varRaw || []);
+             if (Array.isArray(rawVariants)) {
+               parsedVariants = rawVariants.map((v: any) => {
+                 if (v && typeof v === 'object') {
+                   return Object.fromEntries(
+                     Object.entries(v).filter(([key]) => !['__proto__', 'constructor', 'prototype'].includes(key))
+                   );
+                 }
+                 return v;
+               });
+             }
           } catch(e) {}
           return {
             name: row['Product Name'] || row.name || '',
@@ -468,6 +494,7 @@ export const AdminDashboardPage: React.FC = () => {
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
+        worker: true,
         complete: (results) => {
           parseData(results.data);
         },
@@ -747,7 +774,7 @@ export const AdminDashboardPage: React.FC = () => {
       toast.error(err.response?.data?.message || 'Failed to delete category');
     }
   };
-  const activeTabTitle = {
+  const activeTabTitle: Record<string, string> = {
     stats: 'Metrics & Stock',
     orders: 'Manage Orders',
     users: 'Manage Users',
@@ -757,8 +784,17 @@ export const AdminDashboardPage: React.FC = () => {
     flashSales: 'Flash Sales',
     shippingZones: 'Shipping Zones',
     adminLogs: 'Admin Logs',
-    announcements: 'Manage Announcements'
-  }[activeTab] || 'Dashboard';
+    announcements: 'Manage Announcements',
+    analytics: 'Analytics',
+    coupons: 'Manage Coupons',
+    livechat: 'Live Chat Support',
+    newsletter: 'Newsletter',
+    returns: 'Product Returns',
+    securityCenter: 'Security Center',
+    shippingQueue: 'Shipping Queue',
+    warranties: 'Warranties & Claims'
+  };
+  const currentTitle = activeTabTitle[activeTab] || 'Dashboard';
   return (
     <div className="flex h-screen w-full bg-slate-50 text-slate-900 font-sans overflow-hidden">
       {}
@@ -783,225 +819,259 @@ export const AdminDashboardPage: React.FC = () => {
           <div className="text-sm font-medium text-white truncate">{user?.email}</div>
           <div className="text-xs text-blue-400 mt-0.5">Role: {user?.role}</div>
         </div>
-        <nav className="flex-1 overflow-y-auto space-y-1 py-2 px-2">
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+          {/* Section 1: Overview */}
+          <div>
+            <div className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 select-none">Overview</div>
+            <div className="space-y-1">
               <button
                 onClick={() => { setActiveTab('stats'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
                   activeTab === 'stats'
-                    ? 'bg-[#F59E0B] text-white font-bold shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
+                    ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
                 }`}
               >
-                <LayoutDashboard className="h-5 w-5" />
+                <LayoutDashboard className="h-5 w-5 shrink-0" />
                 <span>Dashboard</span>
               </button>
               <button
                 onClick={() => { setActiveTab('analytics'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
                   activeTab === 'analytics'
-                    ? 'bg-[#F59E0B] text-white font-bold shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
+                    ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
                 }`}
               >
-                <TrendingUp className="h-5 w-5" />
+                <TrendingUp className="h-5 w-5 shrink-0" />
                 <span>Full Analytics</span>
               </button>
               <button
-                onClick={() => { setActiveTab('livechat'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                  activeTab === 'livechat'
-                    ? 'bg-[#F59E0B] text-white font-bold shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
-                }`}
-              >
-                <MessageSquare className="h-5 w-5" />
-                <span>Live Chat</span>
-              </button>
-              <button
-                onClick={() => { setActiveTab('securityCenter'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                  activeTab === 'securityCenter'
-                    ? 'bg-[#F59E0B] text-white font-bold shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
-                }`}
-              >
-                <ShieldCheck className="h-5 w-5" />
-                <span>Security Center</span>
-              </button>
-              <button
                 onClick={() => { setActiveTab('adminLogs'); setIsSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
                   activeTab === 'adminLogs'
-                    ? 'bg-[#F59E0B] text-white font-bold shadow-sm'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'
+                    ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
                 }`}
               >
-                <ShieldAlert className="h-5 w-5" />
+                <ShieldAlert className="h-5 w-5 shrink-0" />
                 <span>Admin Logs</span>
               </button>
+            </div>
+          </div>
+
+          {/* Section 2: Catalog & Sales */}
+          <div>
+            <div className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 select-none">Catalog & Sales</div>
+            <div className="space-y-1">
               <button
-            onClick={() => { setActiveTab('orders'); setIsSidebarOpen(false); }}
-            className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-              activeTab === 'orders'
-                ? 'bg-blue-600 text-white'
-                : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <ShoppingBag className="h-4.5 w-4.5" />
-            <span>Orders</span>
-          </button>
-          {user?.role === 'ADMIN' && (
-            <button
-              onClick={() => { setActiveTab('users'); setIsSidebarOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                activeTab === 'users'
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-slate-800 hover:text-white'
-            }`}
-            >
-              <Users className="h-4.5 w-4.5" />
-              <span>Users & Roles</span>
-            </button>
-          )}
-          <button
-            onClick={() => { setActiveTab('productsList'); setIsSidebarOpen(false); }}
-            className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-              activeTab === 'productsList'
-                ? 'bg-blue-600 text-white'
-                : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <Package className="h-4.5 w-4.5" />
-            <span>Manage Products</span>
-          </button>
-          {user?.role === 'ADMIN' && (
-            <button
-              onClick={() => { setActiveTab('flashSales'); setIsSidebarOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                activeTab === 'flashSales'
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-slate-800 hover:text-white'
-              }`}
-            >
-              <Zap className="h-4.5 w-4.5" />
-              <span>Flash Sales</span>
-            </button>
-          )}
-          {user?.role === 'ADMIN' && (
-            <button
-              onClick={() => { setActiveTab('shippingZones'); setIsSidebarOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                activeTab === 'shippingZones'
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-slate-800 hover:text-white'
-              }`}
-            >
-              <MapPin className="h-4.5 w-4.5" />
-              <span>Shipping Zones</span>
-            </button>
-          )}
-          {user?.role === 'ADMIN' && (
-            <button
-              onClick={() => { setActiveTab('shippingQueue'); setIsSidebarOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                activeTab === 'shippingQueue'
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-slate-800 hover:text-white'
-              }`}
-            >
-              <MapPin className="h-4.5 w-4.5" />
-              <span>Shipping Queue</span>
-            </button>
-          )}
-          <button
-            onClick={() => { setActiveTab('addProduct'); setIsSidebarOpen(false); }}
-            className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-              activeTab === 'addProduct'
-                ? 'bg-blue-600 text-white'
-                : 'hover:bg-slate-800 hover:text-white'
-            }`}
-          >
-            <PlusCircle className="h-4.5 w-4.5" />
-            <span>Add Product</span>
-          </button>
-          {user?.role === 'ADMIN' && (
-            <button
-              onClick={() => { setActiveTab('categories'); setIsSidebarOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                activeTab === 'categories'
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-slate-800 hover:text-white'
-              }`}
-            >
-              <Layers className="h-4.5 w-4.5" />
-              <span>Categories</span>
-            </button>
-          )}
-          {user?.role === 'ADMIN' && (
-            <button
-              onClick={() => { setActiveTab('newsletter'); setIsSidebarOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                activeTab === 'newsletter'
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-slate-800 hover:text-white'
-              }`}
-            >
-              <Mail className="h-4.5 w-4.5" />
-              <span>Newsletter</span>
-            </button>
-          )}
-          {user?.role === 'ADMIN' && (
-            <button
-              onClick={() => { setActiveTab('returns'); setIsSidebarOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                activeTab === 'returns'
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-slate-800 hover:text-white'
-              }`}
-            >
-              <RotateCcw className="h-4.5 w-4.5" />
-              <span>Returns & Refunds</span>
-            </button>
-          )}
-          {user?.role === 'ADMIN' && (
-            <button
-              onClick={() => { setActiveTab('warranties'); setIsSidebarOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                activeTab === 'warranties'
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-slate-800 hover:text-white'
-              }`}
-            >
-              <ShieldCheck className="h-4.5 w-4.5" />
-              <span>Warranty Claims</span>
-            </button>
-          )}
-          {user?.role === 'ADMIN' && (
-            <button
-              onClick={() => { setActiveTab('coupons'); setIsSidebarOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                activeTab === 'coupons'
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-slate-800 hover:text-white'
-              }`}
-            >
-              <Megaphone className="h-4.5 w-4.5" />
-              <span>Coupons & Campaigns</span>
-            </button>
-          )}
-          {user?.role === 'ADMIN' && (
-            <button
-              onClick={() => { setActiveTab('announcements'); setIsSidebarOpen(false); }}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-3 transition-colors cursor-pointer ${
-                activeTab === 'announcements'
-                  ? 'bg-blue-600 text-white'
-                  : 'hover:bg-slate-800 hover:text-white'
-              }`}
-            >
-              <Volume2 className="h-4.5 w-4.5" />
-              <span>Announcements</span>
-            </button>
-          )}
+                onClick={() => { setActiveTab('productsList'); setIsSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                  activeTab === 'productsList'
+                    ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                }`}
+              >
+                <Package className="h-5 w-5 shrink-0" />
+                <span>Manage Products</span>
+              </button>
+              <button
+                onClick={() => { setActiveTab('addProduct'); setIsSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                  activeTab === 'addProduct'
+                    ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                }`}
+              >
+                <PlusCircle className="h-5 w-5 shrink-0" />
+                <span>Add Product</span>
+              </button>
+              {user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => { setActiveTab('categories'); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                    activeTab === 'categories'
+                      ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                  }`}
+                >
+                  <Layers className="h-5 w-5 shrink-0" />
+                  <span>Categories</span>
+                </button>
+              )}
+              {user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => { setActiveTab('flashSales'); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                    activeTab === 'flashSales'
+                      ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                  }`}
+                >
+                  <Zap className="h-5 w-5 shrink-0" />
+                  <span>Flash Sales</span>
+                </button>
+              )}
+              {user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => { setActiveTab('coupons'); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                    activeTab === 'coupons'
+                      ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                  }`}
+                >
+                  <Megaphone className="h-5 w-5 shrink-0" />
+                  <span>Coupons</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Section 3: Orders & Logistics */}
+          <div>
+            <div className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 select-none">Orders & Logistics</div>
+            <div className="space-y-1">
+              <button
+                onClick={() => { setActiveTab('orders'); setIsSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                  activeTab === 'orders'
+                    ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                }`}
+              >
+                <ShoppingBag className="h-5 w-5 shrink-0" />
+                <span>Orders</span>
+              </button>
+              {user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => { setActiveTab('shippingZones'); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                    activeTab === 'shippingZones'
+                      ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                  }`}
+                >
+                  <MapPin className="h-5 w-5 shrink-0" />
+                  <span>Shipping Zones</span>
+                </button>
+              )}
+              {user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => { setActiveTab('shippingQueue'); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                    activeTab === 'shippingQueue'
+                      ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                  }`}
+                >
+                  <MapPin className="h-5 w-5 shrink-0" />
+                  <span>Shipping Queue</span>
+                </button>
+              )}
+              {user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => { setActiveTab('returns'); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                    activeTab === 'returns'
+                      ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                  }`}
+                >
+                  <RotateCcw className="h-5 w-5 shrink-0" />
+                  <span>Returns & Refunds</span>
+                </button>
+              )}
+              {user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => { setActiveTab('warranties'); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                    activeTab === 'warranties'
+                      ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                  }`}
+                >
+                  <ShieldCheck className="h-5 w-5 shrink-0" />
+                  <span>Warranty Claims</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Section 4: Marketing & Engagement */}
+          <div>
+            <div className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 select-none">Marketing & Engagement</div>
+            <div className="space-y-1">
+              <button
+                onClick={() => { setActiveTab('livechat'); setIsSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                  activeTab === 'livechat'
+                    ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                }`}
+              >
+                <MessageSquare className="h-5 w-5 shrink-0" />
+                <span>Live Chat</span>
+              </button>
+              {user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => { setActiveTab('newsletter'); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                    activeTab === 'newsletter'
+                      ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                  }`}
+                >
+                  <Mail className="h-5 w-5 shrink-0" />
+                  <span>Newsletter</span>
+                </button>
+              )}
+              {user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => { setActiveTab('announcements'); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                    activeTab === 'announcements'
+                      ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                  }`}
+                >
+                  <Volume2 className="h-5 w-5 shrink-0" />
+                  <span>Announcements</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Section 5: Access Control */}
+          <div>
+            <div className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 select-none">Access Control</div>
+            <div className="space-y-1">
+              {user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => { setActiveTab('users'); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                    activeTab === 'users'
+                      ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                  }`}
+                >
+                  <Users className="h-5 w-5 shrink-0" />
+                  <span>Users & Roles</span>
+                </button>
+              )}
+              <button
+                onClick={() => { setActiveTab('securityCenter'); setIsSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                  activeTab === 'securityCenter'
+                    ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                }`}
+              >
+                <ShieldCheck className="h-5 w-5 shrink-0" />
+                <span>Security Center</span>
+              </button>
+            </div>
+          </div>
         </nav>
         <div className="p-4 border-t border-slate-800 shrink-0">
           <button 
@@ -1027,7 +1097,7 @@ export const AdminDashboardPage: React.FC = () => {
             >
               <Menu className="h-6 w-6" />
             </button>
-            <h1 className="text-lg sm:text-xl font-bold text-slate-800">{activeTabTitle}</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-slate-800">{currentTitle}</h1>
           </div>
           <div className="text-sm font-medium text-slate-500 hidden sm:block">
             {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}

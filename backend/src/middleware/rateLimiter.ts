@@ -17,3 +17,13 @@ export const authLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+export const emailLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 5, // limit each IP to 5 requests per windowMs
+  message: {
+    message: 'Too many email requests from this IP, please try again after 10 minutes',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});

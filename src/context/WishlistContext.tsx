@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../services/api';
-import { v4 as uuidv4 } from 'uuid';
 import toast from 'react-hot-toast';
 interface Product {
   id: string;
@@ -22,9 +21,10 @@ export const WishlistProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [items, setItems] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const getSessionId = () => {
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     let sessionId = localStorage.getItem('nexgen_session_id');
-    if (!sessionId) {
-      sessionId = uuidv4();
+    if (!sessionId || !UUID_REGEX.test(sessionId)) {
+      sessionId = crypto.randomUUID();
       localStorage.setItem('nexgen_session_id', sessionId);
     }
     return sessionId;

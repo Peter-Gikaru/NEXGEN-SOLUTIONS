@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { Send, Users, Circle, Clock, MessageSquare } from 'lucide-react';
 import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 interface VisitorSession {
   visitorId: string;
@@ -10,6 +11,7 @@ interface VisitorSession {
   page?: string;
   createdAt: string;
   lastSeen: string;
+  user?: { name: string, email: string } | null;
 }
 
 interface ChatMessage {
@@ -49,13 +51,15 @@ const AdminLiveChat: React.FC = () => {
         if (exists) return prev;
         return [data, ...prev];
       });
+      const displayName = data.user ? `${data.user.name} (User)` : `Guest Visitor (${data.visitorId.slice(0, 6)})`;
+      toast(`New active visitor: ${displayName}`, { icon: '💬' });
       audio.play().catch(console.error);
     });
 
-    newSocket.on('visitor_status_update', (data: { visitorId: string, status: string, page?: string }) => {
+    newSocket.on('visitor_status_update', (data: { visitorId: string, status: string, page?: string, user?: { name: string, email: string } | null }) => {
       setVisitors(prev => prev.map(v => 
         v.visitorId === data.visitorId 
-          ? { ...v, status: data.status, page: data.page || v.page, lastSeen: new Date().toISOString() } 
+          ? { ...v, status: data.status, page: data.page || v.page, user: data.user !== undefined ? data.user : v.user, lastSeen: new Date().toISOString() } 
           : v
       ));
     });
@@ -114,7 +118,7 @@ const AdminLiveChat: React.FC = () => {
             >
               <div className="flex justify-between items-start mb-1">
                 <p className="font-semibold text-sm text-slate-800 truncate pr-2">
-                  Visitor {v.visitorId.slice(0, 6)}
+                  {v.user ? v.user.name : `Visitor ${v.visitorId.slice(0, 6)}`}
                 </p>
                 <div className="flex items-center gap-1 shrink-0">
                   <Circle className={`w-2 h-2 fill-current ${v.status === 'ONLINE' ? 'text-emerald-500' : 'text-slate-400'}`} />
@@ -124,10 +128,17 @@ const AdminLiveChat: React.FC = () => {
               <p className="text-xs text-slate-500 line-clamp-1 mb-1">
                 Page: {v.page || 'Unknown'}
               </p>
-              <p className="text-[10px] text-slate-400 flex items-center gap-1">
-                <Clock className="w-3 h-3" /> 
-                Seen: {new Date(v.lastSeen).toLocaleTimeString()}
-              </p>
+              <div className="flex justify-between items-center mt-1">
+                <p className="text-[10px] text-slate-400 flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> 
+                  Seen: {new Date(v.lastSeen).toLocaleTimeString()}
+                </p>
+                <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                  v.user ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-600'
+                }`}>
+                  {v.user ? 'User' : 'Guest'}
+                </span>
+              </div>
             </div>
           ))}
           {visitors.length === 0 && (
@@ -145,8 +156,19 @@ const AdminLiveChat: React.FC = () => {
             {/* Chat Header */}
             <div className="p-4 border-b border-slate-200 bg-white flex justify-between items-center shadow-sm z-10">
               <div>
-                <h3 className="font-bold text-slate-800">Visitor {selectedVisitor.slice(0, 6)}</h3>
-                <p className="text-xs text-slate-500">Live Chat Session</p>
+                {(() => {
+                  const currentVisitor = visitors.find(v => v.visitorId === selectedVisitor);
+                  return (
+                    <>
+                      <h3 className="font-bold text-slate-800">
+                        {currentVisitor?.user ? currentVisitor.user.name : `Visitor ${selectedVisitor.slice(0, 6)}`}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        {currentVisitor?.user ? `${currentVisitor.user.email} (Registered User)` : 'Live Chat Guest'}
+                      </p>
+                    </>
+                  );
+                })()}
               </div>
             </div>
 

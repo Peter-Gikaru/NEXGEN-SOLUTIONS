@@ -198,6 +198,8 @@ export const AdminDashboardPage: React.FC = () => {
   const [shippingZones, setShippingZones] = useState<any[]>([]);
   const [editingShippingZoneId, setEditingShippingZoneId] = useState<string | null>(null);
   const [editShippingZoneForm, setEditShippingZoneForm] = useState({ regionName: '', fee: 0, estimatedDays: '' });
+  const [specPairs, setSpecPairs] = useState([{ key: '', value: '' }]);
+  const [editSpecPairs, setEditSpecPairs] = useState<{key: string, value: string}[]>([]);
   const [newShippingZoneForm, setNewShippingZoneForm] = useState({ regionName: '', fee: 0, estimatedDays: '' });
   const [flashSaleForm, setFlashSaleForm] = useState({
     productId: '',
@@ -566,14 +568,12 @@ export const AdminDashboardPage: React.FC = () => {
   };
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
-    let parsedSpecs = {};
-    try {
-      if (productForm.specs.trim()) {
-        parsedSpecs = JSON.parse(productForm.specs);
+    const parsedSpecs: any = {};
+    specPairs.forEach(s => {
+      if (s.key.trim() && s.value.trim()) {
+        parsedSpecs[s.key.trim()] = s.value.trim();
       }
-    } catch (err) {
-      return;
-    }
+    });
     try {
       const productPayload = {
         name: productForm.name,
@@ -588,6 +588,9 @@ export const AdminDashboardPage: React.FC = () => {
         threeDModelUrl: productForm.threeDModelUrl || undefined,
       };
       await api.post('/products', productPayload);
+      toast.success('Product published successfully!');
+      const prodRes = await api.get('/products?includeInactive=true&limit=1000');
+      setProductsList(prodRes.data.products);
       setProductForm({
         name: '',
         description: '',
@@ -600,12 +603,20 @@ export const AdminDashboardPage: React.FC = () => {
         imageUrls: [],
         threeDModelUrl: '',
       });
+      setSpecPairs([{ key: '', value: '' }]);
     } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to publish product');
     }
   };
   const handleUpdateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProduct) return;
+    const parsedEditSpecs: any = {};
+    editSpecPairs.forEach(s => {
+      if (s.key.trim() && s.value.trim()) {
+        parsedEditSpecs[s.key.trim()] = s.value.trim();
+      }
+    });
     try {
       await api.put(`/products/${editingProduct.id}`, {
         name: editingProduct.name,
@@ -616,13 +627,14 @@ export const AdminDashboardPage: React.FC = () => {
         threeDModelUrl: editingProduct.threeDModelUrl,
         variants: editingProduct.variants,
         categoryId: editingProduct.categoryId,
+        specs: parsedEditSpecs,
       });
       toast.success('Product updated successfully!');
       setEditingProduct(null);
       const prodRes = await api.get('/products?includeInactive=true&limit=1000');
       setProductsList(prodRes.data.products);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || 'Failed to update product');
+      toast.error(err.response?.data?.message || err.message || 'Failed to update product');
     }
   };
   const handleEditImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1547,6 +1559,10 @@ export const AdminDashboardPage: React.FC = () => {
                                     try {
                                       parsedVariants = typeof prod.variants === 'string' && prod.variants ? JSON.parse(prod.variants) : (prod.variants || []);
                                     } catch(e) {}
+                                    const initSpecPairs = prod.specs && typeof prod.specs === 'object' && Object.keys(prod.specs).length > 0 
+                                      ? Object.entries(prod.specs).map(([k, v]) => ({ key: k, value: String(v) }))
+                                      : [{ key: '', value: '' }];
+                                    setEditSpecPairs(initSpecPairs);
                                     setEditingProduct({...prod, variants: parsedVariants});
                                   }}
                                   className="text-xs font-bold bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
@@ -1634,6 +1650,21 @@ export const AdminDashboardPage: React.FC = () => {
                             />
                             {uploading && <p className="text-xs text-slate-500 mt-2 font-medium">Uploading images...</p>}
                             {editingProduct.imageUrls && editingProduct.imageUrls.length > 0 && <p className="text-xs text-emerald-600 mt-2 font-medium truncate">Total images: {editingProduct.imageUrls.length}</p>}
+                          </div>
+                          <div className="col-span-2 mb-4">
+                            <div className="flex justify-between items-center mb-2">
+                              <label className="block text-xs font-bold uppercase text-slate-600">Specifications</label>
+                            </div>
+                            <div className="space-y-2">
+                              {editSpecPairs.map((pair, index) => (
+                                <div key={index} className="flex gap-2">
+                                  <input type="text" placeholder="Key (e.g. RAM)" value={pair.key} onChange={(e) => { const newPairs = [...editSpecPairs]; newPairs[index].key = e.target.value; setEditSpecPairs(newPairs); }} className="w-1/3 border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-blue-500" />
+                                  <input type="text" placeholder="Value (e.g. 16GB)" value={pair.value} onChange={(e) => { const newPairs = [...editSpecPairs]; newPairs[index].value = e.target.value; setEditSpecPairs(newPairs); }} className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-blue-500" />
+                                  <button type="button" onClick={() => setEditSpecPairs(editSpecPairs.filter((_, i) => i !== index))} className="text-red-500 hover:text-red-700 px-1"><X className="w-5 h-5" /></button>
+                                </div>
+                              ))}
+                            </div>
+                            <button type="button" onClick={() => setEditSpecPairs([...editSpecPairs, { key: '', value: '' }])} className="mt-2 text-xs text-blue-600 font-bold hover:underline">Add Specification</button>
                           </div>
                           <div className="col-span-2">
                             <div className="flex justify-between items-center mb-2">
@@ -1860,14 +1891,49 @@ export const AdminDashboardPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="pt-2">
-                    <label className="block text-slate-700 text-xs font-bold mb-1.5 uppercase tracking-wide">Specs (JSON Format)</label>
-                    <textarea
-                      value={productForm.specs}
-                      onChange={(e) => setProductForm((p) => ({ ...p, specs: e.target.value }))}
-                      placeholder='{"CPU": "Intel i5", "RAM": "16GB RAM", "Storage": "512GB SSD"}'
-                      rows={3}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 font-mono text-xs focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-900 shadow-inner"
-                    />
+                    <label className="block text-slate-700 text-xs font-bold mb-1.5 uppercase tracking-wide">Specifications</label>
+                    <div className="space-y-2">
+                      {specPairs.map((pair, index) => (
+                        <div key={index} className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="e.g. RAM"
+                            value={pair.key}
+                            onChange={(e) => {
+                              const newPairs = [...specPairs];
+                              newPairs[index].key = e.target.value;
+                              setSpecPairs(newPairs);
+                            }}
+                            className="w-1/3 bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm"
+                          />
+                          <input
+                            type="text"
+                            placeholder="e.g. 16GB"
+                            value={pair.value}
+                            onChange={(e) => {
+                              const newPairs = [...specPairs];
+                              newPairs[index].value = e.target.value;
+                              setSpecPairs(newPairs);
+                            }}
+                            className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 shadow-sm"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setSpecPairs(specPairs.filter((_, i) => i !== index))}
+                            className="text-red-500 hover:text-red-700 px-1 cursor-pointer"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSpecPairs([...specPairs, { key: '', value: '' }])}
+                      className="mt-3 text-xs text-blue-600 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <PlusCircle className="w-4 h-4" /> Add Specification
+                    </button>
                   </div>
                   <div className="pt-4">
                     <button

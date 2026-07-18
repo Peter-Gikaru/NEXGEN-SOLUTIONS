@@ -148,7 +148,7 @@ export const ProductDetailPage: React.FC = () => {
       }
 
       try {
-        const zoneRes = await api.get('/shipping/zones');
+        const zoneRes = await api.get('/shipping');
         setShippingZones(zoneRes.data);
       } catch (e) {
         console.error('Failed to fetch shipping zones', e);

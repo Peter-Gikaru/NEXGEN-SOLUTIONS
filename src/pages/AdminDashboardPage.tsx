@@ -200,6 +200,8 @@ export const AdminDashboardPage: React.FC = () => {
   const [editShippingZoneForm, setEditShippingZoneForm] = useState({ regionName: '', fee: 0, estimatedDays: '' });
   const [specPairs, setSpecPairs] = useState([{ key: '', value: '' }]);
   const [editSpecPairs, setEditSpecPairs] = useState<{key: string, value: string}[]>([]);
+  const [smartPasteText, setSmartPasteText] = useState('');
+  const [editSmartPasteText, setEditSmartPasteText] = useState('');
   const [newShippingZoneForm, setNewShippingZoneForm] = useState({ regionName: '', fee: 0, estimatedDays: '' });
   const [flashSaleForm, setFlashSaleForm] = useState({
     productId: '',
@@ -566,6 +568,57 @@ export const AdminDashboardPage: React.FC = () => {
       setIsUploadingBulk(false);
     }
   };
+
+  const parseSmartPaste = (text: string) => {
+    const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+    const newPairs: {key: string, value: string}[] = [];
+    lines.forEach(line => {
+      let key = '';
+      let value = line;
+      if (line.includes(':')) {
+        const parts = line.split(':');
+        key = parts[0].trim();
+        value = parts.slice(1).join(':').trim();
+      } else if (/RAM|Memory/i.test(line)) {
+        key = 'RAM';
+      } else if (/SSD|HDD|Storage|TB|GB/i.test(line) && !/RAM/i.test(line) && !/Graphics/i.test(line)) {
+        key = 'Storage';
+      } else if (/Display|Screen|Resolution|"/i.test(line)) {
+        key = 'Display';
+      } else if (/WiFi|Bluetooth|Webcam/i.test(line)) {
+        key = 'Connectivity';
+      } else if (/Battery|Charger|Power/i.test(line)) {
+        key = 'Battery';
+      } else if (/Processor|CPU|Core i|Ryzen/i.test(line)) {
+        key = 'Processor';
+      } else if (/Graphics|GPU|NVIDIA|Radeon|Intel Iris/i.test(line)) {
+        key = 'Graphics';
+      } else if (/Keyboard|Backlight/i.test(line)) {
+        key = 'Keyboard';
+      } else if (/Face ID|Fingerprint|Security|Face 🆔/i.test(line)) {
+        key = 'Security';
+      } else if (/Ports|USB|HDMI/i.test(line)) {
+        key = 'Ports';
+      } else {
+        key = 'Feature';
+      }
+      newPairs.push({ key, value });
+    });
+    return newPairs;
+  };
+
+  const handleSmartPasteCreate = () => {
+    const newPairs = parseSmartPaste(smartPasteText);
+    setSpecPairs([...specPairs.filter(p => p.key || p.value), ...newPairs]);
+    setSmartPasteText('');
+  };
+
+  const handleSmartPasteEdit = () => {
+    const newPairs = parseSmartPaste(editSmartPasteText);
+    setEditSpecPairs([...editSpecPairs.filter(p => p.key || p.value), ...newPairs]);
+    setEditSmartPasteText('');
+  };
+
   const handleCreateProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     const parsedSpecs: any = {};
@@ -1652,6 +1705,25 @@ export const AdminDashboardPage: React.FC = () => {
                             {editingProduct.imageUrls && editingProduct.imageUrls.length > 0 && <p className="text-xs text-emerald-600 mt-2 font-medium truncate">Total images: {editingProduct.imageUrls.length}</p>}
                           </div>
                           <div className="col-span-2 mb-4">
+                            <div className="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100">
+                              <label className="block text-blue-800 text-xs font-bold mb-1.5 uppercase tracking-wide">✨ Smart Auto-Fill Specs</label>
+                              <p className="text-xs text-blue-600 mb-2">Paste a list of features here and our smart tool will automatically organize them into a table!</p>
+                              <textarea
+                                value={editSmartPasteText}
+                                onChange={(e) => setEditSmartPasteText(e.target.value)}
+                                placeholder='e.g.&#10;8GB RAM&#10;256GB SSD&#10;PORTS: 2x USB-C'
+                                rows={3}
+                                className="w-full bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 mb-2"
+                              />
+                              <button
+                                type="button"
+                                onClick={handleSmartPasteEdit}
+                                disabled={!editSmartPasteText.trim()}
+                                className="bg-blue-600 text-white text-xs font-bold py-1.5 px-3 rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                              >
+                                Auto-Fill Table
+                              </button>
+                            </div>
                             <div className="flex justify-between items-center mb-2">
                               <label className="block text-xs font-bold uppercase text-slate-600">Specifications</label>
                             </div>
@@ -1891,6 +1963,25 @@ export const AdminDashboardPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="pt-2">
+                    <div className="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100">
+                      <label className="block text-blue-800 text-xs font-bold mb-1.5 uppercase tracking-wide">✨ Smart Auto-Fill Specs</label>
+                      <p className="text-xs text-blue-600 mb-2">Paste a list of features here and our smart tool will automatically organize them into a table!</p>
+                      <textarea
+                        value={smartPasteText}
+                        onChange={(e) => setSmartPasteText(e.target.value)}
+                        placeholder='e.g.&#10;8GB RAM&#10;256GB SSD&#10;PORTS: 2x USB-C'
+                        rows={3}
+                        className="w-full bg-white border border-blue-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 mb-2"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleSmartPasteCreate}
+                        disabled={!smartPasteText.trim()}
+                        className="bg-blue-600 text-white text-xs font-bold py-1.5 px-3 rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                      >
+                        Auto-Fill Table
+                      </button>
+                    </div>
                     <label className="block text-slate-700 text-xs font-bold mb-1.5 uppercase tracking-wide">Specifications</label>
                     <div className="space-y-2">
                       {specPairs.map((pair, index) => (

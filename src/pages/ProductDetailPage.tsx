@@ -71,6 +71,7 @@ export const ProductDetailPage: React.FC = () => {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description');
   const [mainImage, setMainImage] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
@@ -96,6 +97,7 @@ export const ProductDetailPage: React.FC = () => {
       setProduct(data);
       if (response.data.imageUrls && response.data.imageUrls.length > 0) {
         setMainImage(getImageUrl(response.data.imageUrls[0]));
+        setCurrentImageIndex(0);
       }
       if (data.variants && data.variants.length > 0) {
         setSelectedVariant(data.variants[0]);
@@ -164,6 +166,21 @@ export const ProductDetailPage: React.FC = () => {
     fetchProductDetails();
     window.scrollTo(0,0);
   }, [slug]);
+
+  // Auto-play image gallery
+  useEffect(() => {
+    if (!product || !product.imageUrls || product.imageUrls.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => {
+        const nextIndex = (prevIndex + 1) % product.imageUrls.length;
+        setMainImage(getImageUrl(product.imageUrls[nextIndex]));
+        return nextIndex;
+      });
+    }, 4000); // Change image every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [product]);
 
   const handleAddToCart = () => {
     if (!product) return;
@@ -432,9 +449,12 @@ export const ProductDetailPage: React.FC = () => {
                 {product.imageUrls.map((img, index) => (
                   <button
                     key={index}
-                    onClick={() => setMainImage(getImageUrl(img))}
+                    onClick={() => {
+                      setMainImage(getImageUrl(img));
+                      setCurrentImageIndex(index);
+                    }}
                     className={`w-20 h-20 bg-white border rounded-lg p-1.5 flex items-center justify-center cursor-pointer hover:border-[#F59E0B] transition-colors shrink-0 ${
-                      mainImage === getImageUrl(img) ? 'border-2 border-[#F59E0B]' : 'border-gray-200'
+                      currentImageIndex === index ? 'border-2 border-[#F59E0B]' : 'border-gray-200'
                     }`}
                   >
                     <img src={getImageUrl(img)} alt="" className="max-h-full max-w-full object-contain" />

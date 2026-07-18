@@ -44,6 +44,28 @@ if (!process.env.FRONTEND_URL) {
 }
 const app = express();
 app.set('trust proxy', 1);
+
+// Middleware to strictly read real IPs if trust proxy misses it
+app.use((req, res, next) => {
+  const forwardedFor = req.headers['x-forwarded-for'];
+  const realIp = req.headers['x-real-ip'];
+  
+  let clientIp = '';
+  if (forwardedFor) {
+    clientIp = typeof forwardedFor === 'string' ? forwardedFor.split(',')[0] : forwardedFor[0];
+  } else if (realIp) {
+    clientIp = typeof realIp === 'string' ? realIp : realIp[0];
+  }
+  
+  if (clientIp) {
+    Object.defineProperty(req, 'ip', {
+      get: () => clientIp,
+      configurable: true
+    });
+  }
+  next();
+});
+
 const port = process.env.PORT || 5000;
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },

@@ -101,10 +101,22 @@ export const CategoryNav: React.FC = () => {
             )}
           </div>
 
-          <nav className="flex items-center gap-8 font-sans font-bold text-sm text-slate-700 h-full">
-            <Link to="/" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase">HOME</Link>
-            <Link to="/products" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase">ALL PRODUCTS</Link>
-            <Link to="/track" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase">TRACK ORDER</Link>
+          <nav className="flex items-center gap-8 font-sans font-bold text-sm text-slate-700 h-full overflow-x-auto no-scrollbar">
+            <Link to="/" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase whitespace-nowrap">HOME</Link>
+            <Link to="/products" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase whitespace-nowrap">ALL PRODUCTS</Link>
+            
+            {/* Dynamic Categories (Up to 8) */}
+            {categories.slice(0, 8).map(cat => (
+              <Link 
+                key={cat.id} 
+                to={`/products?category=${encodeURIComponent(cat.slug)}`} 
+                className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase whitespace-nowrap"
+              >
+                {cat.name}
+              </Link>
+            ))}
+
+            <Link to="/track" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase whitespace-nowrap">TRACK ORDER</Link>
           </nav>
 
 

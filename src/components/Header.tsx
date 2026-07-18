@@ -605,12 +605,12 @@ export const Header: React.FC = () => {
                 <span className="text-[13px] font-bold text-gray-400 uppercase tracking-wider">
                   Contact & Support
                 </span>
-                <a 
-                  href="tel:+254721420096"
-                  className="flex items-center gap-2 text-text-primary hover:text-secondary font-semibold text-[14px]"
+                <a
+                  href="tel:+254717043408"
+                  className="flex items-center gap-2 text-slate-600 hover:text-[#F59E0B] transition-colors font-medium cursor-pointer"
                 >
-                  <Phone className="h-4 w-4 text-[#d97706]" />
-                  <span>Call: +254 721 420096</span>
+                  <Phone className="h-4 w-4 text-[#F59E0B]" />
+                  <span>Call: +254 717 043408</span>
                 </a>
                 <span className="inline-flex items-center gap-1.5 text-[14px] text-accent font-semibold">
                   <CheckCircle2 className="h-4 w-4 text-accent" />

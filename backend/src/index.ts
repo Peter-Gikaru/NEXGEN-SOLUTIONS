@@ -43,6 +43,7 @@ if (!process.env.FRONTEND_URL) {
   process.exit(1);
 }
 const app = express();
+app.set('trust proxy', 1);
 const port = process.env.PORT || 5000;
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },

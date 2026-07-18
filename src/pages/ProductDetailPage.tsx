@@ -220,9 +220,30 @@ export const ProductDetailPage: React.FC = () => {
     if (!product) return;
     const phoneNumber = "254717043408";
     const currentPrice = product.price + (selectedVariant?.priceOffset || 0);
-    const message = `Hello NexGen Gadgets, I am interested in ordering the ${product.name} which costs KES ${currentPrice.toLocaleString()}. Please assist me with the order process.`;
+    const message = `Hi NexGen, I'm looking to level up my setup with the ${product.name}.\n\nCurrent price showing as KES ${currentPrice.toLocaleString()}.\nCan you help me process this order?`;
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+  };
+
+  const handleShare = async () => {
+    if (!product) return;
+    const shareData = {
+      title: `${product.name} at NexGen Gadgets`,
+      text: `Upgrading your setup? Take a look at the ${product.name}. Great specs, solid performance.`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.log('Share was cancelled or failed.');
+      }
+    } else {
+      // Fallback for browsers that do not support Web Share API
+      navigator.clipboard.writeText(window.location.href);
+      addToast('Link copied to clipboard!');
+    }
   };
 
   const handleToggleWishlist = () => {
@@ -600,6 +621,7 @@ export const ProductDetailPage: React.FC = () => {
                   <Scale className={`h-5 w-5 ${product && isInCompare(product.id) ? 'text-blue-500' : ''}`} />
                 </button>
                 <button
+                  onClick={handleShare}
                   className="bg-white border border-gray-200 text-gray-500 hover:text-[#F59E0B] hover:border-[#F59E0B] p-3.5 rounded-xl transition-all cursor-pointer flex items-center justify-center shadow-sm"
                   aria-label="Share"
                 >

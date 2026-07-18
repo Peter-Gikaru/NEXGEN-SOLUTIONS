@@ -1,0 +1,169 @@
+{
+  "users": [
+    {
+      "id": "1986a614-b89d-47bd-99e0-57047d0b6809",
+      "email": "admin@nexgen.com",
+      "name": "Super Admin",
+      "passwordHash": "$2b$12$SeAHkmFAeVCzXRFn.of5vuoUCpu6Mg9eX.r1q3i5TZewby3ZbAne.",
+      "role": "ADMIN",
+      "status": "ACTIVE",
+      "createdAt": "2026-07-10T14:00:13.785Z",
+      "updatedAt": "2026-07-10T14:00:13.785Z",
+      "isVerified": false,
+      "rewardPoints": 0,
+      "deletedAt": null,
+      "failedLoginAttempts": 0,
+      "lockedUntil": null,
+      "requiresPasswordChange": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "googleId": null,
+      "facebookId": null,
+      "defaultAddress": null
+    },
+    {
+      "id": "85b8708c-592d-4724-989d-c2ff33594194",
+      "email": "user@nexgen.com",
+      "name": "John Doe",
+      "passwordHash": "$2b$12$EjyQkyCP.5AIgvXjNnXnvOGn4soxcuYE7AkklJ4scy8XnLyVfu.h.",
+      "role": "USER",
+      "status": "ACTIVE",
+      "createdAt": "2026-07-10T14:00:14.661Z",
+      "updatedAt": "2026-07-10T14:00:14.661Z",
+      "isVerified": false,
+      "rewardPoints": 0,
+      "deletedAt": null,
+      "failedLoginAttempts": 0,
+      "lockedUntil": null,
+      "requiresPasswordChange": false,
+      "resetPasswordToken": null,
+      "resetPasswordExpires": null,
+      "googleId": null,
+      "facebookId": null,
+      "defaultAddress": null
+    }
+  ],
+  "products": [],
+  "categories": [
+    {
+      "id": "569032c5-2369-4d40-8da0-88e443f979e4",
+      "name": "Laptops",
+      "slug": "laptops",
+      "description": null,
+      "parentId": null
+    },
+    {
+      "id": "806a47fe-66f3-4725-8ea1-94d05a4c758a",
+      "name": "Monitors",
+      "slug": "monitors",
+      "description": null,
+      "parentId": null
+    },
+    {
+      "id": "1ab7dff9-ee76-48d1-b43a-a2890a8084f7",
+      "name": "Printers",
+      "slug": "printers",
+      "description": null,
+      "parentId": null
+    },
+    {
+      "id": "38eb35f4-8d6c-404d-899a-fa2827bd9cae",
+      "name": "UPS",
+      "slug": "ups",
+      "description": null,
+      "parentId": null
+    },
+    {
+      "id": "4f7151ef-5b46-4d20-987a-70636e2120a7",
+      "name": "Dell",
+      "slug": "dell-laptops",
+      "description": null,
+      "parentId": "569032c5-2369-4d40-8da0-88e443f979e4"
+    },
+    {
+      "id": "d0ec9035-80f9-49af-8668-96f425f57125",
+      "name": "Lenovo",
+      "slug": "lenovo-laptops",
+      "description": null,
+      "parentId": "569032c5-2369-4d40-8da0-88e443f979e4"
+    },
+    {
+      "id": "2d22cf6f-a20a-427d-8675-794bb9210a44",
+      "name": "Apple",
+      "slug": "apple-laptops",
+      "description": null,
+      "parentId": "569032c5-2369-4d40-8da0-88e443f979e4"
+    },
+    {
+      "id": "675c30a9-994e-4ca5-aa27-3d5c7df3e3b5",
+      "name": "Asus",
+      "slug": "asus-laptops",
+      "description": null,
+      "parentId": "569032c5-2369-4d40-8da0-88e443f979e4"
+    },
+    {
+      "id": "bf4dc1ba-b7c3-4282-9192-d7fe2d13dcf6",
+      "name": "Acer",
+      "slug": "acer-laptops",
+      "description": null,
+      "parentId": "569032c5-2369-4d40-8da0-88e443f979e4"
+    },
+    {
+      "id": "eed8ac06-8e6f-43fc-8ff2-f321992990f9",
+      "name": "Toshiba",
+      "slug": "toshiba-laptops",
+      "description": null,
+      "parentId": "569032c5-2369-4d40-8da0-88e443f979e4"
+    },
+    {
+      "id": "ab395612-d9b4-4cfc-bc79-7d9381533f42",
+      "name": "Laptop Bags & Sleeves",
+      "slug": "laptop-bags",
+      "description": null,
+      "parentId": "569032c5-2369-4d40-8da0-88e443f979e4"
+    },
+    {
+      "id": "eb3d32e9-9964-48bb-9468-7ce1689c1f5f",
+      "name": "Gaming Monitors",
+      "slug": "gaming-monitors",
+      "description": null,
+      "parentId": "806a47fe-66f3-4725-8ea1-94d05a4c758a"
+    },
+    {
+      "id": "ca3a4416-9116-4aec-b908-6e9e3c3eba00",
+      "name": "Office Monitors",
+      "slug": "office-monitors",
+      "description": null,
+      "parentId": "806a47fe-66f3-4725-8ea1-94d05a4c758a"
+    },
+    {
+      "id": "173ebb92-ad0b-4790-92ff-fd9aa1c0f39d",
+      "name": "4K Professional Screens",
+      "slug": "4k-monitors",
+      "description": null,
+      "parentId": "806a47fe-66f3-4725-8ea1-94d05a4c758a"
+    },
+    {
+      "id": "77bb7d37-d29c-4e41-ab27-af6b75dcbac8",
+      "name": "Generic",
+      "slug": "generic",
+      "description": "Auto-generated category for Generic",
+      "parentId": null
+    },
+    {
+      "id": "205e4f2b-1346-459b-9758-f387295f272b",
+      "name": "Hp",
+      "slug": "hp",
+      "description": "Auto-generated category for Hp",
+      "parentId": "569032c5-2369-4d40-8da0-88e443f979e4"
+    },
+    {
+      "id": "c49d7183-0f01-4952-91c1-94699ee5636f",
+      "name": "Mobile Phones",
+      "slug": "mobile-phones",
+      "description": "Latest smartphones and mobile devices",
+      "parentId": null
+    }
+  ],
+  "orders": []
+}

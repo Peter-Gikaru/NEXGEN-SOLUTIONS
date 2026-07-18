@@ -151,12 +151,37 @@ export const HomePage: React.FC = () => {
     setSortBy('recommended');
     setSearchParams({});
   };
+  
   const searchQuery = searchParams.get('search');
+  // Dynamic SEO Templates
+  const seoTemplates = useMemo(() => {
+    const templates = [
+      {
+        title: "Discover Your Next Laptop | NexGen Gadgets Kenya",
+        description: "Explore our curated collection of premium laptops and accessories. Unleash your productivity with cutting-edge tech tailored for you."
+      },
+      {
+        title: "Top-Tier Tech & Laptops in Kenya | NexGen Gadgets",
+        description: "From creative powerhouses to sleek office laptops, find exactly what you need to upgrade your digital lifestyle. Authentic devices with full warranty."
+      },
+      {
+        title: "NexGen Gadgets | Elevate Your Setup",
+        description: "Level up your workflow with industry-leading electronics. Shop the latest devices in Kenya, featuring unmatched performance and reliability."
+      },
+      {
+        title: "Premium Computing Redefined | NexGen Gadgets",
+        description: "Your ultimate destination for high-performance laptops and gear in Nairobi. Smart choices, competitive pricing, and fast delivery."
+      }
+    ];
+    // Pick one consistently for this render cycle
+    return templates[Math.floor(Math.random() * templates.length)];
+  }, []);
+
   return (
     <div className="w-full flex flex-col min-h-screen bg-bg-gray">
       <SEO 
-        title="Best Laptops in Kenya | NexGen Gadgets"
-        description="Buy laptops in Kenya from top brands like HP, Dell, Lenovo, and Apple. Genuine products, best prices, fast delivery, and warranty included."
+        title={seoTemplates.title}
+        description={seoTemplates.description}
         url="/"
         schema={[organizationSchema, websiteSchema]}
       />

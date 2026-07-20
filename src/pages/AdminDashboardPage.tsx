@@ -1955,13 +1955,12 @@ export const AdminDashboardPage: React.FC = () => {
                           const newName = e.target.value;
                           let autoBrand = productForm.brand;
                           if (newName) {
-                            const firstWord = newName.trim().split(' ')[0];
-                            const commonBrands = ['Apple', 'HP', 'Dell', 'Lenovo', 'ASUS', 'Acer', 'MSI', 'Samsung', 'Microsoft', 'Razer'];
-                            const matched = commonBrands.find(b => b.toLowerCase() === firstWord.toLowerCase());
+                            const commonBrands = ['Apple', 'HP', 'Dell', 'Lenovo', 'ASUS', 'Acer', 'MSI', 'Samsung', 'Microsoft', 'Razer', 'Alienware', 'Gigabyte', 'LG', 'Sony', 'Toshiba'];
+                            const matched = commonBrands.find(b => new RegExp(`\\b${b}\\b`, 'i').test(newName));
                             if (matched) {
                               autoBrand = matched;
                             } else if (!productForm.brand || productForm.brand === productForm.name.split(' ')[0]) {
-                              autoBrand = firstWord;
+                              autoBrand = newName.trim().split(' ')[0];
                             }
                           }
                           setProductForm((p) => ({ ...p, name: newName, brand: autoBrand }));

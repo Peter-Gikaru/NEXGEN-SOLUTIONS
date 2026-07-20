@@ -144,13 +144,6 @@ export const Header: React.FC = () => {
                 </span>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 md:hidden">
-              <button
-                onClick={() => setIsMobileSearchOpen(true)}
-                className="p-2.5 rounded-full bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-colors flex items-center justify-center cursor-pointer text-white"
-                aria-label="Search"
-              >
-                <Search className="h-5 w-5 text-white" />
-              </button>
               <Link
                 to="/wishlist"
                 className="relative p-2.5 rounded-full bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-colors flex items-center justify-center cursor-pointer text-white"
@@ -180,24 +173,24 @@ export const Header: React.FC = () => {
           {}
           <form 
             onSubmit={handleSearchSubmit} 
-            className="hidden md:flex items-center relative w-full max-w-xl lg:max-w-2xl flex-1 mx-4"
+            className="flex items-center relative w-full mt-3 md:mt-0 md:max-w-xl lg:max-w-2xl flex-1 md:mx-4"
           >
             <input
               type="text"
-              placeholder="Search premium laptops & accessories..."
+              placeholder="Search for products..."
               value={searchInput}
               onFocus={() => { if(searchInput.trim().length > 1) setIsSuggestionsOpen(true) }}
               onBlur={() => setTimeout(() => setIsSuggestionsOpen(false), 200)}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full pl-4 pr-12 py-3 text-[18px] bg-white text-text-primary rounded border-2 border-transparent focus:outline-none focus:border-[#d97706] placeholder-gray-400"
+              className="w-full pl-4 pr-12 py-2.5 md:py-3 text-[16px] md:text-[18px] bg-white text-text-primary rounded-lg border border-gray-300 md:border-2 md:border-transparent focus:outline-none focus:border-[#d97706] placeholder-gray-400"
             />
             <button
               type="submit"
-              className="absolute right-0 top-0 bottom-0 px-4 bg-[#d97706] text-primary rounded-r flex items-center justify-center hover:bg-amber-700 cursor-pointer transition-colors"
+              className="absolute right-0 top-0 bottom-0 px-4 text-gray-500 md:bg-[#d97706] md:text-primary md:rounded-r flex items-center justify-center hover:text-gray-700 md:hover:bg-amber-700 cursor-pointer transition-colors"
               aria-label="Search Submit"
             >
-              <Search className="h-5 w-5 text-primary" />
+              <Search className="h-5 w-5 md:text-primary" />
             </button>
             {isSuggestionsOpen && searchInput.trim().length > 1 && (
               <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-b shadow-xl overflow-hidden z-50 divide-y divide-gray-100">

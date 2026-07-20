@@ -2,6 +2,32 @@ if (typeof window !== 'undefined' && !window.process) {
   (window as any).process = { env: { NODE_ENV: 'development' } };
 }
 
+// Security: Disable right-click, F12, Ctrl+U, etc. (client request)
+if (typeof window !== 'undefined') {
+  document.addEventListener('contextmenu', (e) => e.preventDefault());
+  document.addEventListener('keydown', (e) => {
+    // F12
+    if (e.key === 'F12') {
+      e.preventDefault();
+    }
+    // Ctrl+Shift+I / Cmd+Option+I
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+      e.preventDefault();
+    }
+    // Ctrl+Shift+J / Cmd+Option+J
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
+      e.preventDefault();
+    }
+    // Ctrl+U / Cmd+U (View Source)
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) {
+      e.preventDefault();
+    }
+    // Ctrl+S / Cmd+S (Save Page)
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's')) {
+      e.preventDefault();
+    }
+  });
+}
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async'

@@ -186,11 +186,11 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
         </span>
       )}
 
-      <div className="w-full aspect-square bg-white p-4 flex items-center justify-center relative border-b border-border-gray select-none group/image">
+      <div className="w-full aspect-square bg-white relative border-b border-border-gray select-none group/image overflow-hidden">
         <img
           src={getImageUrl(image)}
           alt={title}
-          className="max-h-full max-w-full object-contain mix-blend-multiply transition-transform duration-300 group-hover:scale-[1.03]"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.05]"
           loading="lazy"
         />
         <button

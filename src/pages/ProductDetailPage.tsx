@@ -344,10 +344,47 @@ export const ProductDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex-1 min-h-screen bg-slate-50 flex items-center justify-center font-sans">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#F59E0B] mx-auto mb-4"></div>
-          <p className="text-gray-600 text-sm">Retrieving laptop specifications...</p>
+      <div className="flex-1 bg-slate-50 pb-16 font-sans">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Breadcrumb Skeleton */}
+          <div className="h-4 bg-gray-200 rounded w-1/4 mb-6 animate-pulse"></div>
+          
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+            {/* Image Gallery Skeleton */}
+            <div className="w-full lg:w-[55%] flex flex-col gap-4">
+              <div className="aspect-[4/3] bg-gray-200 rounded-2xl animate-pulse w-full"></div>
+              <div className="flex gap-4 overflow-x-hidden">
+                <div className="w-24 h-24 bg-gray-200 rounded-xl animate-pulse"></div>
+                <div className="w-24 h-24 bg-gray-200 rounded-xl animate-pulse"></div>
+                <div className="w-24 h-24 bg-gray-200 rounded-xl animate-pulse hidden sm:block"></div>
+                <div className="w-24 h-24 bg-gray-200 rounded-xl animate-pulse hidden sm:block"></div>
+              </div>
+            </div>
+
+            {/* Product Details Skeleton */}
+            <div className="w-full lg:w-[45%] flex flex-col gap-6">
+              <div>
+                <div className="h-8 bg-gray-200 rounded w-3/4 mb-3 animate-pulse"></div>
+                <div className="h-8 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <div className="h-5 bg-gray-200 rounded w-32 animate-pulse"></div>
+                <div className="h-5 bg-gray-200 rounded w-24 animate-pulse"></div>
+              </div>
+
+              <div className="h-12 bg-gray-200 rounded w-48 animate-pulse mt-4"></div>
+
+              <div className="space-y-3 mt-6">
+                <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+                <div className="h-4 bg-gray-200 rounded w-5/6 animate-pulse"></div>
+              </div>
+
+              <div className="h-14 bg-gray-200 rounded-xl w-full mt-6 animate-pulse"></div>
+              <div className="h-14 bg-gray-200 rounded-xl w-full animate-pulse"></div>
+            </div>
+          </div>
         </div>
       </div>
     );

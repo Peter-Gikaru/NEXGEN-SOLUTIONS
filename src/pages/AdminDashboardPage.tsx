@@ -1702,7 +1702,32 @@ export const AdminDashboardPage: React.FC = () => {
                               className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer border border-slate-300 rounded p-1"
                             />
                             {uploading && <p className="text-xs text-slate-500 mt-2 font-medium">Uploading images...</p>}
-                            {editingProduct.imageUrls && editingProduct.imageUrls.length > 0 && <p className="text-xs text-emerald-600 mt-2 font-medium truncate">Total images: {editingProduct.imageUrls.length}</p>}
+                            
+                            {/* Photo Gallery Preview */}
+                            {editingProduct.imageUrls && editingProduct.imageUrls.length > 0 && (
+                              <div className="mt-3">
+                                <p className="text-xs text-slate-600 mb-2 font-medium">Current Photos ({editingProduct.imageUrls.length})</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {editingProduct.imageUrls.map((url: string, index: number) => (
+                                    <div key={index} className="relative group w-16 h-16 border border-slate-200 rounded overflow-hidden">
+                                      <img src={getImageUrl(url)} alt={`preview ${index}`} className="w-full h-full object-cover" />
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          const newUrls = [...editingProduct.imageUrls];
+                                          newUrls.splice(index, 1);
+                                          setEditingProduct({...editingProduct, imageUrls: newUrls});
+                                        }}
+                                        className="absolute top-0.5 right-0.5 bg-red-500 text-white p-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        title="Remove photo"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                           <div className="col-span-2 mb-4">
                             <div className="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100">
@@ -1959,7 +1984,32 @@ export const AdminDashboardPage: React.FC = () => {
                         className="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
                       />
                       {uploading && <p className="text-xs text-slate-500 mt-2 font-medium">Uploading images...</p>}
-                      {productForm.imageUrls.length > 0 && <p className="text-xs text-emerald-600 mt-2 font-medium truncate">Uploaded: {productForm.imageUrls.length} images</p>}
+                      
+                      {/* Photo Gallery Preview */}
+                      {productForm.imageUrls.length > 0 && (
+                        <div className="mt-3">
+                          <p className="text-xs text-slate-600 mb-2 font-medium">Current Photos ({productForm.imageUrls.length})</p>
+                          <div className="flex flex-wrap gap-2">
+                            {productForm.imageUrls.map((url: string, index: number) => (
+                              <div key={index} className="relative group w-16 h-16 border border-slate-200 rounded overflow-hidden">
+                                <img src={getImageUrl(url)} alt={`preview ${index}`} className="w-full h-full object-cover" />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newUrls = [...productForm.imageUrls];
+                                    newUrls.splice(index, 1);
+                                    setProductForm({...productForm, imageUrls: newUrls});
+                                  }}
+                                  className="absolute top-0.5 right-0.5 bg-red-500 text-white p-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                  title="Remove photo"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="pt-2">

@@ -49,6 +49,18 @@ export default defineConfig({
         changeOrigin: true,
       }
     }
+  },
+  esbuild: {
+    legalComments: 'none',
+    drop: ['console', 'debugger'],
+  },
+  build: {
+    minify: 'esbuild',
+    rollupOptions: {
+      output: {
+        comments: false
+      }
+    }
   }
 })
 

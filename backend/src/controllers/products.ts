@@ -28,6 +28,8 @@ function levenshteinDistance(a: string, b: string): number {
   }
   return matrix[b.length][a.length];
 }
+import { normalizeBrand } from '../utils/brandNormalizer';
+
 export const getFilterMetadata = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const brands = await prisma.product.findMany({
@@ -35,7 +37,11 @@ export const getFilterMetadata = async (req: Request, res: Response, next: NextF
       distinct: ['brand'],
       where: { isActive: true }
     });
-    const uniqueBrands = brands.map(b => b.brand).filter(Boolean).sort();
+    
+    // Normalize and remove duplicates
+    const uniqueBrands = Array.from(new Set(
+      brands.map(b => b.brand).filter(Boolean).map(normalizeBrand)
+    )).sort();
 
     const productsWithSpecs = await prisma.product.findMany({
       select: { specs: true },
@@ -317,7 +323,7 @@ export const createProduct = async (
         name,
         slug,
         description,
-        brand,
+        brand: brand ? normalizeBrand(brand) : 'Generic',
         price: Number(price),
         compareAtPrice: compareAtPrice ? Number(compareAtPrice) : null,
         stock: Number(stock),
@@ -346,7 +352,7 @@ export const updateProduct = async (
     const updateData: any = {};
     if (name) updateData.name = name;
     if (description) updateData.description = description;
-    if (brand) updateData.brand = brand;
+    if (brand) updateData.brand = normalizeBrand(brand);
     if (price !== undefined) updateData.price = Number(price);
     if (compareAtPrice !== undefined) updateData.compareAtPrice = compareAtPrice ? Number(compareAtPrice) : null;
     if (stock !== undefined) updateData.stock = Number(stock);
@@ -508,7 +514,7 @@ export const createBulkProducts = async (
             name: row.name,
             slug,
             description: row.description || '',
-            brand: row.brand || 'Generic',
+            brand: row.brand ? normalizeBrand(row.brand) : 'Generic',
             price: parseFloat(row.price),
             compareAtPrice: row.compareAtPrice ? parseFloat(row.compareAtPrice) : null,
             stock: parseInt(row.stock) || 0,

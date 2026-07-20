@@ -30,7 +30,6 @@ import HelpCenterPage from './pages/HelpCenterPage';
 import { AnnouncementBar } from './components/AnnouncementBar';
 import { Footer } from './components/Footer';
 import { FollowUsSidebar } from './components/FollowUsSidebar';
-import { SupportWidget } from './components/SupportWidget';
 
 import { CookieConsent } from './components/CookieConsent';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
@@ -119,7 +118,6 @@ const CustomerLayout: React.FC = () => {
 
       <Footer />
       <FollowUsSidebar />
-      <SupportWidget />
       <LiveChatWidget />
       {}
       <CookieConsent />

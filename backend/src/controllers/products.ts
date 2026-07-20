@@ -36,7 +36,29 @@ export const getFilterMetadata = async (req: Request, res: Response, next: NextF
       where: { isActive: true }
     });
     const uniqueBrands = brands.map(b => b.brand).filter(Boolean).sort();
-    return res.json({ brands: uniqueBrands });
+
+    const productsWithSpecs = await prisma.product.findMany({
+      select: { specs: true },
+      where: { isActive: true }
+    });
+
+    const dynamicSpecsRaw: Record<string, Set<string>> = {};
+    productsWithSpecs.forEach(p => {
+      if (p.specs && typeof p.specs === 'object' && !Array.isArray(p.specs)) {
+        Object.entries(p.specs as Record<string, any>).forEach(([key, value]) => {
+          if (value === undefined || value === null || String(value).trim() === '') return;
+          if (!dynamicSpecsRaw[key]) dynamicSpecsRaw[key] = new Set();
+          dynamicSpecsRaw[key].add(String(value).trim());
+        });
+      }
+    });
+
+    const dynamicSpecs: Record<string, string[]> = {};
+    Object.entries(dynamicSpecsRaw).forEach(([key, valSet]) => {
+      dynamicSpecs[key] = Array.from(valSet).sort();
+    });
+
+    return res.json({ brands: uniqueBrands, dynamicSpecs });
   } catch (error) {
     return next(error);
   }
@@ -93,34 +115,28 @@ export const listProducts = async (
         { category: { name: { contains: searchStr } } },
       ];
     }
-    const { cpu, ram, storage, condition, generation } = req.query;
-    if (cpu || ram || storage || condition || generation) {
-      if (!whereClause.AND) whereClause.AND = [];
-      
-      const buildSpecsOr = (field: string, value: any) => {
-        if (!value) return null;
-        const values = Array.isArray(value) ? value : [value];
-        if (values.length === 1) {
-          return { specs: { path: [field], equals: values[0] as string } };
-        }
-        return {
-          OR: values.map((v: any) => ({
-            specs: { path: [field], equals: v as string }
-          }))
-        };
+    const standardQueries = ['category', 'search', 'minPrice', 'maxPrice', 'brand', 'sort', 'page', 'limit', 'includeInactive'];
+    
+    const buildSpecsOr = (field: string, value: any) => {
+      if (!value) return null;
+      const values = Array.isArray(value) ? value : [value];
+      if (values.length === 1) {
+        return { specs: { path: [field], equals: values[0] as string } };
+      }
+      return {
+        OR: values.map((v: any) => ({
+          specs: { path: [field], equals: v as string }
+        }))
       };
+    };
 
-      const cpuClause = buildSpecsOr('cpu', cpu);
-      if (cpuClause) whereClause.AND.push(cpuClause);
-      const ramClause = buildSpecsOr('ram', ram);
-      if (ramClause) whereClause.AND.push(ramClause);
-      const storageClause = buildSpecsOr('storage', storage);
-      if (storageClause) whereClause.AND.push(storageClause);
-      const conditionClause = buildSpecsOr('condition', condition);
-      if (conditionClause) whereClause.AND.push(conditionClause);
-      const generationClause = buildSpecsOr('generation', generation);
-      if (generationClause) whereClause.AND.push(generationClause);
-    }
+    Object.keys(req.query).forEach(key => {
+      if (!standardQueries.includes(key)) {
+        if (!whereClause.AND) whereClause.AND = [];
+        const specClause = buildSpecsOr(key, req.query[key]);
+        if (specClause) whereClause.AND.push(specClause);
+      }
+    });
 
     let orderByClause: any = { createdAt: 'desc' };
     if (sort === 'price_asc') {

@@ -36,4 +36,5 @@ export interface FilterState {
   storage: string[];
   condition: string[];
   generation: string[];
+  [key: string]: string | string[] | boolean | undefined;
 }

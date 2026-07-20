@@ -21,30 +21,31 @@ export const ProductListingPage: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const initialFilters = useMemo<FilterState>(() => {
     const category = searchParams.get('category') || '';
-    const brandParam = searchParams.get('brand');
-    const brand = brandParam ? [brandParam] : [];
-    return {
+    const brandParams = searchParams.getAll('brand');
+    const base: FilterState = {
       category,
-      brand,
+      brand: brandParams,
       minPrice: '',
       maxPrice: '',
       rating: '',
-      inStockOnly: false,
-      cpu: [],
-      ram: [],
-      storage: [],
-      condition: [],
-      generation: []
+      inStockOnly: false
     };
+    const standardKeys = ['category', 'search', 'brand', 'sort', 'page', 'limit', 'minPrice', 'maxPrice', 'rating', 'inStockOnly'];
+    searchParams.forEach((value, key) => {
+      if (!standardKeys.includes(key)) {
+        if (!base[key]) base[key] = [];
+        if (!(base[key] as string[]).includes(value)) {
+          (base[key] as string[]).push(value);
+        }
+      }
+    });
+    return base;
   }, [searchParams]);
   const [activeFilters, setActiveFilters] = useState<FilterState>(initialFilters);
   useEffect(() => {
-    setActiveFilters(prev => ({
-      ...prev,
-      category: searchParams.get('category') || '',
-      brand: searchParams.get('brand') ? [searchParams.get('brand')!] : prev.brand,
-    }));
-  }, [searchParams]);
+    const updated = { ...initialFilters };
+    setActiveFilters(updated);
+  }, [searchParams, initialFilters]);
   
   useEffect(() => {
     setPage(1);
@@ -61,16 +62,18 @@ export const ProductListingPage: React.FC = () => {
           page,
           sort: sortBy
         };
+        const standardKeys = ['category', 'search', 'brand', 'sort', 'page', 'limit', 'minPrice', 'maxPrice', 'rating', 'inStockOnly'];
+        
         if (activeFilters.category) params.category = activeFilters.category;
-        if (activeFilters.brand.length > 0) params.brand = activeFilters.brand;
+        if (activeFilters.brand && (activeFilters.brand as string[]).length > 0) params.brand = activeFilters.brand;
         if (activeFilters.minPrice) params.minPrice = activeFilters.minPrice;
         if (activeFilters.maxPrice) params.maxPrice = activeFilters.maxPrice;
-        if (activeFilters.cpu.length > 0) params.cpu = activeFilters.cpu;
-        if (activeFilters.ram.length > 0) params.ram = activeFilters.ram;
-        if (activeFilters.storage.length > 0) params.storage = activeFilters.storage;
-        if (activeFilters.condition.length > 0) params.condition = activeFilters.condition;
-        if (activeFilters.generation.length > 0) params.generation = activeFilters.generation;
-
+        
+        Object.entries(activeFilters).forEach(([key, value]) => {
+          if (!standardKeys.includes(key) && Array.isArray(value) && value.length > 0) {
+            params[key] = value;
+          }
+        });
         const response = await api.get('/products', { params });
         const mapped = response.data.products.map((p: any) => ({
           id: p.slug,
@@ -111,13 +114,19 @@ export const ProductListingPage: React.FC = () => {
     setIsLoading(true);
     setActiveFilters(newFilters);
     setIsMobileFiltersOpen(false);
-    const params: Record<string, string> = {};
+    const params = new URLSearchParams();
     const searchVal = searchParams.get('search');
-    if (searchVal) params.search = searchVal;
-    if (newFilters.category) params.category = newFilters.category;
-    if (newFilters.brand.length === 1) {
-      params.brand = newFilters.brand[0];
+    if (searchVal) params.append('search', searchVal);
+    if (newFilters.category) params.append('category', newFilters.category as string);
+    if (newFilters.brand && (newFilters.brand as string[]).length > 0) {
+      (newFilters.brand as string[]).forEach(b => params.append('brand', b));
     }
+    const standardKeys = ['category', 'search', 'brand', 'sort', 'page', 'limit', 'minPrice', 'maxPrice', 'rating', 'inStockOnly'];
+    Object.entries(newFilters).forEach(([key, value]) => {
+      if (!standardKeys.includes(key) && Array.isArray(value)) {
+        value.forEach(v => params.append(key, String(v)));
+      }
+    });
     setSearchParams(params);
     const timer = setTimeout(() => {
       setIsLoading(false);
@@ -132,12 +141,7 @@ export const ProductListingPage: React.FC = () => {
       minPrice: '',
       maxPrice: '',
       rating: '',
-      inStockOnly: false,
-      cpu: [],
-      ram: [],
-      storage: [],
-      condition: [],
-      generation: []
+      inStockOnly: false
     };
     setActiveFilters(cleared);
     setSearchParams({});
@@ -224,7 +228,11 @@ export const ProductListingPage: React.FC = () => {
           </div>
         </div>
         {}
-        {(activeFilters.category || activeFilters.brand.length > 0 || activeFilters.minPrice || activeFilters.maxPrice || activeFilters.rating || activeFilters.cpu.length > 0 || activeFilters.ram.length > 0 || activeFilters.storage.length > 0 || activeFilters.condition.length > 0 || activeFilters.generation.length > 0) && (
+        {(Object.entries(activeFilters).some(([key, val]) => {
+          if (['category', 'minPrice', 'maxPrice', 'rating'].includes(key)) return !!val;
+          if (Array.isArray(val)) return val.length > 0;
+          return false;
+        })) && (
           <div className="flex flex-wrap gap-2 items-center text-[14px] select-none text-left">
             <span className="text-text-secondary font-medium">Active:</span>
             {activeFilters.category && (
@@ -239,8 +247,8 @@ export const ProductListingPage: React.FC = () => {
                 </button>
               </span>
             )}
-            {activeFilters.brand.map((b: string) => (
-              <span key={b} className="bg-emerald-50 text-accent border border-emerald-100 px-2 py-0.5 rounded flex items-center gap-1.5 font-semibold">
+            {activeFilters.brand && activeFilters.brand.map((b: string) => (
+              <span key={`brand-${b}`} className="bg-emerald-50 text-accent border border-emerald-100 px-2 py-0.5 rounded flex items-center gap-1.5 font-semibold">
                 {b}
                 <button 
                   type="button"
@@ -251,19 +259,21 @@ export const ProductListingPage: React.FC = () => {
                 </button>
               </span>
             ))}
-            {['cpu', 'ram', 'storage', 'condition', 'generation'].map(key => 
-              (activeFilters[key as keyof FilterState] as string[]).map((val: string) => (
-                <span key={`${key}-${val}`} className="bg-emerald-50 text-accent border border-emerald-100 px-2 py-0.5 rounded flex items-center gap-1.5 font-semibold">
-                  {val}
-                  <button 
-                    type="button"
-                    onClick={() => handleApplyFilters({ ...activeFilters, [key]: (activeFilters[key as keyof FilterState] as string[]).filter((x: string) => x !== val) })} 
-                    className="hover:text-red-500 cursor-pointer"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </span>
-              ))
+            {Object.entries(activeFilters)
+              .filter(([key, val]) => !['category', 'brand', 'minPrice', 'maxPrice', 'rating', 'inStockOnly'].includes(key) && Array.isArray(val) && val.length > 0)
+              .map(([key, valArray]) => 
+                (valArray as string[]).map((val: string) => (
+                  <span key={`${key}-${val}`} className="bg-emerald-50 text-accent border border-emerald-100 px-2 py-0.5 rounded flex items-center gap-1.5 font-semibold">
+                    {val}
+                    <button 
+                      type="button"
+                      onClick={() => handleApplyFilters({ ...activeFilters, [key]: (activeFilters[key as keyof FilterState] as string[]).filter((x: string) => x !== val) })} 
+                      className="hover:text-red-500 cursor-pointer"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))
             )}
             {(activeFilters.minPrice || activeFilters.maxPrice) && (
               <span className="bg-emerald-50 text-accent border border-emerald-100 px-2 py-0.5 rounded flex items-center gap-1.5 font-semibold">

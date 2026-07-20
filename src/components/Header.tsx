@@ -417,7 +417,9 @@ export const Header: React.FC = () => {
         </div>
       </div>
       {}
-      <CategoryNav />
+      <div className="hidden md:block">
+        <CategoryNav />
+      </div>
       {}
       {isMobileSearchOpen && (
         <div className="fixed inset-0 z-50 bg-[#1a1a2e]/90 flex flex-col p-4 md:hidden">

@@ -18,13 +18,7 @@
 }
 
 html {
-  /* 
-    Fluid Typography & Spacing scaling: 
-    Base font size scales smoothly from 13px on small phones (320px) 
-    up to 16px on tablets/desktops (768px+).
-    This makes ALL text, padding, and margins in Tailwind (using rems) perfectly dynamic based on phone width!
-  */
-  font-size: clamp(13px, 1.1vw + 9.5px, 16px);
+  font-size: 16px;
 }
 
 body {

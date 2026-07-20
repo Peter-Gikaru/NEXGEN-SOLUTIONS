@@ -88,12 +88,20 @@ export const listProducts = async (
       whereClause.isActive = true;
     }
     if (category) {
-      whereClause.category = {
-        OR: [
-          { slug: category as string },
-          { name: category as string }
-        ]
-      };
+      const catStr = category as string;
+      const possibleBrand = normalizeBrand(catStr.replace(/-/g, ' ').replace(/\blaptops?\b/gi, '').trim());
+      
+      const catOrBrand: any[] = [
+        { category: { slug: catStr } },
+        { category: { name: catStr } }
+      ];
+
+      if (possibleBrand && possibleBrand !== 'Generic') {
+        catOrBrand.push({ brand: possibleBrand });
+      }
+
+      if (!whereClause.AND) whereClause.AND = [];
+      whereClause.AND.push({ OR: catOrBrand });
     }
     if (brand) {
       if (Array.isArray(brand)) {

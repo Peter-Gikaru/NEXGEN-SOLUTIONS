@@ -51,7 +51,6 @@ export default defineConfig({
     }
   },
   esbuild: {
-    legalComments: 'none',
     drop: ['console', 'debugger'],
   },
   build: {

@@ -7,9 +7,28 @@ import { ChevronDown, SlidersHorizontal, X } from 'lucide-react';
 import { SEO } from '../components/SEO';
 import type { FilterState } from '../types';
 import { buildBreadcrumbs } from '../lib/structured-data';
+import { useCategories } from '../hooks/useCategories';
 
 export const ProductListingPage: React.FC = () => {
+  const { categories } = useCategories();
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  const getCategoryName = (slug: string) => {
+    const findNode = (nodes: any[]): any => {
+      for (const node of nodes) {
+        if (node.slug === slug) return node.name;
+        if (node.children) {
+          const found = findNode(node.children);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+    const rawName = findNode(categories) || slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    // Strip "Laptops" or "Laptop" to make it cleaner like a brand, per user request
+    return rawName.replace(/\blaptops?\b/gi, '').trim() || rawName;
+  };
+  
   const [isLoading, setIsLoading] = useState(false);
   const [sortBy, setSortBy] = useState('recommended');
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
@@ -237,7 +256,7 @@ export const ProductListingPage: React.FC = () => {
             <span className="text-text-secondary font-medium">Active:</span>
             {activeFilters.category && (
               <span className="bg-emerald-50 text-accent border border-emerald-100 px-2 py-0.5 rounded flex items-center gap-1.5 font-semibold">
-                {activeFilters.category}
+                {getCategoryName(activeFilters.category)}
                 <button 
                   type="button"
                   onClick={() => handleApplyFilters({ ...activeFilters, category: '' })} 

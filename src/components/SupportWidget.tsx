@@ -13,9 +13,11 @@ export const SupportWidget: React.FC = () => {
     setIsOpen(false);
   };
 
+  const nodeRef = React.useRef(null);
+
   return (
-    <Draggable bounds="window" handle=".drag-handle">
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <Draggable nodeRef={nodeRef} bounds="window" handle=".drag-handle">
+      <div ref={nodeRef} className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       {isOpen && (
         <div className="mb-4 bg-white border border-slate-200 shadow-2xl rounded-2xl w-80 overflow-hidden transform origin-bottom-right transition-all">
           <div className="bg-[#1a1a2e] p-4 flex justify-between items-center text-white">

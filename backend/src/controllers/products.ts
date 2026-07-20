@@ -375,7 +375,7 @@ export const deleteProduct = async (
     const existing = await prisma.product.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ message: 'Product not found' });
     
-    // Safety check: Prevent deleting products that have been ordered
+    
     const orderItemsCount = await prisma.orderItem.count({ where: { productId: id } });
     if (orderItemsCount > 0) {
       return res.status(400).json({ 

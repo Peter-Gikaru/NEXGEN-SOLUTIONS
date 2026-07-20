@@ -171,7 +171,7 @@ export const initCronJobs = () => {
     }
   });
 
-  // 5. Daily database backup task (at 2:00 AM)
+  
   cron.schedule('0 2 * * *', async () => {
     console.log('[CRON] Running daily database backup...');
     try {

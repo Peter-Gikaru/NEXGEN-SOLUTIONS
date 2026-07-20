@@ -47,7 +47,7 @@ export const InstallPWA: React.FC = () => {
     setDeferredPrompt(null);
   };
 
-  // Check if already running in standalone (installed app) mode
+  
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone;
 
   if (isStandalone || !showPrompt) return null;

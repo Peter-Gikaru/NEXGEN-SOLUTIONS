@@ -40,6 +40,7 @@ interface Order {
   paymentStatus: string;
   orderStatus: string;
   paymentMethod: string;
+  expectedDeliveryDate?: string;
   trackingNumber: string | null;
   createdAt: string;
   items: OrderItem[];
@@ -326,6 +327,11 @@ export const CustomerDashboardPage: React.FC = () => {
                         )}
                       </div>
                       <p className="text-xs text-gray-400 mt-1">Placed on {new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                      {selectedOrder.expectedDeliveryDate && (
+                        <p className="text-xs font-bold text-[#F59E0B] mt-1 flex items-center gap-1">
+                          <Truck className="h-3 w-3" /> Expected Delivery: {new Date(selectedOrder.expectedDeliveryDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        </p>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       {selectedOrder.orderStatus === 'PENDING' && (

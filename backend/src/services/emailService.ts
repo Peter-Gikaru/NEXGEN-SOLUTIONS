@@ -238,6 +238,44 @@ export const sendPasswordResetEmail = async (email: string, resetUrl: string) =>
   } catch (error) {}
 };
 
+export const sendDelayNotificationEmail = async (email: string, name: string, order: any, newDate: string, apologyNote: string) => {
+  const trackingNumber = order.trackingNumber || 'Processing...';
+  const content = `
+    <h2>Important Update Regarding Your Order</h2>
+    <p>Hi ${name},</p>
+    <p>We are writing to inform you of a delay regarding your order <strong style="color:#0f172a;">${trackingNumber}</strong>.</p>
+    
+    <div style="background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0;">
+      <h3 style="margin-top: 0; color: #b45309; font-size: 16px;">New Expected Delivery Date</h3>
+      <p style="font-size: 18px; font-weight: bold; color: #d97706; margin: 5px 0;">${newDate}</p>
+    </div>
+
+    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+      <p style="margin: 0; font-style: italic; color: #475569;">"${apologyNote}"</p>
+    </div>
+
+    <p>We sincerely apologize for any inconvenience this may cause. We are working hard to get your order to you as quickly as possible.</p>
+
+    <center>
+      <a href="${appUrl}/track" class="btn">Track Your Package</a>
+    </center>
+  `;
+
+  const mailOptions = {
+    from: `"NexGen Gadgets Support" <${fromEmail}>`,
+    to: email,
+    subject: `Update on your order #${order.id.substring(0, 8).toUpperCase()}`,
+    html: generateEmailLayout(content),
+  };
+  try {
+    if (process.env.SMTP_USER && process.env.SMTP_USER !== 'mock_user') {
+      await transporter.sendMail(mailOptions);
+    }
+  } catch (error) {
+    console.error('Error sending delay notification email:', error);
+  }
+};
+
 export const sendWelcomeEmail = async (email: string, name: string) => {
   const content = `
     <h2>Welcome to NexGen Gadgets, ${name}!</h2>

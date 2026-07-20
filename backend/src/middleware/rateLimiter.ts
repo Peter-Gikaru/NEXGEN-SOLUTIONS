@@ -19,8 +19,8 @@ export const authLimiter = rateLimit({
 });
 
 export const emailLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 5, // limit each IP to 5 requests per windowMs
+  windowMs: 10 * 60 * 1000, 
+  max: 5, 
   message: {
     message: 'Too many email requests from this IP, please try again after 10 minutes',
   },

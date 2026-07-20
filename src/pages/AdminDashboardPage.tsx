@@ -33,7 +33,8 @@ import {
   ShieldCheck,
   Megaphone,
   MessageSquare,
-  Check
+  Check,
+  AlertCircle
 } from 'lucide-react';
 import AdminNewsletter from '../components/admin/AdminNewsletter';
 import AdminReturns from '../components/admin/AdminReturns';
@@ -235,6 +236,9 @@ export const AdminDashboardPage: React.FC = () => {
     password: '',
     role: 'USER',
   });
+  const [delayOrderId, setDelayOrderId] = useState<string | null>(null);
+  const [delayDate, setDelayDate] = useState<string>('');
+  const [delayNote, setDelayNote] = useState<string>('');
   useEffect(() => {
     if (!user || user.role !== 'ADMIN') {
       navigate('/login');
@@ -377,7 +381,7 @@ export const AdminDashboardPage: React.FC = () => {
       setPreviewPage(1);
       return;
     }
-    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; 
     if (file.size > MAX_FILE_SIZE) {
       toast.error('File is too large. Maximum allowed size is 5MB.');
       e.target.value = '';
@@ -725,6 +729,25 @@ export const AdminDashboardPage: React.FC = () => {
       toast.error('Failed to update order status');
     }
   };
+
+  const handleReportDelay = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!delayOrderId || !delayDate) return;
+    try {
+      const res = await api.put(`/orders/${delayOrderId}/delay`, { 
+        expectedDeliveryDate: delayDate, 
+        apologyNote: delayNote 
+      });
+      setOrders(prev => prev.map(o => o.id === delayOrderId ? res.data : o));
+      toast.success('Delay reported and user notified successfully.');
+      setDelayOrderId(null);
+      setDelayDate('');
+      setDelayNote('');
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || 'Failed to report delay');
+    }
+  };
+
   const handleUpdatePaymentStatus = async (id: string, status: string) => {
     if (!window.confirm(`Are you sure you want to change this order's payment status to ${status}?`)) return;
     try {
@@ -896,7 +919,7 @@ export const AdminDashboardPage: React.FC = () => {
           <div className="text-xs text-blue-400 mt-0.5">Role: {user?.role}</div>
         </div>
         <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
-          {/* Section 1: Overview */}
+          {}
           <div>
             <div className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 select-none">Overview</div>
             <div className="space-y-1">
@@ -936,7 +959,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Section 2: Catalog & Sales */}
+          {}
           <div>
             <div className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 select-none">Catalog & Sales</div>
             <div className="space-y-1">
@@ -1004,7 +1027,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Section 3: Orders & Logistics */}
+          {}
           <div>
             <div className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 select-none">Orders & Logistics</div>
             <div className="space-y-1">
@@ -1074,7 +1097,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Section 4: Marketing & Engagement */}
+          {}
           <div>
             <div className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 select-none">Marketing & Engagement</div>
             <div className="space-y-1">
@@ -1118,7 +1141,7 @@ export const AdminDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Section 5: Access Control */}
+          {}
           <div>
             <div className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 select-none">Access Control</div>
             <div className="space-y-1">
@@ -1343,6 +1366,7 @@ export const AdminDashboardPage: React.FC = () => {
                           <th className="pb-3 px-2 font-semibold">Amount</th>
                           <th className="pb-3 px-2 font-semibold">Order Status</th>
                           <th className="pb-3 px-2 font-semibold">Payment</th>
+                          <th className="pb-3 px-2 font-semibold text-right">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1383,6 +1407,14 @@ export const AdminDashboardPage: React.FC = () => {
                                 <option value="PAID">PAID</option>
                                 <option value="FAILED">FAILED</option>
                               </select>
+                            </td>
+                            <td className="py-4 px-2 text-right">
+                              <button
+                                onClick={() => setDelayOrderId(ord.id)}
+                                className="bg-amber-100 text-amber-700 hover:bg-amber-200 px-3 py-1.5 rounded text-xs font-bold transition-colors cursor-pointer"
+                              >
+                                Report Delay
+                              </button>
                             </td>
                           </tr>
                         ))}
@@ -1824,7 +1856,7 @@ export const AdminDashboardPage: React.FC = () => {
               </div>
             )}
             {activeTab === 'addProduct' && (
-              <div className="space-y-6 max-w-3xl">
+              <div className="space-y-6 w-full">
                 {}
                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 lg:p-8">
                   <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
@@ -2017,7 +2049,7 @@ export const AdminDashboardPage: React.FC = () => {
                       />
                       {uploading && <p className="text-xs text-slate-500 mt-2 font-medium">Uploading images...</p>}
                       
-                      {/* Photo Gallery Preview */}
+                      {}
                       {productForm.imageUrls.length > 0 && (
                         <div className="mt-3">
                           <p className="text-xs text-slate-600 mb-2 font-medium">Current Photos ({productForm.imageUrls.length})</p>
@@ -2459,6 +2491,60 @@ export const AdminDashboardPage: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {delayOrderId && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex justify-center items-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-amber-50">
+              <h2 className="text-xl font-bold text-amber-800 flex items-center gap-2">
+                <AlertCircle className="h-6 w-6" /> Report Delay
+              </h2>
+              <button onClick={() => setDelayOrderId(null)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+            <form onSubmit={handleReportDelay} className="p-6 space-y-5">
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">New Expected Delivery Date</label>
+                <input
+                  type="date"
+                  required
+                  value={delayDate}
+                  onChange={(e) => setDelayDate(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-700 mb-2">Apology & Explanation (Sent to User)</label>
+                <textarea
+                  required
+                  rows={4}
+                  value={delayNote}
+                  onChange={(e) => setDelayNote(e.target.value)}
+                  placeholder="e.g. Due to bad weather, your package will arrive a day late..."
+                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-colors resize-none"
+                ></textarea>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setDelayOrderId(null)}
+                  className="flex-1 px-4 py-3 bg-white border border-slate-300 text-slate-700 rounded-xl font-bold hover:bg-slate-50 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-3 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 transition-colors cursor-pointer shadow-lg shadow-amber-500/30"
+                >
+                  Send Update
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

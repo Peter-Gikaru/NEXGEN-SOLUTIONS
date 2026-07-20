@@ -57,13 +57,38 @@ export const createOrder = async (
       });
     }
     let shippingFee = 500; 
+    let expectedDeliveryDate: Date | null = null;
+    let estimatedDaysStr = '2 - 3 Business Days';
     if (subtotal >= 50000) {
       shippingFee = 0;
-    } else if (shippingAddress.city) {
+    } 
+    if (shippingAddress.city) {
       const zone = await prisma.shippingZone.findFirst({
         where: { regionName: shippingAddress.city }
       });
-      if (zone) shippingFee = zone.fee;
+      if (zone) {
+        shippingFee = subtotal >= 50000 ? 0 : zone.fee;
+        estimatedDaysStr = zone.estimatedDays;
+      } else if (shippingAddress.city.toLowerCase().includes('nairobi')) {
+        estimatedDaysStr = 'Next Day Delivery';
+      }
+    }
+    const date = new Date();
+    if (estimatedDaysStr.toLowerCase().includes('same')) {
+      expectedDeliveryDate = date;
+    } else if (estimatedDaysStr.toLowerCase().includes('next')) {
+      date.setDate(date.getDate() + 1);
+      expectedDeliveryDate = date;
+    } else {
+      const match = estimatedDaysStr.match(/(\d+)/g);
+      if (match && match.length > 0) {
+        const maxDays = Math.max(...match.map(Number));
+        date.setDate(date.getDate() + maxDays);
+        expectedDeliveryDate = date;
+      } else {
+        date.setDate(date.getDate() + 3);
+        expectedDeliveryDate = date;
+      }
     }
 
     let discount = 0;
@@ -131,6 +156,7 @@ export const createOrder = async (
           paymentMethod,
           paymentStatus: paymentMethod === 'COD' ? 'PENDING' : 'PENDING',
           orderStatus: 'PENDING',
+          expectedDeliveryDate,
           trackingNumber: `NXG-${Math.floor(100000 + Math.random() * 900000)}`,
           items: {
             create: orderItemsData,
@@ -383,6 +409,65 @@ export const returnOrder = async (
     });
     return res.json(updatedOrder);
   } catch (error) {
-    return next(error);
+    next(error);
+  }
+};
+
+export const reportDelay = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const { expectedDeliveryDate, apologyNote } = req.body;
+
+    if (!req.user || req.user.role !== 'ADMIN') {
+      return res.status(403).json({ message: 'Not authorized to report delays' });
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: { user: true },
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    const updatedOrder = await prisma.order.update({
+      where: { id },
+      data: {
+        expectedDeliveryDate: new Date(expectedDeliveryDate),
+        trackingEvents: {
+          create: {
+            status: 'DELAYED',
+            location: 'System',
+            description: apologyNote || 'Your order has been delayed. We apologize for the inconvenience.',
+          },
+        },
+      },
+    });
+
+    const email = order.user?.email || (order.shippingAddress as any)?.guestEmail;
+    const name = order.user?.name || (order.shippingAddress as any)?.guestName || 'Customer';
+
+    if (email) {
+      import('../services/emailService').then(({ sendDelayNotificationEmail }) => {
+        sendDelayNotificationEmail(
+          email, 
+          name, 
+          updatedOrder, 
+          new Date(expectedDeliveryDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }), 
+          apologyNote
+        );
+      });
+    }
+
+    if (req.user) logAction('REPORT_DELAY', `Reported delay for order ${order.id}`, 'INFO', req.user.id);
+
+    res.json(updatedOrder);
+  } catch (error) {
+    next(error);
   }
 };

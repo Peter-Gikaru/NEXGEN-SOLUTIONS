@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { calculateExactDateRange } from '../utils/dateUtils';
 import { 
   ArrowLeft, 
   MapPin, 
@@ -159,7 +160,7 @@ export const CheckoutPage: React.FC = () => {
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
               <span className="text-slate-500 text-sm font-medium">Estimated Delivery</span>
               <span className="font-bold text-slate-800">
-                {selectedZone ? selectedZone.estimatedDays : (city.toLowerCase().includes('nairobi') ? 'Next Day Delivery' : '2 - 3 Business Days')}
+                {calculateExactDateRange(selectedZone ? selectedZone.estimatedDays : (city.toLowerCase().includes('nairobi') ? 'Next Day Delivery' : '2 - 3 Business Days'))}
               </span>
             </div>
             <div className="flex justify-between items-center border-b border-slate-200 pb-3">
@@ -406,6 +407,14 @@ export const CheckoutPage: React.FC = () => {
                     )}
                   </span>
                 </div>
+                {selectedZoneId && (
+                  <div className="flex justify-between font-semibold text-slate-600">
+                    <span>Expected Delivery</span>
+                    <span className="text-slate-900 text-right">
+                      {calculateExactDateRange(shippingZones.find(z => z.id === selectedZoneId)?.estimatedDays || '2-3 days')}
+                    </span>
+                  </div>
+                )}
                 <div className="border-t border-slate-100 pt-5 mt-3 flex justify-between text-2xl font-black">
                   <span className="text-slate-900">Total</span>
                   <span className="text-[#F59E0B]">KES {total.toLocaleString()}</span>

@@ -153,7 +153,7 @@ export const HomePage: React.FC = () => {
   };
   
   const searchQuery = searchParams.get('search');
-  // Dynamic SEO Templates
+  
   const seoTemplates = useMemo(() => {
     const templates = [
       {
@@ -173,7 +173,7 @@ export const HomePage: React.FC = () => {
         description: "Your ultimate destination for high-performance laptops and gear in Nairobi. Smart choices, competitive pricing, and fast delivery."
       }
     ];
-    // Pick one consistently for this render cycle
+    
     return templates[Math.floor(Math.random() * templates.length)];
   }, []);
 
@@ -194,9 +194,9 @@ export const HomePage: React.FC = () => {
       </div>
       {}
       <div className="max-w-[1600px] mx-auto px-4 w-full pt-6 flex flex-col gap-6">
-        {/* Trust Badges */}
+        {}
         <TrustBadges />
-        {/* Flash Sales */}
+        {}
         <FlashDeals />
         {}
         <ProductGrid products={products} onShopNowClick={(category, brand, search) => {

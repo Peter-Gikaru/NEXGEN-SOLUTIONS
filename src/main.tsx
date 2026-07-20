@@ -2,27 +2,27 @@ if (typeof window !== 'undefined' && !window.process) {
   (window as any).process = { env: { NODE_ENV: 'development' } };
 }
 
-// Security: Disable right-click, F12, Ctrl+U, etc. (client request)
+
 if (typeof window !== 'undefined') {
   document.addEventListener('contextmenu', (e) => e.preventDefault());
   document.addEventListener('keydown', (e) => {
-    // F12
+    
     if (e.key === 'F12') {
       e.preventDefault();
     }
-    // Ctrl+Shift+I / Cmd+Option+I
+    
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
       e.preventDefault();
     }
-    // Ctrl+Shift+J / Cmd+Option+J
+    
     if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'J' || e.key === 'j')) {
       e.preventDefault();
     }
-    // Ctrl+U / Cmd+U (View Source)
+    
     if ((e.ctrlKey || e.metaKey) && (e.key === 'U' || e.key === 'u')) {
       e.preventDefault();
     }
-    // Ctrl+S / Cmd+S (Save Page)
+    
     if ((e.ctrlKey || e.metaKey) && (e.key === 'S' || e.key === 's')) {
       e.preventDefault();
     }
@@ -40,7 +40,7 @@ import { CompareProvider } from './context/CompareContext.tsx'
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 const isGoogleEnabled = GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID !== 'your_google_client_id.apps.googleusercontent.com';
 
-// Unregister any active PWA Service Workers to deactivate app installation triggers
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.getRegistrations().then((registrations) => {
     for (const registration of registrations) {

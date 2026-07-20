@@ -31,7 +31,7 @@ import { AnnouncementBar } from './components/AnnouncementBar';
 import { Footer } from './components/Footer';
 import { FollowUsSidebar } from './components/FollowUsSidebar';
 import { SupportWidget } from './components/SupportWidget';
-// import { InstallPWA } from './components/InstallPWA';
+
 import { CookieConsent } from './components/CookieConsent';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
@@ -44,23 +44,23 @@ import { Link } from 'react-router-dom';
 const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
     <div className="min-h-screen w-full flex font-sans antialiased bg-white overflow-hidden">
-      {/* Left Side: Solid Corporate Blue with Logo */}
+      {}
       <div className="hidden lg:flex w-1/2 bg-[#0f172a] items-center justify-center relative">
-        {/* Logo centered on the blue background */}
+        {}
         <div className="flex flex-col items-center justify-center transform transition-transform hover:scale-105 duration-300">
           <img src="/favicon.png" alt="NexGen Logo" className="h-40 w-auto object-contain drop-shadow-2xl" />
           <h2 className="text-white text-3xl font-bold mt-8 tracking-wide">NexGen Gadgets</h2>
           <p className="text-slate-400 mt-2 font-medium">Premium Tech, Delivered.</p>
         </div>
         
-        {/* Subtle decorative gradient */}
+        {}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-900/20 to-transparent pointer-events-none"></div>
       </div>
 
-      {/* Right Side: Form Area (White) */}
+      {}
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center py-12 px-4 sm:px-12 xl:px-24 bg-white relative">
         <div className="w-full max-w-[440px]">
-          {/* Mobile Logo Fallback (Hidden on Desktop since it's on the left) */}
+          {}
           <div className="flex lg:hidden justify-center mb-8">
             <Link to="/">
               <img src="/favicon.png" alt="NexGen Logo" className="h-16 w-auto object-contain" />
@@ -121,7 +121,7 @@ const CustomerLayout: React.FC = () => {
       <FollowUsSidebar />
       <SupportWidget />
       <LiveChatWidget />
-      {/* <InstallPWA /> */}
+      {}
       <CookieConsent />
       <MobileBottomNav />
       <CartDrawer />

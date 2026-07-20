@@ -105,7 +105,7 @@ export const CategoryNav: React.FC = () => {
             <Link to="/" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase whitespace-nowrap">HOME</Link>
             <Link to="/products" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase whitespace-nowrap">ALL PRODUCTS</Link>
             
-            {/* Dynamic Categories (All) */}
+            {}
             {categories.map(cat => (
               <Link 
                 key={cat.id} 

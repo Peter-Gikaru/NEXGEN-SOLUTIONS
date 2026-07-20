@@ -138,6 +138,7 @@ model Order {
   paymentAttempts     Int                  @default(0)
   cancellationReason  String?
   promoCodeId         String?
+  expectedDeliveryDate DateTime?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
   user                User?                @relation(fields: [userId], references: [id])

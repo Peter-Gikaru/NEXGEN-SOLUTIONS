@@ -201,7 +201,7 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
           )}
         </div>
 
-        {/* Price Range */}
+        {}
         <div className="pt-6">
           <button 
             type="button"

@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useCompare } from '../context/CompareContext';
 import api from '../services/api';
+import { calculateExactDateRange } from '../utils/dateUtils';
 import { 
   Star,
   StarHalf,
@@ -167,7 +168,7 @@ export const ProductDetailPage: React.FC = () => {
     window.scrollTo(0,0);
   }, [slug]);
 
-  // Auto-play image gallery
+  
   useEffect(() => {
     if (!product || !product.imageUrls || product.imageUrls.length <= 1) return;
     
@@ -177,7 +178,7 @@ export const ProductDetailPage: React.FC = () => {
         setMainImage(getImageUrl(product.imageUrls[nextIndex]));
         return nextIndex;
       });
-    }, 4000); // Change image every 4 seconds
+    }, 4000); 
 
     return () => clearInterval(interval);
   }, [product]);
@@ -257,7 +258,7 @@ export const ProductDetailPage: React.FC = () => {
         console.log('Share was cancelled or failed.');
       }
     } else {
-      // Fallback for browsers that do not support Web Share API
+      
       navigator.clipboard.writeText(window.location.href);
       addToast('Link copied to clipboard!');
     }
@@ -602,9 +603,9 @@ export const ProductDetailPage: React.FC = () => {
                 {selectedZoneId && (
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-600">Estimated Delivery:</span>
+                      <span className="text-gray-600">Expected Delivery:</span>
                       <span className="font-bold text-[#1a1a2e]">
-                        {shippingZones.find(z => z.id === selectedZoneId)?.estimatedDays}
+                        {calculateExactDateRange(shippingZones.find(z => z.id === selectedZoneId)?.estimatedDays || '2-3 days')}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">

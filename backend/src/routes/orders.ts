@@ -5,6 +5,7 @@ import {
   getOrderDetails,
   cancelOrder,
   returnOrder,
+  reportDelay,
 } from '../controllers/orders';
 import { authenticateJWT, optionalAuthenticateJWT } from '../middleware/auth';
 import { validateBody, orderSchema } from '../utils/validation';
@@ -19,5 +20,6 @@ router.get('/', authenticateJWT, listOrders);
 router.get('/:id', authenticateJWT, getOrderDetails);
 router.put('/:id/cancel', optionalAuthenticateJWT, cancelOrder);
 router.put('/:id/return', optionalAuthenticateJWT, returnOrder);
+router.put('/:id/delay', authenticateJWT, reportDelay);
 
 export default router;

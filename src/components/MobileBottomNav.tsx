@@ -62,7 +62,7 @@ export const MobileBottomNav: React.FC = () => {
               <div className={`p-1.5 rounded-full transition-colors relative ${isActive ? 'text-[#F59E0B]' : 'text-slate-500'}`}>
                 <Icon className="w-5.5 h-5.5 transition-transform duration-250 hover:scale-105" />
                 
-                {/* Cart or Wishlist Badge */}
+                {}
                 {item.badge !== undefined && (
                   <span className="absolute -top-0.5 -right-0.5 bg-rose-500 text-white font-sans font-black text-[9px] h-4 min-w-[16px] px-1 rounded-full flex items-center justify-center shadow-sm animate-pulse border border-white">
                     {item.badge}

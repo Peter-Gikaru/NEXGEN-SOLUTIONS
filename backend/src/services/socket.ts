@@ -18,7 +18,7 @@ const parseCookies = (cookieString: string | undefined): Record<string, string> 
 };
 
 export const setupSocket = (io: Server) => {
-  // Authentication middleware for incoming Socket connections
+  
   io.use((socket, next) => {
     const cookiesHeader = socket.handshake.headers.cookie;
     if (cookiesHeader) {
@@ -33,7 +33,7 @@ export const setupSocket = (io: Server) => {
           };
           socket.data.user = decoded;
         } catch (err) {
-          // Token expired or invalid, keep anonymous
+          
         }
       }
     }
@@ -52,7 +52,7 @@ export const setupSocket = (io: Server) => {
     });
 
     socket.on('visitor_connect', async (data: { visitorId: string, page: string }) => {
-      // Validate visitorId format (v_ followed by alphanumeric characters) to prevent injection/hijacking
+      
       const VISITOR_ID_REGEX = /^v_[a-z0-9]{10,30}$/i;
       if (!data.visitorId || !VISITOR_ID_REGEX.test(data.visitorId)) {
         logger.warn(`SECURITY: Malformed visitorId connect attempt: ${data.visitorId}`);
@@ -123,7 +123,7 @@ export const setupSocket = (io: Server) => {
     });
 
     socket.on('visitor_disconnect', async (data: { visitorId: string }) => {
-      // Validate caller owns this session
+      
       if (socket.data.visitorId !== data.visitorId && socket.data.user?.role !== 'ADMIN') {
         return;
       }

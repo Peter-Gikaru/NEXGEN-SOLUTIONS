@@ -49,14 +49,5 @@ export default defineConfig({
         changeOrigin: true,
       }
     }
-  },
-  build: {
-    minify: 'esbuild',
-    rollupOptions: {
-      output: {
-        comments: false
-      }
-    }
   }
 })
-

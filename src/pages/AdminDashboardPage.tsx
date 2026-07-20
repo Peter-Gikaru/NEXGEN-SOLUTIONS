@@ -2154,7 +2154,7 @@ export const AdminDashboardPage: React.FC = () => {
               </div>
             )}
             {activeTab === 'categories' && (
-              <div className="space-y-6 max-w-5xl">
+              <div className="space-y-6 w-full">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {}
                   <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">

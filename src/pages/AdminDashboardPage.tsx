@@ -183,7 +183,7 @@ export const AdminDashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'stats' | 'orders' | 'users' | 'addProduct' | 'productsList' | 'categories' | 'flashSales' | 'shippingZones' | 'adminLogs' | 'announcements' | 'newsletter' | 'returns' | 'warranties' | 'coupons' | 'livechat' | 'shippingQueue' | 'securityCenter' | 'analytics'>('stats');
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const [stats, setStats] = useState<Stats>({ totalSales: 0, totalOrders: 0, totalUsers: 0 });
   const [lowStock, setLowStock] = useState<LowStock[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -870,8 +870,8 @@ export const AdminDashboardPage: React.FC = () => {
         />
       )}
       {}
-      <aside className={`fixed inset-y-0 left-0 w-64 bg-slate-900 text-slate-300 flex flex-col z-50 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="h-16 flex items-center px-6 border-b border-slate-800 shrink-0 justify-between">
+      <aside className={`fixed inset-y-0 left-0 bg-slate-900 text-slate-300 flex flex-col z-50 transform transition-all duration-300 ease-in-out ${isSidebarOpen ? 'w-64 translate-x-0' : 'w-0 -translate-x-full overflow-hidden'} md:relative`}>
+        <div className="h-16 flex items-center px-6 border-b border-slate-800 shrink-0 justify-between w-64">
           <div className="font-sans text-xl font-bold tracking-tight text-white">
             NexGen <span className="text-blue-500">Admin</span>
           </div>
@@ -1157,8 +1157,8 @@ export const AdminDashboardPage: React.FC = () => {
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 sm:px-6 shrink-0 shadow-sm z-10">
           <div className="flex items-center gap-3">
             <button 
-              className="md:hidden p-2 -ml-2 text-slate-600 hover:text-slate-900 rounded-md"
-              onClick={() => setIsSidebarOpen(true)}
+              className="p-2 -ml-2 text-slate-600 hover:text-slate-900 rounded-md transition-colors"
+              onClick={() => setIsSidebarOpen(prev => !prev)}
             >
               <Menu className="h-6 w-6" />
             </button>

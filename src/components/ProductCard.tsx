@@ -240,14 +240,14 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
       <div className="p-3.5 border-t border-border-gray bg-bg-gray mt-auto z-10 select-none flex flex-col gap-2">
         <button
           onClick={handleBuyNow}
-          className="w-full bg-[#1a1a2e] text-white py-2.5 lg:py-2 rounded text-base lg:text-sm font-bold flex items-center justify-center gap-2 shadow hover:bg-slate-800 transition-all lg:hidden lg:group-hover:flex"
+          className="w-full bg-[#1a1a2e] text-white py-2.5 lg:py-2 rounded text-base lg:text-sm font-bold flex items-center justify-center gap-2 shadow hover:bg-slate-800 transition-all"
         >
           Buy Now
         </button>
 
         <button
           onClick={handleWhatsAppOrder}
-          className="w-full bg-[#25D366] text-white py-2.5 lg:py-2 rounded text-base lg:text-sm font-bold flex items-center justify-center gap-2 shadow hover:bg-[#1ebd59] transition-all lg:hidden lg:group-hover:flex"
+          className="w-full bg-[#25D366] text-white py-2.5 lg:py-2 rounded text-base lg:text-sm font-bold flex items-center justify-center gap-2 shadow hover:bg-[#1ebd59] transition-all"
         >
           <WhatsAppIcon size={18} /> Quick Order
         </button>

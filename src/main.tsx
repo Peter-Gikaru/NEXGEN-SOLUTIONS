@@ -1,3 +1,7 @@
+if (typeof window !== 'undefined' && !window.process) {
+  (window as any).process = { env: { NODE_ENV: 'development' } };
+}
+
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async'

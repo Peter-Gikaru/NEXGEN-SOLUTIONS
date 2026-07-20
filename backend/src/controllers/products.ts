@@ -200,8 +200,10 @@ export const getProductBySlug = async (
 ) => {
   try {
     const { slug } = req.params;
-    let product = await prisma.product.findUnique({
-      where: { slug },
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+    
+    let product = await prisma.product.findFirst({
+      where: isUUID ? { id: slug } : { slug },
       include: {
         category: true,
         reviews: {

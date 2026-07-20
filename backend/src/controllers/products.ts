@@ -344,6 +344,15 @@ export const deleteProduct = async (
     const { id } = req.params;
     const existing = await prisma.product.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ message: 'Product not found' });
+    
+    // Safety check: Prevent deleting products that have been ordered
+    const orderItemsCount = await prisma.orderItem.count({ where: { productId: id } });
+    if (orderItemsCount > 0) {
+      return res.status(400).json({ 
+        message: "This product is linked to past orders and cannot be permanently deleted. Please use 'Recall' to hide it from the store instead." 
+      });
+    }
+
     await prisma.product.delete({ where: { id } });
     await logAdminAction(req.user!.id, 'DELETE_PRODUCT', `Deleted product: ${existing.name} (${existing.id})`, req.ip);
     return res.json({ message: 'Product deleted successfully' });

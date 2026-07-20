@@ -778,6 +778,17 @@ export const AdminDashboardPage: React.FC = () => {
       toast.error('Failed to toggle product status');
     }
   };
+  const handleDeleteProduct = async (id: string) => {
+    if (!window.confirm('Are you absolutely sure you want to permanently delete this product? This action cannot be undone.')) return;
+    try {
+      await api.delete(`/products/${id}`);
+      setProductsList(prev => prev.filter(p => p.id !== id));
+      toast.success('Product deleted successfully');
+    } catch (err: any) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to delete product. It may be linked to past orders.');
+    }
+  };
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -1637,6 +1648,13 @@ export const AdminDashboardPage: React.FC = () => {
                                     Publish
                                   </button>
                                 )}
+                                <button
+                                  onClick={() => handleDeleteProduct(prod.id)}
+                                  className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors border border-transparent hover:border-red-200"
+                                  title="Delete product permanently"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
                               </div>
                             </td>
                           </tr>

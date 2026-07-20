@@ -121,11 +121,11 @@ export const listProducts = async (
       if (!value) return null;
       const values = Array.isArray(value) ? value : [value];
       if (values.length === 1) {
-        return { specs: { path: [field], equals: values[0] as string } };
+        return { specs: { path: [field], string_contains: values[0] as string } };
       }
       return {
         OR: values.map((v: any) => ({
-          specs: { path: [field], equals: v as string }
+          specs: { path: [field], string_contains: v as string }
         }))
       };
     };

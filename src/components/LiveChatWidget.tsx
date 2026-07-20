@@ -67,7 +67,7 @@ export const LiveChatWidget: React.FC = () => {
   const nodeRef = React.useRef(null);
 
   return (
-    <Draggable nodeRef={nodeRef} bounds="window" handle=".drag-handle">
+    <Draggable nodeRef={nodeRef} handle=".drag-handle">
       <div ref={nodeRef} className="fixed bottom-6 right-6 z-[100]">
         {isOpen ? (
           <div className="bg-white w-80 sm:w-96 rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[400px]">

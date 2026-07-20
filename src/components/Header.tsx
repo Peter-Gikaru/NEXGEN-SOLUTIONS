@@ -143,7 +143,14 @@ export const Header: React.FC = () => {
                   NexGen <span className="text-[#F59E0B]">Gadgets</span>
                 </span>
             </div>
-            <div className="flex items-center gap-3 md:hidden">
+            <div className="flex items-center gap-2 sm:gap-3 md:hidden">
+              <button
+                onClick={() => setIsMobileSearchOpen(true)}
+                className="p-2.5 rounded-full bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-colors flex items-center justify-center cursor-pointer text-white"
+                aria-label="Search"
+              >
+                <Search className="h-5 w-5 text-white" />
+              </button>
               <Link
                 to="/wishlist"
                 className="relative p-2.5 rounded-full bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-colors flex items-center justify-center cursor-pointer text-white"

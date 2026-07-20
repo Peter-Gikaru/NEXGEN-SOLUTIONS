@@ -708,6 +708,15 @@ export const ProductDetailPage: React.FC = () => {
                       <p className="text-xs text-slate-500">Subject to terms & conditions</p>
                     </div>
                   </div>
+                  {(product?.category?.name?.toLowerCase().includes('mobile') || product?.name.toLowerCase().includes('phone')) && String(product?.specs?.condition || '').toLowerCase() !== 'new' && (
+                    <div className="px-4 py-3 flex items-center gap-3 bg-amber-50 border-t border-amber-100">
+                      <ShieldCheck className="h-5 w-5 text-amber-600 shrink-0" />
+                      <div>
+                        <h4 className="text-sm font-bold text-amber-800">No Screen/Battery Warranty</h4>
+                        <p className="text-xs text-amber-700 leading-snug font-medium">KINDLY NOTE THAT ALL USED PHONES ARE SOLD WITHOUT SCREEN AND BATTERY WARRANTY.</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

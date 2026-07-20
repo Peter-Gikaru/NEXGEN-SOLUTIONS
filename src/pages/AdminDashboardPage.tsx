@@ -1181,7 +1181,7 @@ export const AdminDashboardPage: React.FC = () => {
         </header>
         {}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[1600px] mx-auto space-y-6 lg:space-y-8">
+          <div className="w-full space-y-6 lg:space-y-8">
             {activeTab === 'announcements' && (
               <AdminAnnouncements />
             )}

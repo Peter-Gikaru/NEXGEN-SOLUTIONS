@@ -6,12 +6,12 @@ import { buildBreadcrumbs } from '../lib/structured-data';
 
 const faqs = [
   {
-    question: "Are your laptops brand new and original?",
-    answer: "Yes! Every single laptop and accessory we sell is 100% brand new, original, and comes factory-sealed. We source our products directly from authorized distributors and do not deal in refurbished or used items."
+    question: "What is the condition of the products you sell?",
+    answer: "We sell a variety of products to suit all budgets. We offer Ex-UK, refurbished, and brand new items. The condition of each specific product is clearly labeled on its product page."
   },
   {
     question: "Do your products come with a warranty?",
-    answer: "Absolutely. All our laptops come with a minimum 1-year manufacturer's warranty. This covers any hardware defects that may arise under normal use. Please note that physical damage, liquid damage, or unauthorized modifications void the warranty."
+    answer: "Absolutely. All our laptops come with a minimum 1-year manufacturer's warranty. This covers any hardware defects that may arise under normal use. KINDLY NOTE THAT ALL USED PHONES ARE SOLD WITHOUT SCREEN AND BATTERY WARRANTY. Please note that physical damage, liquid damage, or unauthorized modifications void the warranty."
   },
   {
     question: "Do you offer financing or installments?",

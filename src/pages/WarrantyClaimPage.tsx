@@ -93,6 +93,9 @@ export const WarrantyClaimPage: React.FC = () => {
             <div>
               <h1 className="text-2xl font-bold text-slate-900">File a Warranty Claim</h1>
               <p className="text-slate-500 text-sm">Order ID: {orderId}</p>
+              <div className="mt-2 bg-amber-50 border border-amber-200 text-amber-800 text-xs px-3 py-2 rounded-lg inline-block font-medium">
+                KINDLY NOTE THAT ALL USED PHONES ARE SOLD WITHOUT SCREEN AND BATTERY WARRANTY.
+              </div>
             </div>
           </div>
 

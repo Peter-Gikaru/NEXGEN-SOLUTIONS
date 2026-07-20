@@ -55,7 +55,7 @@ export const ReturnPolicyPage: React.FC = () => {
                 2. Opened or Unsealed Items
               </h2>
               <p>
-                Because we guarantee that our customers receive brand new, factory-sealed electronics, any product that has been opened or unsealed is subject to a strict <strong>15% restocking fee</strong>. This fee covers the diminished value of the item, as we can no longer sell it as new. We reserve the right to reject returns of opened items if they show any signs of use, scratches, missing accessories, or tampered software.
+                Because we sell a variety of items ranging from brand new to Ex-UK, any product that has been opened or unsealed may be subject to a strict <strong>15% restocking fee</strong>. This fee covers the diminished value of the item, as we can no longer sell it in its original condition. We reserve the right to reject returns of items if they show any signs of use, scratches, missing accessories, or tampered software.
               </p>
             </section>
 
@@ -68,7 +68,7 @@ export const ReturnPolicyPage: React.FC = () => {
                 If your item arrives damaged or suffers from an out-of-the-box hardware defect, you must report it to us within <strong>48 hours of delivery</strong>. We will arrange a free return and issue a full replacement or refund immediately upon inspecting the defective unit. 
               </p>
               <div className="bg-red-50 text-red-800 p-4 rounded-lg mt-3 text-sm">
-                <strong>Note:</strong> Software glitches, unauthorized OS modifications, or physical damage caused after delivery are not considered out-of-the-box defects and will be handled under the manufacturer's warranty instead.
+                <strong>Note:</strong> Software glitches, unauthorized OS modifications, or physical damage caused after delivery are not considered out-of-the-box defects and will be handled under the manufacturer's warranty instead. KINDLY NOTE THAT ALL USED PHONES ARE SOLD WITHOUT SCREEN AND BATTERY WARRANTY.
               </div>
             </section>
 

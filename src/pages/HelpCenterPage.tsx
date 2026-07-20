@@ -41,7 +41,7 @@ const faqs = [
     questions: [
       {
         q: 'Do your laptops come with a warranty?',
-        a: 'Yes, all brand new laptops come with a standard 1-year manufacturer warranty. Refurbished laptops come with a 6-month limited warranty.'
+        a: 'Yes, brand new laptops come with a standard 1-year manufacturer warranty. Refurbished laptops come with a 6-month limited warranty. KINDLY NOTE THAT ALL USED PHONES ARE SOLD WITHOUT SCREEN AND BATTERY WARRANTY.'
       },
       {
         q: 'How do I claim a warranty?',

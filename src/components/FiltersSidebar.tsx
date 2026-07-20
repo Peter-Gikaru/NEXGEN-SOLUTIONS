@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useCategories, type CategoryNode } from '../hooks/useCategories';
 import { Filter, ChevronDown, ChevronRight, Check } from 'lucide-react';
 import type { FilterState } from '../types';
+import api from '../services/api';
 
 interface FiltersSidebarProps {
   filters: FilterState;
@@ -65,7 +66,18 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
   onChange
 }) => {
   const { categories, loading } = useCategories();
-  const brands = ['HP', 'Dell', 'Lenovo', 'Apple', 'ASUS', 'Acer', 'Samsung', 'MSI', 'Generic'];
+  const [brands, setBrands] = useState<string[]>(['HP', 'Dell', 'Lenovo', 'Apple', 'ASUS', 'Acer', 'Samsung', 'MSI']);
+  
+  React.useEffect(() => {
+    api.get('/products/meta/filters')
+      .then(res => {
+        if (res.data?.brands?.length > 0) {
+          setBrands(res.data.brands);
+        }
+      })
+      .catch(err => console.error('Failed to load dynamic brands:', err));
+  }, []);
+
   const cpus = ['Intel Core i3', 'Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'AMD Ryzen 3', 'AMD Ryzen 5', 'AMD Ryzen 7', 'Apple M1', 'Apple M2', 'Apple M3'];
   const rams = ['4GB', '8GB', '16GB', '32GB', '64GB'];
   const storages = ['128GB', '256GB', '512GB', '1TB', '2TB'];

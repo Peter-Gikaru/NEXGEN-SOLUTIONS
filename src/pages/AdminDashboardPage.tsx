@@ -1919,7 +1919,21 @@ export const AdminDashboardPage: React.FC = () => {
                         type="text"
                         required
                         value={productForm.name}
-                        onChange={(e) => setProductForm((p) => ({ ...p, name: e.target.value }))}
+                        onChange={(e) => {
+                          const newName = e.target.value;
+                          let autoBrand = productForm.brand;
+                          if (newName) {
+                            const firstWord = newName.trim().split(' ')[0];
+                            const commonBrands = ['Apple', 'HP', 'Dell', 'Lenovo', 'ASUS', 'Acer', 'MSI', 'Samsung', 'Microsoft', 'Razer'];
+                            const matched = commonBrands.find(b => b.toLowerCase() === firstWord.toLowerCase());
+                            if (matched) {
+                              autoBrand = matched;
+                            } else if (!productForm.brand || productForm.brand === productForm.name.split(' ')[0]) {
+                              autoBrand = firstWord;
+                            }
+                          }
+                          setProductForm((p) => ({ ...p, name: newName, brand: autoBrand }));
+                        }}
                         placeholder="HP ProBook 450"
                         className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-900 shadow-sm"
                       />

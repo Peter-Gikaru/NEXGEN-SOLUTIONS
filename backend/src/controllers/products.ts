@@ -28,6 +28,20 @@ function levenshteinDistance(a: string, b: string): number {
   }
   return matrix[b.length][a.length];
 }
+export const getFilterMetadata = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const brands = await prisma.product.findMany({
+      select: { brand: true },
+      distinct: ['brand'],
+      where: { isActive: true }
+    });
+    const uniqueBrands = brands.map(b => b.brand).filter(Boolean).sort();
+    return res.json({ brands: uniqueBrands });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export const listProducts = async (
   req: Request,
   res: Response,

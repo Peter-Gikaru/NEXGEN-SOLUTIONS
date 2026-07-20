@@ -31,10 +31,5 @@ export interface FilterState {
   maxPrice: string;
   rating: string;
   inStockOnly: boolean;
-  cpu: string[];
-  ram: string[];
-  storage: string[];
-  condition: string[];
-  generation: string[];
   [key: string]: string | string[] | boolean | undefined;
 }

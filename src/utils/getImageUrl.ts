@@ -1,6 +1,6 @@
 export const getImageUrl = (url: string | undefined | null): string => {
   if (!url) {
-    return 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=500&auto=format&fit=crop&q=60';
+    return '/favicon.png';
   }
   if (url.startsWith('http') || url.startsWith('data:')) {
     return url;

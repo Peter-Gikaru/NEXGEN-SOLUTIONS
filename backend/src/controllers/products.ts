@@ -54,7 +54,11 @@ export const listProducts = async (
       };
     }
     if (brand) {
-      whereClause.brand = brand as string;
+      if (Array.isArray(brand)) {
+        whereClause.brand = { in: brand as string[] };
+      } else {
+        whereClause.brand = brand as string;
+      }
     }
     if (minPrice || maxPrice) {
       whereClause.price = {};
@@ -78,11 +82,30 @@ export const listProducts = async (
     const { cpu, ram, storage, condition, generation } = req.query;
     if (cpu || ram || storage || condition || generation) {
       if (!whereClause.AND) whereClause.AND = [];
-      if (cpu) whereClause.AND.push({ specs: { path: ['cpu'], equals: cpu as string } });
-      if (ram) whereClause.AND.push({ specs: { path: ['ram'], equals: ram as string } });
-      if (storage) whereClause.AND.push({ specs: { path: ['storage'], equals: storage as string } });
-      if (condition) whereClause.AND.push({ specs: { path: ['condition'], equals: condition as string } });
-      if (generation) whereClause.AND.push({ specs: { path: ['generation'], equals: generation as string } });
+      
+      const buildSpecsOr = (field: string, value: any) => {
+        if (!value) return null;
+        const values = Array.isArray(value) ? value : [value];
+        if (values.length === 1) {
+          return { specs: { path: [field], equals: values[0] as string } };
+        }
+        return {
+          OR: values.map((v: any) => ({
+            specs: { path: [field], equals: v as string }
+          }))
+        };
+      };
+
+      const cpuClause = buildSpecsOr('cpu', cpu);
+      if (cpuClause) whereClause.AND.push(cpuClause);
+      const ramClause = buildSpecsOr('ram', ram);
+      if (ramClause) whereClause.AND.push(ramClause);
+      const storageClause = buildSpecsOr('storage', storage);
+      if (storageClause) whereClause.AND.push(storageClause);
+      const conditionClause = buildSpecsOr('condition', condition);
+      if (conditionClause) whereClause.AND.push(conditionClause);
+      const generationClause = buildSpecsOr('generation', generation);
+      if (generationClause) whereClause.AND.push(generationClause);
     }
 
     let orderByClause: any = { createdAt: 'desc' };

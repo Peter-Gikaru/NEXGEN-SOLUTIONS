@@ -62,14 +62,14 @@ export const ProductListingPage: React.FC = () => {
           sort: sortBy
         };
         if (activeFilters.category) params.category = activeFilters.category;
-        if (activeFilters.brand.length > 0) params.brand = activeFilters.brand[0];
+        if (activeFilters.brand.length > 0) params.brand = activeFilters.brand;
         if (activeFilters.minPrice) params.minPrice = activeFilters.minPrice;
         if (activeFilters.maxPrice) params.maxPrice = activeFilters.maxPrice;
-        if (activeFilters.cpu.length > 0) params.cpu = activeFilters.cpu[0];
-        if (activeFilters.ram.length > 0) params.ram = activeFilters.ram[0];
-        if (activeFilters.storage.length > 0) params.storage = activeFilters.storage[0];
-        if (activeFilters.condition.length > 0) params.condition = activeFilters.condition[0];
-        if (activeFilters.generation.length > 0) params.generation = activeFilters.generation[0];
+        if (activeFilters.cpu.length > 0) params.cpu = activeFilters.cpu;
+        if (activeFilters.ram.length > 0) params.ram = activeFilters.ram;
+        if (activeFilters.storage.length > 0) params.storage = activeFilters.storage;
+        if (activeFilters.condition.length > 0) params.condition = activeFilters.condition;
+        if (activeFilters.generation.length > 0) params.generation = activeFilters.generation;
 
         const response = await api.get('/products', { params });
         const mapped = response.data.products.map((p: any) => ({

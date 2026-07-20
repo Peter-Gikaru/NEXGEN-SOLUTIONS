@@ -216,7 +216,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
           </span>
         )}
 
-        <h3 className="text-lg font-semibold font-sans text-dark-primary line-clamp-2 leading-snug hover:text-secondary transition-colors duration-100">
+        <h3 className="text-lg font-semibold font-sans text-dark-primary line-clamp-2 leading-snug hover:text-secondary transition-colors duration-100 min-h-[3.25rem]">
           {title}
         </h3>
 

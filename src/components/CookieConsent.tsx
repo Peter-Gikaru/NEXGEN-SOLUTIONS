@@ -20,20 +20,26 @@ export const CookieConsent: React.FC = () => {
 
   useEffect(() => {
     const savedConsent = localStorage.getItem('nexgen_cookie_consent');
-    if (!savedConsent) {
-      
-      const timer = setTimeout(() => setIsVisible(true), 1000);
-      return () => clearTimeout(timer);
-    } else {
+    const sessionDismiss = sessionStorage.getItem('nexgen_cookie_dismissed');
+
+    if (savedConsent) {
       try {
         const parsed = JSON.parse(savedConsent);
         setSettings(parsed);
         applyCookieSettings(parsed);
       } catch (e) {
-        setIsVisible(true);
+        if (!sessionDismiss) setIsVisible(true);
       }
+    } else if (!sessionDismiss) {
+      const timer = setTimeout(() => setIsVisible(true), 1000);
+      return () => clearTimeout(timer);
     }
   }, []);
+
+  const handleDismiss = () => {
+    sessionStorage.setItem('nexgen_cookie_dismissed', 'true');
+    setIsVisible(false);
+  };
 
   const handleAcceptAll = () => {
     const allAccepted = { essential: true, functional: true, analytics: true, marketing: true };
@@ -194,8 +200,15 @@ export const CookieConsent: React.FC = () => {
       ) : (
         
         <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-8 md:w-[450px] bg-white border border-gray-200 rounded-xl shadow-2xl z-[9999] animate-slide-up overflow-hidden">
-          <div className="p-5">
-            <div className="flex items-start gap-4">
+          <div className="p-5 relative">
+            <button 
+              onClick={handleDismiss}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+              aria-label="Dismiss cookie notice"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="flex items-start gap-4 pr-6">
               <div className="bg-amber-100 p-2.5 rounded-full shrink-0 mt-1">
                 <Cookie className="w-6 h-6 text-[#F59E0B]" />
               </div>

@@ -1940,7 +1940,7 @@ export const AdminDashboardPage: React.FC = () => {
                         <label className="block text-sm font-semibold text-slate-700 mb-2">Category *</label>
                         <select
                           value={productForm.categoryId}
-                          onChange={(e) => setProductForm({ ...productForm, categoryId: e.target.value })}
+                          onChange={(e) => setProductForm((p) => ({ ...p, categoryId: e.target.value }))}
                           className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B] transition-colors"
                           required
                         >

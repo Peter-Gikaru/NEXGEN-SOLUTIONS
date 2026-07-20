@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import Draggable from 'react-draggable';
 import { io, Socket } from 'socket.io-client';
 import { MessageSquare, X } from 'lucide-react';
 
@@ -64,64 +65,66 @@ export const LiveChatWidget: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[100]">
-      {isOpen ? (
-        <div className="bg-white w-80 sm:w-96 rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[400px]">
-          <div className="bg-[#0f172a] text-white p-4 flex justify-between items-center">
-            <div>
-              <h3 className="font-bold text-sm">NexGen Live Support</h3>
-              <p className="text-xs text-slate-400">We typically reply in a few minutes.</p>
-            </div>
-            <button onClick={() => setIsOpen(false)} className="text-slate-300 hover:text-white transition-colors">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
-            {messages.length === 0 ? (
-              <p className="text-center text-slate-400 text-sm mt-10">Send us a message to start chatting!</p>
-            ) : (
-              messages.map((msg, idx) => (
-                <div key={idx} className={`flex ${msg.sender === 'VISITOR' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
-                    msg.sender === 'VISITOR' 
-                      ? 'bg-[#f59e0b] text-white rounded-tr-sm' 
-                      : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm shadow-sm'
-                  }`}>
-                    {msg.content}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          <form onSubmit={sendMessage} className="p-3 bg-white border-t border-slate-200">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your message..."
-                className="flex-1 border border-slate-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-[#f59e0b]"
-              />
-              <button 
-                type="submit"
-                disabled={!input.trim()}
-                className="bg-[#0f172a] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-slate-800 disabled:opacity-50 transition-colors"
-              >
-                Send
+    <Draggable bounds="window" handle=".drag-handle">
+      <div className="fixed bottom-6 right-6 z-[100]">
+        {isOpen ? (
+          <div className="bg-white w-80 sm:w-96 rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col h-[400px]">
+            <div className="bg-[#0f172a] text-white p-4 flex justify-between items-center drag-handle cursor-move">
+              <div>
+                <h3 className="font-bold text-sm">NexGen Live Support</h3>
+                <p className="text-xs text-slate-400">We typically reply in a few minutes.</p>
+              </div>
+              <button onClick={() => setIsOpen(false)} className="text-slate-300 hover:text-white transition-colors cursor-pointer">
+                <X className="w-5 h-5" />
               </button>
             </div>
-          </form>
-        </div>
-      ) : (
-        <button 
-          onClick={() => setIsOpen(true)}
-          className="bg-[#f59e0b] text-white p-4 rounded-full shadow-lg hover:bg-[#d97706] hover:scale-105 active:scale-95 transition-all flex items-center justify-center"
-        >
-          <MessageSquare className="w-6 h-6" />
-        </button>
-      )}
-    </div>
+            
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
+              {messages.length === 0 ? (
+                <p className="text-center text-slate-400 text-sm mt-10">Send us a message to start chatting!</p>
+              ) : (
+                messages.map((msg, idx) => (
+                  <div key={idx} className={`flex ${msg.sender === 'VISITOR' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${
+                      msg.sender === 'VISITOR' 
+                        ? 'bg-[#f59e0b] text-white rounded-tr-sm' 
+                        : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm shadow-sm'
+                    }`}>
+                      {msg.content}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <form onSubmit={sendMessage} className="p-3 bg-white border-t border-slate-200">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Type your message..."
+                  className="flex-1 border border-slate-300 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-[#f59e0b]"
+                />
+                <button 
+                  type="submit"
+                  disabled={!input.trim()}
+                  className="bg-[#0f172a] text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-slate-800 disabled:opacity-50 transition-colors cursor-pointer"
+                >
+                  Send
+                </button>
+              </div>
+            </form>
+          </div>
+        ) : (
+          <button 
+            onClick={() => setIsOpen(true)}
+            className="bg-[#f59e0b] text-white p-4 rounded-full shadow-lg hover:bg-[#d97706] hover:scale-105 active:scale-95 transition-all flex items-center justify-center drag-handle cursor-move"
+          >
+            <MessageSquare className="w-6 h-6" />
+          </button>
+        )}
+      </div>
+    </Draggable>
   );
 };

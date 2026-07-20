@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MessageCircle, X, ExternalLink } from 'lucide-react';
+import Draggable from 'react-draggable';
 
 export const SupportWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,7 +14,8 @@ export const SupportWidget: React.FC = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <Draggable bounds="window" handle=".drag-handle">
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       {isOpen && (
         <div className="mb-4 bg-white border border-slate-200 shadow-2xl rounded-2xl w-80 overflow-hidden transform origin-bottom-right transition-all">
           <div className="bg-[#1a1a2e] p-4 flex justify-between items-center text-white">
@@ -45,11 +47,12 @@ export const SupportWidget: React.FC = () => {
       )}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-14 h-14 bg-[#F59E0B] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-amber-500 transition-all hover:scale-105 cursor-pointer z-50"
+        className="w-14 h-14 bg-[#F59E0B] text-white rounded-full flex items-center justify-center shadow-lg hover:bg-amber-500 transition-all hover:scale-105 cursor-pointer z-50 drag-handle"
         aria-label="Support"
       >
         {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-7 h-7" />}
       </button>
-    </div>
+      </div>
+    </Draggable>
   );
 };

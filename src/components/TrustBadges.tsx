@@ -6,8 +6,8 @@ export const TrustBadges: React.FC = () => {
     {
       id: 1,
       icon: <ShieldCheck className="h-8 w-8 text-[#10B981] shrink-0" />,
-      title: 'Genuine Products',
-      description: '100% brand-new laptops direct from manufacturers'
+      title: 'Quality Products',
+      description: 'We sell high-quality New, Refurbished, and Ex-UK laptops'
     },
     {
       id: 2,

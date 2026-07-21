@@ -76,7 +76,7 @@ export const listProducts = async (
   next: NextFunction
 ) => {
   try {
-    const { category, search, minPrice, maxPrice, brand, sort, page = '1', limit = '10' } = req.query;
+    const { category, search, minPrice, maxPrice, brand, sort, page = '1', limit = '10', stockStatus } = req.query;
     const pageNum = parseInt(page as string) || 1;
     const limitNum = parseInt(limit as string) || 10;
     const skip = (pageNum - 1) * limitNum;
@@ -129,7 +129,17 @@ export const listProducts = async (
         { category: { name: { contains: searchStr } } },
       ];
     }
-    const standardQueries = ['category', 'search', 'minPrice', 'maxPrice', 'brand', 'sort', 'page', 'limit', 'includeInactive'];
+    const standardQueries = ['category', 'search', 'minPrice', 'maxPrice', 'brand', 'sort', 'page', 'limit', 'includeInactive', 'stockStatus'];
+    
+    if (stockStatus) {
+      if (stockStatus === 'inStock') {
+        whereClause.stock = { gt: 0 };
+      } else if (stockStatus === 'outOfStock') {
+        whereClause.stock = 0;
+      } else if (stockStatus === 'lowStock') {
+        whereClause.stock = { gt: 0, lte: 5 };
+      }
+    }
     
     const buildSpecsOr = (field: string, value: any) => {
       if (!value) return null;
@@ -320,7 +330,7 @@ export const createProduct = async (
   next: NextFunction
 ) => {
   try {
-    const { name, description, brand, price, compareAtPrice, stock, categoryId, specs, imageUrls, threeDModelUrl } = req.body;
+    const { name, description, brand, price, compareAtPrice, stock, categoryId, condition, specs, imageUrls, threeDModelUrl } = req.body;
     let slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     const existing = await prisma.product.findUnique({ where: { slug } });
     if (existing) {
@@ -337,6 +347,7 @@ export const createProduct = async (
         stock: Number(stock),
         categoryId,
         specs: typeof specs === 'string' ? JSON.parse(specs) : specs,
+        condition: condition || 'NEW',
         imageUrls: Array.isArray(imageUrls) ? imageUrls : (typeof imageUrls === 'string' ? imageUrls.split(',').map((s: string) => s.trim()).filter(Boolean) : []),
         threeDModelUrl,
       }
@@ -354,7 +365,7 @@ export const updateProduct = async (
 ) => {
   try {
     const { id } = req.params;
-    const { name, description, brand, price, compareAtPrice, stock, categoryId, specs, imageUrls, isActive, variants } = req.body;
+    const { name, description, brand, price, compareAtPrice, stock, categoryId, condition, specs, imageUrls, isActive, variants } = req.body;
     const existing = await prisma.product.findUnique({ where: { id } });
     if (!existing) return res.status(404).json({ message: 'Product not found' });
     const updateData: any = {};
@@ -365,6 +376,7 @@ export const updateProduct = async (
     if (compareAtPrice !== undefined) updateData.compareAtPrice = compareAtPrice ? Number(compareAtPrice) : null;
     if (stock !== undefined) updateData.stock = Number(stock);
     if (categoryId) updateData.categoryId = categoryId;
+    if (condition) updateData.condition = condition;
     if (specs) updateData.specs = typeof specs === 'string' ? JSON.parse(specs) : specs;
     if (imageUrls) updateData.imageUrls = Array.isArray(imageUrls) ? imageUrls : (typeof imageUrls === 'string' ? imageUrls.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
     if (isActive !== undefined) updateData.isActive = Boolean(isActive);

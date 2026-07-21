@@ -386,7 +386,7 @@ export const ProductListingPage: React.FC = () => {
                       stockStatus={product.stockStatus}
                       stockCount={product.stockCount}
                       isVerified={product.isVerified}
-                      condition={product.specs?.condition}
+                      condition={product.condition}
                     />
                   ))}
                 </div>

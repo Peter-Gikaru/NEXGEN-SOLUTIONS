@@ -701,5 +701,5 @@ export const passkeyLoginFinish = async (
   }
 };
 
-export const checkPasskey = async (req: Request, res: Response, next: NextFunction) => { try { const email = req.query.email as string; if (!email) return res.status(400).json({ message: 'Email required' }); const user = await prisma.user.findUnique({ where: { email }, include: { webAuthnCredentials: true } }); if (!user || user.webAuthnCredentials.length === 0) { return res.json({ hasPasskey: false }); } return res.json({ hasPasskey: true }); } catch (error) { return next(error); } };
+export const checkPasskey = async (req: Request, res: Response, next: NextFunction) => { try { const email = req.query.email as string; if (!email) return res.status(400).json({ message: 'Email required' }); const user = await prisma.user.findUnique({ where: { email }, include: { webAuthnCredentials: true } }); if (!user) { return res.json({ exists: false, hasPasskey: false }); } if (user.webAuthnCredentials.length === 0) { return res.json({ exists: true, hasPasskey: false }); } return res.json({ exists: true, hasPasskey: true }); } catch (error) { return next(error); } };
 

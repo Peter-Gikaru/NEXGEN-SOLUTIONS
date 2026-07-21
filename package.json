@@ -17,6 +17,8 @@
     "axios": "^1.18.1",
     "csv-parser": "^3.2.1",
     "csv-writer": "^1.6.0",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^1.23.0",
     "papaparse": "^5.5.4",

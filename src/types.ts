@@ -22,6 +22,7 @@ export interface Product {
     whatsInBox?: string[];
     [key: string]: any;
   };
+  condition?: string;
 }
 
 export interface FilterState {

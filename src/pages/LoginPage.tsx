@@ -21,16 +21,70 @@ export const LoginPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
+  const [step, setStep] = useState<'email' | 'password'>('email');
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  React.useEffect(() => {
+    const initConditionalUI = async () => {
+      try {
+        if (window.PublicKeyCredential && PublicKeyCredential.isConditionalMediationAvailable) {
+          const isAvailable = await PublicKeyCredential.isConditionalMediationAvailable();
+          if (isAvailable) {
+            const resp = await api.post('/auth/passkey/login/start');
+            const options = resp.data;
+            const asseResp = await startAuthentication({ optionsJSON: options, mediation: 'conditional' });
+            
+            const verificationResp = await api.post('/auth/passkey/login/finish', asseResp);
+            passkeyLoginAction(verificationResp.data);
+            toast.success('Successfully logged in with Passkey');
+            
+            if (verificationResp.data.requiresPasswordChange) {
+              navigate('/force-change-password');
+            } else if (redirect) {
+              navigate(`/${redirect}`);
+            } else {
+              navigate('/');
+            }
+          }
+        }
+      } catch (err: any) {
+        console.log('Conditional UI aborted or failed', err);
+      }
+    };
+    initConditionalUI();
+  }, [passkeyLoginAction, navigate, redirect]);
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email) return;
     
     setIsSubmitting(true);
+    try {
+      const checkResp = await api.get(`/auth/passkey/check?email=${encodeURIComponent(email)}`);
+      
+      if (!checkResp.data.exists) {
+        toast.error('Account not found. Please register an account first.');
+        return;
+      }
+      
+      if (checkResp.data.hasPasskey) {
+        // Prompt passkey automatically
+        handlePasskeyLogin();
+      } else {
+        setStep('password');
+      }
+    } catch (err: any) {
+      toast.error('Failed to verify email. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
     try {
       const userData = await login(email, password);
       toast.success('Successfully logged in');
-      
       if (userData.requiresPasswordChange) {
         navigate('/force-change-password');
       } else if (redirect) {
@@ -171,61 +225,71 @@ export const LoginPage: React.FC = () => {
 
         
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-slate-700 text-sm font-bold mb-2" htmlFor="email">
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:bg-white focus:border-[#F59E0B] focus:ring-2 focus:ring-[#F59E0B]/20 transition-all placeholder-slate-400 text-slate-900 font-medium"
-              />
-            </div>
-          </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-slate-700 text-sm font-bold" htmlFor="password">
-                Password
+        <form onSubmit={step === 'email' ? handleEmailSubmit : handlePasswordSubmit} className="space-y-6">
+          {step === 'email' ? (
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <label className="block text-slate-700 text-sm font-bold mb-2" htmlFor="email">
+                Email Address
               </label>
-              <Link to="/forgot-password" className="text-xs text-[#F59E0B] hover:underline font-bold">
-                Forgot password?
-              </Link>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="username webauthn"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:bg-white focus:border-[#F59E0B] focus:ring-2 focus:ring-[#F59E0B]/20 transition-all placeholder-slate-400 text-slate-900 font-medium"
+                />
+              </div>
             </div>
-            <div className="relative">
-              <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-12 py-3.5 text-sm focus:outline-none focus:bg-white focus:border-[#F59E0B] focus:ring-2 focus:ring-[#F59E0B]/20 transition-all placeholder-slate-400 text-slate-900 font-medium"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-600 transition-colors"
-              >
-                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-              </button>
+          ) : (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-4">
+              <div className="flex items-center gap-2 mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                <Mail className="h-4 w-4 text-slate-500" />
+                <span className="text-sm text-slate-700 font-medium">{email}</span>
+                <button type="button" onClick={() => setStep('email')} className="ml-auto text-xs text-[#F59E0B] font-bold hover:underline">Change</button>
+              </div>
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-slate-700 text-sm font-bold" htmlFor="password">
+                    Password
+                  </label>
+                  <Link to="/forgot-password" className="text-xs text-[#F59E0B] hover:underline font-bold">
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-12 py-3.5 text-sm focus:outline-none focus:bg-white focus:border-[#F59E0B] focus:ring-2 focus:ring-[#F59E0B]/20 transition-all placeholder-slate-400 text-slate-900 font-medium"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-3.5 text-slate-500 hover:text-slate-600 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
           <button
             type="submit"
             disabled={isSubmitting}
             className="w-full bg-[#F59E0B] text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-amber-600 transition-colors disabled:opacity-50 cursor-pointer shadow-lg shadow-amber-500/30"
           >
-            <span>{isSubmitting ? 'Verifying Account...' : 'Secure Sign In'}</span>
+            <span>{isSubmitting ? 'Please wait...' : step === 'email' ? 'Continue' : 'Secure Sign In'}</span>
             {!isSubmitting && <ArrowRight className="h-5 w-5" />}
           </button>
         </form>

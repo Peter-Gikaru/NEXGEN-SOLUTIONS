@@ -508,13 +508,13 @@ export const ProductDetailPage: React.FC = () => {
                 <span className="bg-slate-100 border border-slate-200 text-slate-700 text-xs px-2.5 py-1 rounded-md font-bold uppercase select-none">
                   {product.brand}
                 </span>
-                {product.specs?.condition && (
+                {product.condition && (
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-md shadow-sm select-none uppercase ${
-                    String(product.specs.condition).toLowerCase() === 'new' ? 'bg-emerald-500 text-white' : 
-                    String(product.specs.condition).toLowerCase() === 'refurbished' ? 'bg-[#1a1a2e] text-white' : 
+                    product.condition.toLowerCase() === 'new' ? 'bg-emerald-500 text-white' : 
+                    product.condition.toLowerCase() === 'refurbished' ? 'bg-[#1a1a2e] text-white' : 
                     'bg-[#F59E0B] text-white'
                   }`}>
-                    {String(product.specs.condition)}
+                    {product.condition}
                   </span>
                 )}
                 {product.specs?.warranty && (

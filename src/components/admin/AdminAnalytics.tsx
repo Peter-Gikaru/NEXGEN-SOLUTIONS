@@ -9,11 +9,32 @@ import { TrendingUp, Users, ShoppingBag, DollarSign, AlertCircle } from 'lucide-
 export const AdminAnalytics = () => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await api.get('/categories');
+        setCategories(res.data);
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
+      setLoading(true);
       try {
-        const res = await api.get('/admin/analytics/full');
+        const params = new URLSearchParams();
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+        if (category) params.append('category', category);
+        const res = await api.get(`/admin/analytics/full?${params.toString()}`);
         setData(res.data);
       } catch (error) {
         console.error('Failed to fetch analytics:', error);
@@ -22,7 +43,7 @@ export const AdminAnalytics = () => {
       }
     };
     fetchAnalytics();
-  }, []);
+  }, [startDate, endDate, category]);
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
@@ -91,6 +112,33 @@ export const AdminAnalytics = () => {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Analytics Hub</h2>
           <p className="text-sm text-gray-500">Comprehensive overview of your store's performance.</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          >
+            <option value="">All Categories</option>
+            {categories.map((c: any) => (
+              <option key={c.id} value={c.slug}>{c.name}</option>
+            ))}
+          </select>
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <span className="text-slate-400">-</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
         </div>
       </div>
 

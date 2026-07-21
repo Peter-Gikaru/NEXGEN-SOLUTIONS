@@ -85,6 +85,7 @@ model Product {
   warranty        String           @default("1 Year")
   threeDModelUrl  String?
   isActive        Boolean          @default(true)
+  condition       String           @default("NEW")
   cartItems       CartItem[]
   flashSale       FlashSale?
   orderItems      OrderItem[]

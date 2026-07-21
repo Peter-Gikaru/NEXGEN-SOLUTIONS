@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -34,7 +36,10 @@ import {
   Megaphone,
   MessageSquare,
   Check,
-  AlertCircle
+  AlertCircle,
+  Download,
+  Search,
+  Table
 } from 'lucide-react';
 import AdminNewsletter from '../components/admin/AdminNewsletter';
 import AdminReturns from '../components/admin/AdminReturns';
@@ -44,6 +49,8 @@ import AdminLiveChat from '../components/admin/AdminLiveChat';
 import AdminShippingQueue from '../components/admin/AdminShippingQueue';
 import AdminSecurity from '../components/admin/AdminSecurity';
 import { AdminAnalytics } from '../components/admin/AdminAnalytics';
+import { AdminCustomReports } from '../components/admin/AdminCustomReports';
+
 const RecursiveCategoryItem = ({ 
   category, 
   level = 0,
@@ -183,13 +190,23 @@ interface Order {
 export const AdminDashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'stats' | 'orders' | 'users' | 'addProduct' | 'productsList' | 'categories' | 'flashSales' | 'shippingZones' | 'adminLogs' | 'announcements' | 'newsletter' | 'returns' | 'warranties' | 'coupons' | 'livechat' | 'shippingQueue' | 'securityCenter' | 'analytics'>('stats');
+  const [activeTab, setActiveTab] = useState<'stats' | 'orders' | 'users' | 'addProduct' | 'productsList' | 'categories' | 'flashSales' | 'shippingZones' | 'adminLogs' | 'announcements' | 'newsletter' | 'returns' | 'warranties' | 'coupons' | 'livechat' | 'shippingQueue' | 'securityCenter' | 'analytics' | 'customReports'>('stats');
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const [stats, setStats] = useState<Stats>({ totalSales: 0, totalOrders: 0, totalUsers: 0 });
   const [lowStock, setLowStock] = useState<LowStock[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [ordersPage, setOrdersPage] = useState(1);
   const [ordersTotalPages, setOrdersTotalPages] = useState(1);
+  const [orderSearch, setOrderSearch] = useState('');
+  const [orderStatusFilter, setOrderStatusFilter] = useState('');
+  const [orderPaymentFilter, setOrderPaymentFilter] = useState('');
+  const [orderStartDate, setOrderStartDate] = useState('');
+  const [orderEndDate, setOrderEndDate] = useState('');
+  const [productSearch, setProductSearch] = useState('');
+  const [productCategoryFilter, setProductCategoryFilter] = useState('');
+  const [productStockFilter, setProductStockFilter] = useState('');
+  const [productMinPrice, setProductMinPrice] = useState('');
+  const [productMaxPrice, setProductMaxPrice] = useState('');
   const [users, setUsers] = useState<User[]>([]);
   const [usersPage, setUsersPage] = useState(1);
   const [usersTotalPages, setUsersTotalPages] = useState(1);
@@ -221,6 +238,7 @@ export const AdminDashboardPage: React.FC = () => {
     specs: '',
     imageUrls: [] as string[],
     threeDModelUrl: '',
+    condition: 'NEW',
   });
   const [bulkFile, setBulkFile] = useState<File | null>(null);
   const [parsedBulkData, setParsedBulkData] = useState<any[]>([]);
@@ -271,7 +289,17 @@ export const AdminDashboardPage: React.FC = () => {
     if (activeTab === 'orders') {
       const fetchOrders = async () => {
         try {
-          const response = await api.get(`/admin/orders?page=${ordersPage}&limit=50`);
+          const params = new URLSearchParams({
+            page: ordersPage.toString(),
+            limit: '50'
+          });
+          if (orderSearch) params.append('search', orderSearch);
+          if (orderStatusFilter) params.append('status', orderStatusFilter);
+          if (orderPaymentFilter) params.append('paymentMethod', orderPaymentFilter);
+          if (orderStartDate) params.append('startDate', orderStartDate);
+          if (orderEndDate) params.append('endDate', orderEndDate);
+          
+          const response = await api.get(`/admin/orders?${params.toString()}`);
           setOrders(response.data.data);
           setOrdersTotalPages(response.data.totalPages);
         } catch (err) {
@@ -293,7 +321,17 @@ export const AdminDashboardPage: React.FC = () => {
     } else if (activeTab === 'productsList') {
       const fetchProducts = async () => {
         try {
-          const response = await api.get('/products?includeInactive=true&limit=100');
+          const params = new URLSearchParams({
+            includeInactive: 'true',
+            limit: '100'
+          });
+          if (productSearch) params.append('search', productSearch);
+          if (productCategoryFilter) params.append('category', productCategoryFilter);
+          if (productStockFilter) params.append('stockStatus', productStockFilter);
+          if (productMinPrice) params.append('minPrice', productMinPrice);
+          if (productMaxPrice) params.append('maxPrice', productMaxPrice);
+          
+          const response = await api.get(`/products?${params.toString()}`);
           setProductsList(response.data.products);
         } catch (err) {
           console.error(err);
@@ -333,7 +371,7 @@ export const AdminDashboardPage: React.FC = () => {
       };
       fetchLogs();
     }
-  }, [activeTab, ordersPage, usersPage]);
+  }, [activeTab, ordersPage, usersPage, orderSearch, orderStatusFilter, orderPaymentFilter, orderStartDate, orderEndDate, productSearch, productCategoryFilter, productStockFilter, productMinPrice, productMaxPrice]);
   const handleCreateFlashSale = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -640,6 +678,7 @@ export const AdminDashboardPage: React.FC = () => {
         compareAtPrice: productForm.compareAtPrice ? Number(productForm.compareAtPrice) : null,
         stock: Number(productForm.stock),
         categoryId: productForm.categoryId,
+        condition: productForm.condition,
         specs: parsedSpecs,
         imageUrls: productForm.imageUrls,
         threeDModelUrl: productForm.threeDModelUrl || undefined,
@@ -656,6 +695,7 @@ export const AdminDashboardPage: React.FC = () => {
         compareAtPrice: 0,
         stock: 10,
         categoryId: categories.length > 0 ? categories[0].id : '',
+        condition: 'NEW',
         specs: '',
         imageUrls: [],
         threeDModelUrl: '',
@@ -678,8 +718,8 @@ export const AdminDashboardPage: React.FC = () => {
       await api.put(`/products/${editingProduct.id}`, {
         name: editingProduct.name,
         description: editingProduct.description,
-        price: Number(editingProduct.price),
         compareAtPrice: editingProduct.compareAtPrice ? Number(editingProduct.compareAtPrice) : null,
+        condition: editingProduct.condition,
         imageUrls: editingProduct.imageUrls,
         threeDModelUrl: editingProduct.threeDModelUrl,
         variants: editingProduct.variants,
@@ -944,6 +984,17 @@ export const AdminDashboardPage: React.FC = () => {
               >
                 <TrendingUp className="h-5 w-5 shrink-0" />
                 <span>Full Analytics</span>
+              </button>
+              <button
+                onClick={() => { setActiveTab('customReports'); setIsSidebarOpen(false); }}
+                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                  activeTab === 'customReports'
+                    ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                    : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                }`}
+              >
+                <Table className="h-5 w-5 shrink-0" />
+                <span>Custom Reports</span>
               </button>
               <button
                 onClick={() => { setActiveTab('adminLogs'); setIsSidebarOpen(false); }}
@@ -1232,6 +1283,9 @@ export const AdminDashboardPage: React.FC = () => {
             {activeTab === 'analytics' && (
               <AdminAnalytics />
             )}
+            {activeTab === 'customReports' && (
+              <AdminCustomReports />
+            )}
             {activeTab === 'stats' && (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
@@ -1332,27 +1386,94 @@ export const AdminDashboardPage: React.FC = () => {
             )}
             {activeTab === 'orders' && (
               <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
-                  <h3 className="font-bold text-slate-800">Order Management</h3>
-                  <button 
-                    onClick={async () => {
-                      try {
-                        const response = await api.get('/admin/orders/export', { responseType: 'blob' });
-                        const url = window.URL.createObjectURL(new Blob([response.data]));
-                        const link = document.createElement('a');
-                        link.href = url;
-                        link.setAttribute('download', 'orders_export.csv');
-                        document.body.appendChild(link);
-                        link.click();
-                        link.parentNode?.removeChild(link);
-                      } catch (err) {
-                        console.error('Failed to export orders', err);
-                      }
-                    }}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-blue-700 transition-colors"
-                  >
-                    Export Orders CSV
-                  </button>
+                <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/50 flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-slate-800">Order Management</h3>
+                    <button 
+                      onClick={async () => {
+                        try {
+                          const params = new URLSearchParams();
+                          if (orderSearch) params.append('search', orderSearch);
+                          if (orderStatusFilter) params.append('status', orderStatusFilter);
+                          if (orderPaymentFilter) params.append('paymentMethod', orderPaymentFilter);
+                          if (orderStartDate) params.append('startDate', orderStartDate);
+                          if (orderEndDate) params.append('endDate', orderEndDate);
+                          
+                          const response = await api.get(`/admin/orders/export?${params.toString()}`, { responseType: 'blob' });
+                          const url = window.URL.createObjectURL(new Blob([response.data]));
+                          const link = document.createElement('a');
+                          link.href = url;
+                          link.setAttribute('download', 'orders_export.csv');
+                          document.body.appendChild(link);
+                          link.click();
+                          link.parentNode?.removeChild(link);
+                        } catch (err) {
+                          console.error('Failed to export orders', err);
+                        }
+                      }}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Bulk Export (CSV)
+                    </button>
+                  </div>
+                  
+                  {/* Filters Bar */}
+                  <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                    <div className="flex-1 min-w-[200px]">
+                      <div className="relative">
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="text"
+                          placeholder="Search email or name..."
+                          value={orderSearch}
+                          onChange={(e) => { setOrderSearch(e.target.value); setOrdersPage(1); }}
+                          className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <select
+                      value={orderStatusFilter}
+                      onChange={(e) => { setOrderStatusFilter(e.target.value); setOrdersPage(1); }}
+                      className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      <option value="">All Statuses</option>
+                      <option value="PENDING">Pending</option>
+                      <option value="CONFIRMED">Confirmed</option>
+                      <option value="SHIPPED">Shipped</option>
+                      <option value="DELIVERED">Delivered</option>
+                      <option value="CANCELLED">Cancelled</option>
+                      <option value="RETURN_REQUESTED">Return Req.</option>
+                      <option value="RETURNED">Returned</option>
+                    </select>
+                    <select
+                      value={orderPaymentFilter}
+                      onChange={(e) => { setOrderPaymentFilter(e.target.value); setOrdersPage(1); }}
+                      className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      <option value="">All Payments</option>
+                      <option value="PENDING">Pending</option>
+                      <option value="PAID">Paid</option>
+                      <option value="FAILED">Failed</option>
+                    </select>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="date"
+                        value={orderStartDate}
+                        onChange={(e) => { setOrderStartDate(e.target.value); setOrdersPage(1); }}
+                        className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        title="Start Date"
+                      />
+                      <span className="text-slate-400">-</span>
+                      <input
+                        type="date"
+                        value={orderEndDate}
+                        onChange={(e) => { setOrderEndDate(e.target.value); setOrdersPage(1); }}
+                        className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        title="End Date"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className="p-6 overflow-x-auto">
                   {orders.length === 0 ? (
@@ -1602,15 +1723,99 @@ export const AdminDashboardPage: React.FC = () => {
             )}
             {activeTab === 'productsList' && (
               <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
-                  <h3 className="font-bold text-slate-800">Product Management</h3>
-                  <button 
-                    onClick={handleDeleteAllProducts}
-                    className="px-3 py-1.5 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 flex items-center gap-2 cursor-pointer transition-colors shadow-sm"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    Delete All Products
-                  </button>
+                <div className="px-6 py-5 border-b border-slate-200 bg-slate-50/50 flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-bold text-slate-800">Product Management</h3>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => {
+                          const doc = new jsPDF();
+                          doc.setFontSize(18);
+                          doc.text('Stock Report', 14, 22);
+                          doc.setFontSize(11);
+                          doc.setTextColor(100);
+                          doc.text(`Generated on ${new Date().toLocaleDateString()}`, 14, 30);
+                          
+                          autoTable(doc, {
+                            startY: 36,
+                            head: [['Product Name', 'Category', 'Price (KES)', 'Stock', 'Status']],
+                            body: productsList.map(p => [
+                              p.name,
+                              p.category?.name || 'Uncategorized',
+                              p.price.toLocaleString(),
+                              p.stock.toString(),
+                              p.stock > 5 ? 'In Stock' : p.stock > 0 ? 'Low Stock' : 'Out of Stock'
+                            ]),
+                          });
+                          doc.save('stock_report.pdf');
+                        }}
+                        className="px-3 py-1.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 flex items-center gap-2 cursor-pointer transition-colors shadow-sm"
+                      >
+                        <Download className="w-4 h-4" />
+                        Generate Stock Report (PDF)
+                      </button>
+                      <button 
+                        onClick={handleDeleteAllProducts}
+                        className="px-3 py-1.5 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 flex items-center gap-2 cursor-pointer transition-colors shadow-sm"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete All Products
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Product Filters Bar */}
+                  <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+                    <div className="flex-1 min-w-[200px]">
+                      <div className="relative">
+                        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="text"
+                          placeholder="Search products..."
+                          value={productSearch}
+                          onChange={(e) => setProductSearch(e.target.value)}
+                          className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <select
+                      value={productCategoryFilter}
+                      onChange={(e) => setProductCategoryFilter(e.target.value)}
+                      className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      <option value="">All Categories</option>
+                      {categories.map(c => (
+                        <option key={c.id} value={c.slug}>{c.name}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={productStockFilter}
+                      onChange={(e) => setProductStockFilter(e.target.value)}
+                      className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    >
+                      <option value="">All Stock</option>
+                      <option value="inStock">In Stock</option>
+                      <option value="lowStock">Low Stock</option>
+                      <option value="outOfStock">Out of Stock</option>
+                    </select>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        placeholder="Min KES"
+                        value={productMinPrice}
+                        onChange={(e) => setProductMinPrice(e.target.value)}
+                        className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
+                      />
+                      <span className="text-slate-400">-</span>
+                      <input
+                        type="number"
+                        placeholder="Max KES"
+                        value={productMaxPrice}
+                        onChange={(e) => setProductMaxPrice(e.target.value)}
+                        className="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-24"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className="p-6 overflow-x-auto">
                   {productsList.length === 0 ? (
@@ -1716,7 +1921,7 @@ export const AdminDashboardPage: React.FC = () => {
                               className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                               required
                             >
-                              <option value="">Select Category</option>
+                              <option value="" disabled>Select Category</option>
                               {categories.map((cat) => (
                                 <optgroup key={cat.id} label={cat.name}>
                                   <option value={cat.id}>{cat.name}</option>
@@ -2024,7 +2229,7 @@ export const AdminDashboardPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
-                               <div>
+                       <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-2">Category *</label>
                         <select
                           value={productForm.categoryId}
@@ -2032,11 +2237,26 @@ export const AdminDashboardPage: React.FC = () => {
                           className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B] transition-colors"
                           required
                         >
+                          <option value="" disabled>Select Category</option>
                           {categories.map((cat) => (
                             <option key={cat.id} value={cat.id}>{cat.name}</option>
                           ))}
                         </select>
                       </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">Condition *</label>
+                        <select
+                          value={productForm.condition}
+                          onChange={(e) => setProductForm((p) => ({ ...p, condition: e.target.value }))}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B] transition-colors"
+                          required
+                        >
+                          <option value="NEW">New</option>
+                          <option value="REFURBISHED">Refurbished</option>
+                          <option value="EX_UK">Ex-UK</option>
+                        </select>
+                      </div>
+                    </div>
                     <div>
                       <label className="block text-slate-700 text-xs font-bold mb-1.5 uppercase tracking-wide">Product Images</label>
                       <input
@@ -2074,7 +2294,6 @@ export const AdminDashboardPage: React.FC = () => {
                         </div>
                       )}
                     </div>
-                  </div>
                   <div className="pt-2">
                     <div className="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100">
                       <label className="block text-blue-800 text-xs font-bold mb-1.5 uppercase tracking-wide">✨ Smart Auto-Fill Specs</label>

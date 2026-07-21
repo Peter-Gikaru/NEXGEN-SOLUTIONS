@@ -81,7 +81,7 @@ export const Carousel: React.FC = () => {
               <span className="bg-secondary text-[#1a1a2e] text-[14px] font-semibold px-3 py-1 rounded shadow-sm">
                 {slide.title}
               </span>
-              <h2 className="text-2xl md:text-3xl font-semibold font-sans max-w-3xl leading-snug drop-shadow-md">
+              <h2 className="text-3xl md:text-5xl font-bold font-sans max-w-4xl leading-tight drop-shadow-md">
                 {slide.subtitle}
               </h2>
               {slide.hasTimer && (

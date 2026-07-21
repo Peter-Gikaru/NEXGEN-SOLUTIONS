@@ -160,13 +160,36 @@ export const listAllOrders = async (
     if (!req.user) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
-    const { page = '1', limit = '50' } = req.query;
+    const { page = '1', limit = '50', status, paymentMethod, startDate, endDate, search } = req.query;
     const pageNum = parseInt(page as string) || 1;
     const limitNum = parseInt(limit as string) || 50;
     const skip = (pageNum - 1) * limitNum;
+
+    const where: any = {};
+    if (status) where.orderStatus = status;
+    if (paymentMethod) where.paymentStatus = paymentMethod;
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt.gte = new Date(startDate as string);
+      if (endDate) {
+        const end = new Date(endDate as string);
+        end.setHours(23, 59, 59, 999);
+        where.createdAt.lte = end;
+      }
+    }
+    if (search) {
+      where.user = {
+        OR: [
+          { email: { contains: search as string, mode: 'insensitive' } },
+          { name: { contains: search as string, mode: 'insensitive' } }
+        ]
+      };
+    }
+
     const [total, orders] = await Promise.all([
-      prisma.order.count(),
+      prisma.order.count({ where }),
       prisma.order.findMany({
+        where,
         skip,
         take: limitNum,
         include: {
@@ -371,7 +394,31 @@ export const exportOrders = async (
 ) => {
   try {
     if (!req.user) return res.status(401).json({ message: 'Unauthorized' });
+
+    const { status, paymentMethod, startDate, endDate, search } = req.query;
+    const where: any = {};
+    if (status) where.orderStatus = status;
+    if (paymentMethod) where.paymentStatus = paymentMethod;
+    if (startDate || endDate) {
+      where.createdAt = {};
+      if (startDate) where.createdAt.gte = new Date(startDate as string);
+      if (endDate) {
+        const end = new Date(endDate as string);
+        end.setHours(23, 59, 59, 999);
+        where.createdAt.lte = end;
+      }
+    }
+    if (search) {
+      where.user = {
+        OR: [
+          { email: { contains: search as string, mode: 'insensitive' } },
+          { name: { contains: search as string, mode: 'insensitive' } }
+        ]
+      };
+    }
+
     const orders = await prisma.order.findMany({
+      where,
       include: { user: true },
       orderBy: { createdAt: 'desc' }
     });

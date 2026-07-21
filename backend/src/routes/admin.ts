@@ -19,6 +19,7 @@ import {
 import { authenticateJWT, authorizeRoles } from '../middleware/auth';
 import { getFullAnalytics } from '../controllers/analytics';
 import { getAuditLogs, getSecurityAlerts, resolveSecurityAlert } from '../controllers/security';
+import { generateDynamicReport } from '../controllers/reports';
 
 const router = Router();
 
@@ -27,6 +28,7 @@ router.use(authenticateJWT);
 router.get('/security/logs', authorizeRoles('ADMIN'), getAuditLogs);
 router.get('/security/alerts', authorizeRoles('ADMIN'), getSecurityAlerts);
 router.put('/security/alerts/:id/resolve', authorizeRoles('ADMIN'), resolveSecurityAlert);
+router.post('/reports/dynamic', authorizeRoles('ADMIN'), generateDynamicReport);
 router.get('/analytics/full', authorizeRoles('ADMIN'), getFullAnalytics);
 router.get('/stats', authorizeRoles('ADMIN'), getDashboardStats);
 router.get('/orders', authorizeRoles('ADMIN'), listAllOrders);

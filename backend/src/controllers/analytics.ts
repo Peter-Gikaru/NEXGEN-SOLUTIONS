@@ -3,44 +3,52 @@ import prisma from '../config/db';
 
 export const getFullAnalytics = async (req: Request, res: Response) => {
   try {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const { startDate, endDate } = req.query;
 
-    
+    let dateFilter: any = undefined;
+    if (startDate || endDate) {
+      dateFilter = {};
+      if (startDate) dateFilter.gte = new Date(startDate as string);
+      if (endDate) {
+        const end = new Date(endDate as string);
+        end.setHours(23, 59, 59, 999);
+        dateFilter.lte = end;
+      }
+    } else {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      dateFilter = { gte: thirtyDaysAgo };
+    }
+
     const totalRevenueResult = await prisma.order.aggregate({
       _sum: { totalAmount: true },
-      where: { orderStatus: { not: 'CANCELED' } }
+      where: { 
+        orderStatus: { not: 'CANCELED' },
+        createdAt: dateFilter
+      }
     });
     const totalRevenue = totalRevenueResult._sum.totalAmount || 0;
 
-    const totalOrders = await prisma.order.count();
-    const activeUsers = await prisma.user.count();
+    const totalOrders = await prisma.order.count({ where: { createdAt: dateFilter } });
+    const activeUsers = await prisma.user.count({ where: { createdAt: dateFilter } });
     const lowStockItems = await prisma.product.count({
       where: { stock: { lte: 5 } }
     });
 
-    
     const recentOrders = await prisma.order.findMany({
       where: {
-        createdAt: { gte: thirtyDaysAgo },
+        createdAt: dateFilter,
         orderStatus: { not: 'CANCELED' }
       },
-      select: { totalAmount: true, createdAt: true }
+      select: { totalAmount: true, createdAt: true },
+      orderBy: { createdAt: 'asc' }
     });
 
-    
     const salesMap: Record<string, number> = {};
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      salesMap[d.toISOString().split('T')[0]] = 0;
-    }
-
     recentOrders.forEach(o => {
       const dateStr = o.createdAt.toISOString().split('T')[0];
-      if (salesMap[dateStr] !== undefined) {
-        salesMap[dateStr] += o.totalAmount;
-      }
+      if (!salesMap[dateStr]) salesMap[dateStr] = 0;
+      salesMap[dateStr] += o.totalAmount;
     });
 
     const salesByDay = Object.keys(salesMap).map(date => ({
@@ -102,17 +110,24 @@ export const getFullAnalytics = async (req: Request, res: Response) => {
       orderBy: {
         _sum: { quantity: 'desc' }
       },
-      take: 5
+      take: 20 // take more since we might filter out some
     });
 
+    const { category } = req.query;
     const topSellingData = [];
     for (const item of orderItems) {
-      const product = await prisma.product.findUnique({ where: { id: item.productId }});
+      const product = await prisma.product.findUnique({ 
+        where: { id: item.productId },
+        include: { category: true }
+      });
       if (product) {
-        topSellingData.push({
-          name: product.name,
-          sales: item._sum.quantity || 0
-        });
+        if (!category || product.category?.slug === category || product.category?.name === category) {
+          topSellingData.push({
+            name: product.name,
+            sales: item._sum.quantity || 0
+          });
+          if (topSellingData.length >= 5) break;
+        }
       }
     }
 

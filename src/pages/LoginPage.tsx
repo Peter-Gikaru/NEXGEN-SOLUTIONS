@@ -60,7 +60,7 @@ export const LoginPage: React.FC = () => {
     initConditionalUI();
 
     return () => {
-      WebAuthnAbortService.cancel();
+      WebAuthnAbortService.cancelCeremony();
     };
   }, [passkeyLoginAction, navigate, redirect]);
 

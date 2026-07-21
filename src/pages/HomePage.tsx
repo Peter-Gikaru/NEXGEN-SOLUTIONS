@@ -84,6 +84,7 @@ export const HomePage: React.FC = () => {
           rating: p.rating || 5.0,
           reviewCount: p.reviewCount || 0,
           image: p.imageUrls[0] || '',
+          hoverImage: p.imageUrls[1] || undefined,
           discount: p.compareAtPrice ? Math.round(((p.compareAtPrice - p.price) / p.compareAtPrice) * 100) : 0,
           stockStatus: 'in_stock',
           stockCount: p.stock,

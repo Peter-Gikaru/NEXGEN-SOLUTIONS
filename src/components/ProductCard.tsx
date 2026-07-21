@@ -15,6 +15,7 @@ interface ProductCardProps {
   id: string;
   slug?: string;
   image: string;
+  hoverImage?: string;
   title: string;
   price: number;
   originalPrice: number;
@@ -31,6 +32,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
   id,
   slug,
   image,
+  hoverImage,
   title,
   price,
   originalPrice,
@@ -190,9 +192,17 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
         <img
           src={getImageUrl(image)}
           alt={title}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.05]"
+          className={`w-full h-full object-cover transition-all duration-500 ease-out ${hoverImage ? 'group-hover/image:opacity-0 group-hover/image:scale-[1.05]' : 'group-hover/image:scale-[1.05]'}`}
           loading="lazy"
         />
+        {hoverImage && (
+          <img
+            src={getImageUrl(hoverImage)}
+            alt={`${title} alternate`}
+            className="w-full h-full object-cover absolute inset-0 opacity-0 transition-all duration-500 ease-out group-hover/image:opacity-100 group-hover/image:scale-[1.05]"
+            loading="lazy"
+          />
+        )}
         <button
           onClick={handleToggleWishlist}
           className="absolute top-3 right-3 bg-white/90 backdrop-blur text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-2 rounded-full shadow-sm transition-colors z-20 opacity-0 group-hover/image:opacity-100 focus:opacity-100"

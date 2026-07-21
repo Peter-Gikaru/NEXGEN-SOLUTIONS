@@ -9,6 +9,7 @@ export interface Product {
   rating: number;
   reviewCount: number;
   image: string;
+  hoverImage?: string;
   discount: number;
   stockStatus: 'in_stock' | 'low_stock' | 'out_of_stock';
   stockCount?: number;

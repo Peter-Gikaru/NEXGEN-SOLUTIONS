@@ -134,6 +134,7 @@ export const WishlistPage: React.FC = () => {
                   id={product.id}
                   slug={product.slug}
                   image={product.imageUrls?.[0] || ''}
+                  hoverImage={product.imageUrls?.[1] || undefined}
                   title={product.name}
                   price={product.price}
                   originalPrice={product.compareAtPrice || product.price}

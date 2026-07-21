@@ -128,6 +128,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({ products, onShopNowCli
                   key={product.id}
                   id={product.id}
                   image={product.image}
+                  hoverImage={product.hoverImage}
                   title={product.title}
                   price={product.price}
                   originalPrice={product.originalPrice}

@@ -562,7 +562,12 @@ export const ProductDetailPage: React.FC = () => {
                   {product.variants.map((v: any, idx: number) => (
                     <button
                       key={v.id || idx}
-                      onClick={() => setSelectedVariant(v)}
+                      onClick={() => {
+                        setSelectedVariant(v);
+                        if (v.imageUrl) {
+                          setMainImage(v.imageUrl);
+                        }
+                      }}
                       className={`px-3 py-1.5 border rounded-lg text-sm font-semibold cursor-pointer transition-colors ${
                         (selectedVariant?.id && selectedVariant?.id === v.id) || (selectedVariant && selectedVariant === v)
                           ? 'border-[#F59E0B] bg-amber-50 text-[#F59E0B]' 

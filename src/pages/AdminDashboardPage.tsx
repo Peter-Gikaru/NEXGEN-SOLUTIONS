@@ -2025,27 +2025,34 @@ export const AdminDashboardPage: React.FC = () => {
                             </div>
                             <div className="space-y-2">
                               {editingProduct.variants && editingProduct.variants.map((variant: any, index: number) => (
-                                <div key={variant.id || index} className="flex gap-2 items-center bg-slate-50 p-2 rounded border border-slate-200">
-                                  <input type="text" placeholder="Name (e.g. 16GB RAM)" value={variant.name} onChange={(e) => {
-                                    const newVars = [...editingProduct.variants];
-                                    newVars[index].name = e.target.value;
-                                    setEditingProduct({...editingProduct, variants: newVars});
-                                  }} className="flex-1 border border-slate-300 rounded p-1 text-sm focus:outline-none focus:border-blue-500" />
-                                  <input type="number" placeholder="Price offset" value={variant.priceOffset} onChange={(e) => {
-                                    const newVars = [...editingProduct.variants];
-                                    newVars[index].priceOffset = Number(e.target.value);
-                                    setEditingProduct({...editingProduct, variants: newVars});
-                                  }} className="w-24 border border-slate-300 rounded p-1 text-sm focus:outline-none focus:border-blue-500" />
-                                  <input type="number" placeholder="Stock" value={variant.stock} onChange={(e) => {
-                                    const newVars = [...editingProduct.variants];
-                                    newVars[index].stock = Number(e.target.value);
-                                    setEditingProduct({...editingProduct, variants: newVars});
-                                  }} className="w-20 border border-slate-300 rounded p-1 text-sm focus:outline-none focus:border-blue-500" />
-                                  <button type="button" onClick={() => {
-                                    const newVars = [...editingProduct.variants];
-                                    newVars.splice(index, 1);
-                                    setEditingProduct({...editingProduct, variants: newVars});
-                                  }} className="text-red-500 hover:text-red-700"><X className="h-4 w-4" /></button>
+                                <div key={variant.id || index} className="flex flex-col gap-2 bg-slate-50 p-3 rounded border border-slate-200">
+                                  <div className="flex gap-2 items-center">
+                                    <input type="text" placeholder="Name (e.g. 16GB RAM)" value={variant.name || [variant.size, variant.color].filter(Boolean).join(' - ') || ''} onChange={(e) => {
+                                      const newVars = [...editingProduct.variants];
+                                      newVars[index].name = e.target.value;
+                                      setEditingProduct({...editingProduct, variants: newVars});
+                                    }} className="flex-1 border border-slate-300 rounded p-1.5 text-sm focus:outline-none focus:border-blue-500" />
+                                    <input type="number" placeholder="Price offset" value={variant.priceOffset || 0} onChange={(e) => {
+                                      const newVars = [...editingProduct.variants];
+                                      newVars[index].priceOffset = Number(e.target.value);
+                                      setEditingProduct({...editingProduct, variants: newVars});
+                                    }} className="w-24 border border-slate-300 rounded p-1.5 text-sm focus:outline-none focus:border-blue-500" />
+                                    <input type="number" placeholder="Stock" value={variant.stock || 0} onChange={(e) => {
+                                      const newVars = [...editingProduct.variants];
+                                      newVars[index].stock = Number(e.target.value);
+                                      setEditingProduct({...editingProduct, variants: newVars});
+                                    }} className="w-20 border border-slate-300 rounded p-1.5 text-sm focus:outline-none focus:border-blue-500" />
+                                    <button type="button" onClick={() => {
+                                      const newVars = [...editingProduct.variants];
+                                      newVars.splice(index, 1);
+                                      setEditingProduct({...editingProduct, variants: newVars});
+                                    }} className="text-red-500 hover:text-red-700 ml-1"><X className="h-5 w-5" /></button>
+                                  </div>
+                                  <input type="text" placeholder="Variant Image URL (Optional)" value={variant.imageUrl || ''} onChange={(e) => {
+                                      const newVars = [...editingProduct.variants];
+                                      newVars[index].imageUrl = e.target.value;
+                                      setEditingProduct({...editingProduct, variants: newVars});
+                                  }} className="w-full border border-slate-300 rounded p-1.5 text-sm focus:outline-none focus:border-blue-500" />
                                 </div>
                               ))}
                             </div>

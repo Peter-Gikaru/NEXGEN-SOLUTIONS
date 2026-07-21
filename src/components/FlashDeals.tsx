@@ -78,6 +78,7 @@ export const FlashDeals: React.FC = () => {
             <ProductCard
               id={product.id}
               image={product.image}
+              hoverImage={product.hoverImage}
               title={product.title}
               price={product.price}
               originalPrice={product.originalPrice}

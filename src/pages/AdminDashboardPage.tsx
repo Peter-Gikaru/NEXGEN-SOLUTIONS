@@ -257,6 +257,18 @@ export const AdminDashboardPage: React.FC = () => {
   const [delayOrderId, setDelayOrderId] = useState<string | null>(null);
   const [delayDate, setDelayDate] = useState<string>('');
   const [delayNote, setDelayNote] = useState<string>('');
+
+  const renderCategoryOptions = (cats: AdminCategory[], level = 0): React.ReactNode[] => {
+    return cats.flatMap((cat) => [
+      <option key={cat.id} value={cat.id}>
+        {'\u00A0'.repeat(level * 4)}
+        {level > 0 ? '↳ ' : ''}
+        {cat.name}
+      </option>,
+      ...(cat.children?.length ? renderCategoryOptions(cat.children, level + 1) : [])
+    ]);
+  };
+
   useEffect(() => {
     if (!user || user.role !== 'ADMIN') {
       navigate('/login');
@@ -1922,14 +1934,7 @@ export const AdminDashboardPage: React.FC = () => {
                               required
                             >
                               <option value="" disabled>Select Category</option>
-                              {categories.map((cat) => (
-                                <optgroup key={cat.id} label={cat.name}>
-                                  <option value={cat.id}>{cat.name}</option>
-                                  {cat.children && cat.children.map(sub => (
-                                    <option key={sub.id} value={sub.id}>— {sub.name}</option>
-                                  ))}
-                                </optgroup>
-                              ))}
+                              {renderCategoryOptions(categories)}
                             </select>
                           </div>
                         </div>
@@ -2245,9 +2250,7 @@ export const AdminDashboardPage: React.FC = () => {
                           required
                         >
                           <option value="" disabled>Select Category</option>
-                          {categories.map((cat) => (
-                            <option key={cat.id} value={cat.id}>{cat.name}</option>
-                          ))}
+                          {renderCategoryOptions(categories)}
                         </select>
                       </div>
                       <div>
@@ -2404,9 +2407,7 @@ export const AdminDashboardPage: React.FC = () => {
                           className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B] text-slate-900 shadow-sm cursor-pointer"
                         >
                           <option value="">None (Top-level)</option>
-                          {categories.map((cat) => (
-                            <option key={cat.id} value={cat.id}>{cat.name}</option>
-                          ))}
+                          {renderCategoryOptions(categories)}
                         </select>
                       </div>
                       <div>

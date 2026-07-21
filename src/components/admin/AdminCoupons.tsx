@@ -19,10 +19,13 @@ export const AdminCoupons: React.FC = () => {
 
   useEffect(() => {
     fetchCoupons();
+    const interval = setInterval(() => fetchCoupons(true), 15000);
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchCoupons = async () => {
+  const fetchCoupons = async (isBackground = false) => {
     try {
+      if (!isBackground) setLoading(true);
       const response = await api.get('/admin/coupons');
       setCoupons(response.data);
     } catch (error) {

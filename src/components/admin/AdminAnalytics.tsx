@@ -27,6 +27,7 @@ export const AdminAnalytics = () => {
   }, []);
 
   useEffect(() => {
+    let interval: ReturnType<typeof setInterval>;
     const fetchAnalytics = async () => {
       setLoading(true);
       try {
@@ -43,11 +44,13 @@ export const AdminAnalytics = () => {
       }
     };
     fetchAnalytics();
+    interval = setInterval(fetchAnalytics, 15000);
+    return () => clearInterval(interval);
   }, [startDate, endDate, category]);
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <div className="space-y-6 animate-pulse">
         <div className="flex items-center justify-between">

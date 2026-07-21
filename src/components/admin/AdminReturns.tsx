@@ -8,10 +8,13 @@ export const AdminReturns: React.FC = () => {
 
   useEffect(() => {
     fetchReturns();
+    const interval = setInterval(() => fetchReturns(true), 15000);
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchReturns = async () => {
+  const fetchReturns = async (isBackground = false) => {
     try {
+      if (!isBackground) setLoading(true);
       const response = await api.get('/admin/returns');
       setReturns(response.data);
     } catch (error) {
@@ -31,7 +34,7 @@ export const AdminReturns: React.FC = () => {
     }
   };
 
-  if (loading) return <div>Loading returns...</div>;
+  if (loading && returns.length === 0) return <div>Loading returns...</div>;
 
   return (
     <div>

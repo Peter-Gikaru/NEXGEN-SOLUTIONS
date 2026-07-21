@@ -8,10 +8,13 @@ export const AdminWarranties: React.FC = () => {
 
   useEffect(() => {
     fetchWarranties();
+    const interval = setInterval(() => fetchWarranties(true), 15000);
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchWarranties = async () => {
+  const fetchWarranties = async (isBackground = false) => {
     try {
+      if (!isBackground) setLoading(true);
       const response = await api.get('/admin/warranties');
       setWarranties(response.data);
     } catch (error) {
@@ -31,7 +34,7 @@ export const AdminWarranties: React.FC = () => {
     }
   };
 
-  if (loading) return <div>Loading warranties...</div>;
+  if (loading && warranties.length === 0) return <div>Loading warranties...</div>;
 
   return (
     <div>

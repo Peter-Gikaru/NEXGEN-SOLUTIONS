@@ -11,8 +11,8 @@ export const AdminSecurity = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (isBackground = false) => {
+    if (!isBackground) setLoading(true);
     try {
       const [logsRes, alertsRes] = await Promise.all([
         api.get(`/admin/security/logs?page=${page}&limit=20`),
@@ -31,6 +31,8 @@ export const AdminSecurity = () => {
 
   useEffect(() => {
     fetchData();
+    const interval = setInterval(() => fetchData(true), 10000);
+    return () => clearInterval(interval);
   }, [page]);
 
   const handleResolveAlert = async (id: string) => {

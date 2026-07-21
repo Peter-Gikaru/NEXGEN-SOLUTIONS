@@ -194,8 +194,16 @@ interface Order {
 export const AdminDashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'stats' | 'orders' | 'users' | 'addProduct' | 'productsList' | 'categories' | 'flashSales' | 'shippingZones' | 'adminLogs' | 'announcements' | 'newsletter' | 'returns' | 'warranties' | 'coupons' | 'livechat' | 'shippingQueue' | 'securityCenter' | 'analytics' | 'customReports'>('stats');
+  const [activeTab, setActiveTab] = useState<string>('stats');
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
+  const [autoRefreshTrigger, setAutoRefreshTrigger] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAutoRefreshTrigger(prev => prev + 1);
+    }, 10000); 
+    return () => clearInterval(interval);
+  }, []);
   const [stats, setStats] = useState<Stats>({ totalSales: 0, totalOrders: 0, totalUsers: 0 });
   const [lowStock, setLowStock] = useState<LowStock[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -301,7 +309,7 @@ export const AdminDashboardPage: React.FC = () => {
     };
     fetchStats();
     fetchCategories();
-  }, [user, navigate]);
+  }, [user, navigate, autoRefreshTrigger]);
   useEffect(() => {
     if (activeTab === 'orders') {
       const fetchOrders = async () => {
@@ -388,7 +396,7 @@ export const AdminDashboardPage: React.FC = () => {
       };
       fetchLogs();
     }
-  }, [activeTab, ordersPage, usersPage, orderSearch, orderStatusFilter, orderPaymentFilter, orderStartDate, orderEndDate, productSearch, productCategoryFilter, productStockFilter, productMinPrice, productMaxPrice]);
+  }, [activeTab, ordersPage, usersPage, orderSearch, orderStatusFilter, orderPaymentFilter, orderStartDate, orderEndDate, productSearch, productCategoryFilter, productStockFilter, productMinPrice, productMaxPrice, autoRefreshTrigger]);
   const handleCreateFlashSale = async (e: React.FormEvent) => {
     e.preventDefault();
     try {

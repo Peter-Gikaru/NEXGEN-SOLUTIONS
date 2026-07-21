@@ -18,9 +18,9 @@ const AdminShippingQueue: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchQueue = async () => {
+  const fetchQueue = async (isBackground = false) => {
     try {
-      setLoading(true);
+      if (!isBackground) setLoading(true);
       
       
       const response = await api.get('/admin/orders?page=1&limit=200');
@@ -42,6 +42,8 @@ const AdminShippingQueue: React.FC = () => {
 
   useEffect(() => {
     fetchQueue();
+    const interval = setInterval(() => fetchQueue(true), 15000);
+    return () => clearInterval(interval);
   }, []);
 
   const updateStatus = async (orderId: string, newStatus: string) => {
@@ -54,7 +56,7 @@ const AdminShippingQueue: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (loading && orders.length === 0) {
     return <Loader text="Fetching shipping queue..." />;
   }
 

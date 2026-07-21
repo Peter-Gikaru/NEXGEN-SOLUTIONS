@@ -61,7 +61,7 @@ const RecursiveCategoryItem = ({
   category: AdminCategory; 
   level?: number;
   onDelete: (id: string) => void;
-  onEdit: (id: string, currentName: string) => void;
+  onEdit: (cat: AdminCategory) => void;
   onAddChild: (parentId: string, parentName: string) => void;
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -92,7 +92,7 @@ const RecursiveCategoryItem = ({
         </div>
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity md:opacity-100">
           <button 
-            onClick={() => onEdit(category.id, category.name)}
+            onClick={() => onEdit(category)}
             className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded flex items-center gap-1"
             title={`Edit ${category.name}`}
           >
@@ -247,6 +247,7 @@ export const AdminDashboardPage: React.FC = () => {
   const [categories, setCategories] = useState<AdminCategory[]>([]);
   const [adminLogs, setAdminLogs] = useState<AdminLog[]>([]);
   const [newCategoryForm, setNewCategoryForm] = useState({ name: '', description: '', parentId: '' });
+  const [editingCategoryModal, setEditingCategoryModal] = useState<AdminCategory | null>(null);
   const [uploading, setUploading] = useState(false);
   const [newUserForm, setNewUserForm] = useState({
     name: '',
@@ -890,13 +891,22 @@ export const AdminDashboardPage: React.FC = () => {
       toast.error(err.response?.data?.message || 'Failed to create category');
     }
   };
-  const handleUpdateCategory = async (id: string, currentName: string) => {
-    const newName = window.prompt('Enter new category name:', currentName);
-    if (!newName || newName === currentName) return;
+  const handleUpdateCategory = (cat: AdminCategory) => {
+    setEditingCategoryModal(cat);
+  };
+
+  const handleSaveCategoryEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingCategoryModal) return;
     try {
-      await api.put(`/categories/${id}`, { name: newName });
+      await api.put(`/categories/${editingCategoryModal.id}`, { 
+        name: editingCategoryModal.name,
+        description: editingCategoryModal.description,
+        parentId: editingCategoryModal.parentId || null
+      });
       const res = await api.get('/categories');
       setCategories(res.data);
+      setEditingCategoryModal(null);
       toast.success('Category updated successfully!');
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Failed to update category');
@@ -2764,6 +2774,67 @@ export const AdminDashboardPage: React.FC = () => {
                   className="flex-1 px-4 py-3 bg-amber-500 text-white rounded-xl font-bold hover:bg-amber-600 transition-colors cursor-pointer shadow-lg shadow-amber-500/30"
                 >
                   Send Update
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {editingCategoryModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl relative border border-slate-100">
+            <button
+              onClick={() => setEditingCategoryModal(null)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+            <h2 className="text-2xl font-black text-slate-900 mb-6">Edit Category</h2>
+            <form onSubmit={handleSaveCategoryEdit} className="space-y-4">
+              <div>
+                <label className="block text-slate-700 text-sm font-bold mb-2">Category Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={editingCategoryModal.name}
+                  onChange={(e) => setEditingCategoryModal({ ...editingCategoryModal, name: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B] transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-slate-700 text-sm font-bold mb-2">Description (Optional)</label>
+                <textarea
+                  value={editingCategoryModal.description || ''}
+                  onChange={(e) => setEditingCategoryModal({ ...editingCategoryModal, description: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B] transition-colors resize-none"
+                  rows={3}
+                ></textarea>
+              </div>
+              <div>
+                <label className="block text-slate-700 text-sm font-bold mb-2">Parent Category (Optional)</label>
+                <select
+                  value={editingCategoryModal.parentId || ''}
+                  onChange={(e) => setEditingCategoryModal({ ...editingCategoryModal, parentId: e.target.value || null })}
+                  className="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#F59E0B] focus:ring-1 focus:ring-[#F59E0B] text-slate-900 shadow-sm cursor-pointer"
+                >
+                  <option value="">None (Top-level)</option>
+                  {renderCategoryOptions(categories)}
+                </select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setEditingCategoryModal(null)}
+                  className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 rounded-xl font-bold hover:bg-slate-200 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors cursor-pointer shadow-lg shadow-emerald-600/30"
+                >
+                  Save Changes
                 </button>
               </div>
             </form>

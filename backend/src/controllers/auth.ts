@@ -591,6 +591,8 @@ export const passkeyRegisterFinish = async (
       
       await prisma.webAuthnChallenge.delete({ where: { id: challengeObj.id } });
       
+      await logAction('USER_REGISTER_PASSKEY', `User ${req.user.email} registered a new Passkey`, 'INFO', req.user.id, undefined, req.ip, req.headers['user-agent'] as string);
+      
       return res.json({ verified: true });
     }
     
@@ -689,6 +691,8 @@ export const passkeyLoginFinish = async (
         sameSite: 'strict',
       });
       
+      await logAction('USER_LOGIN', `User ${credential.user.email} logged in via Passkey`, 'INFO', credential.user.id, undefined, req.ip, req.headers['user-agent'] as string);
+      
       return res.json({
         id: credential.user.id,
         email: credential.user.email,
@@ -699,6 +703,7 @@ export const passkeyLoginFinish = async (
       });
     }
     
+    await logAction('LOGIN_FAILED', `Passkey verification failed`, 'WARNING', undefined, undefined, req.ip, req.headers['user-agent'] as string);
     return res.status(400).json({ message: 'Verification failed' });
   } catch (error) {
     return next(error);

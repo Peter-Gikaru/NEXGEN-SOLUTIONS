@@ -39,7 +39,11 @@ import {
   AlertCircle,
   Download,
   Search,
-  Table
+  Table,
+  CheckCircle,
+  XCircle,
+  BarChart,
+  RefreshCw
 } from 'lucide-react';
 import AdminNewsletter from '../components/admin/AdminNewsletter';
 import AdminReturns from '../components/admin/AdminReturns';
@@ -2554,7 +2558,23 @@ export const AdminDashboardPage: React.FC = () => {
             {activeTab === 'adminLogs' && (
               <div className="space-y-6 animate-fade-in">
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                  <h3 className="font-bold text-slate-800 mb-4 text-lg">Admin Activity Logs</h3>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-slate-800 text-lg">Admin Activity Logs</h3>
+                    <button 
+                      onClick={async () => {
+                        try {
+                          const res = await api.get('/admin/logs');
+                          setAdminLogs(res.data);
+                          toast.success('Logs refreshed');
+                        } catch (err) {
+                          toast.error('Failed to refresh logs');
+                        }
+                      }}
+                      className="px-3 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded text-sm font-medium transition-colors flex items-center"
+                    >
+                      <RefreshCw className="w-4 h-4 mr-2" /> Refresh
+                    </button>
+                  </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm border-collapse min-w-[800px]">
                       <thead>

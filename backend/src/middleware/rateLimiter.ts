@@ -18,6 +18,16 @@ export const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+export const passkeyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 30, 
+  message: {
+    message: 'Too many passkey initialization requests, please try again later',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 export const emailLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, 
   max: 5, 

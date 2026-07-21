@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { register, login, logout, getProfile, updateAddress, deactivateAccount, restoreAccount, googleLogin, forgotPassword, resetPassword, forceChangePassword, facebookLogin, passkeyRegisterStart, passkeyRegisterFinish, passkeyLoginStart, passkeyLoginFinish, checkPasskey } from '../controllers/auth';
 import { authenticateJWT } from '../middleware/auth';
 import { validateBody, registerSchema, loginSchema } from '../utils/validation';
-import { authLimiter, emailLimiter } from '../middleware/rateLimiter';
+import { authLimiter, emailLimiter, passkeyLimiter } from '../middleware/rateLimiter';
 
 const router = Router();
 
@@ -21,8 +21,8 @@ router.post('/force-change-password', authenticateJWT, forceChangePassword);
 
 router.post('/passkey/register/start', authenticateJWT, passkeyRegisterStart);
 router.post('/passkey/register/finish', authenticateJWT, passkeyRegisterFinish);
-router.post('/passkey/login/start', authLimiter, passkeyLoginStart);
+router.post('/passkey/login/start', passkeyLimiter, passkeyLoginStart);
 router.post('/passkey/login/finish', authLimiter, passkeyLoginFinish);
-router.get('/passkey/check', authLimiter, checkPasskey);
+router.get('/passkey/check', passkeyLimiter, checkPasskey);
 
 export default router;

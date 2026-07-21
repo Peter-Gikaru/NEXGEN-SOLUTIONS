@@ -56,6 +56,7 @@ interface ProductDetails {
   reviews: Review[];
   rating: number;
   variants: { id: string; name: string; priceOffset: number; stock: number }[] | null;
+  condition?: string;
 }
 
 export const ProductDetailPage: React.FC = () => {

@@ -40,9 +40,6 @@ import {
   Download,
   Search,
   Table,
-  CheckCircle,
-  XCircle,
-  BarChart,
   RefreshCw
 } from 'lucide-react';
 import AdminNewsletter from '../components/admin/AdminNewsletter';

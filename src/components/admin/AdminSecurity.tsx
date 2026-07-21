@@ -69,7 +69,7 @@ export const AdminSecurity = () => {
           <h2 className="text-2xl font-bold text-gray-900">Security Center</h2>
           <p className="text-sm text-gray-500">Monitor system access, abuse patterns, and audit logs.</p>
         </div>
-        <button onClick={fetchData} className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50">
+        <button onClick={() => fetchData()} className="flex items-center space-x-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:bg-gray-50">
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           <span>Refresh</span>
         </button>

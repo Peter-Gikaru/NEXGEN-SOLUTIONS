@@ -559,17 +559,17 @@ export const ProductDetailPage: React.FC = () => {
               <div className="pt-2">
                 <span className="text-sm font-semibold text-slate-500 block mb-2">Select Variant:</span>
                 <div className="flex flex-wrap gap-2">
-                  {product.variants.map((v) => (
+                  {product.variants.map((v: any, idx: number) => (
                     <button
-                      key={v.id}
+                      key={v.id || idx}
                       onClick={() => setSelectedVariant(v)}
                       className={`px-3 py-1.5 border rounded-lg text-sm font-semibold cursor-pointer transition-colors ${
-                        selectedVariant?.id === v.id 
+                        (selectedVariant?.id && selectedVariant?.id === v.id) || (selectedVariant && selectedVariant === v)
                           ? 'border-[#F59E0B] bg-amber-50 text-[#F59E0B]' 
                           : 'border-gray-200 text-slate-600 hover:border-gray-300'
                       }`}
                     >
-                      {v.name} {v.priceOffset > 0 && `(+KES ${v.priceOffset.toLocaleString()})`}
+                      {v.name || [v.size, v.color].filter(Boolean).join(' - ') || 'Variant'} {v.priceOffset > 0 && `(+KES ${v.priceOffset.toLocaleString()})`}
                     </button>
                   ))}
                 </div>

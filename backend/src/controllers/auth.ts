@@ -12,15 +12,19 @@ import axios from 'axios';
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-const generateToken = (user: { id: string; email: string; role: string }) => {
+export const generateToken = (
+  user: { id: string; email: string; role: string },
+  ip: string,
+  userAgent: string
+) => {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
     throw new Error('JWT_SECRET is not configured. Server cannot generate tokens.');
   }
   return jwt.sign(
-    { id: user.id, email: user.email, role: user.role },
+    { id: user.id, email: user.email, role: user.role, ip, userAgent },
     secret,
-    { expiresIn: '24h' }
+    { expiresIn: '20m' }
   );
 };
 export const register = async (
@@ -63,7 +67,7 @@ export const register = async (
     ).catch(console.error);
     
     await logAction('USER_REGISTER', `User ${user.email} registered successfully`, 'INFO', user.id, undefined, req.ip, req.headers['user-agent'] as string);
-    const token = generateToken(user);
+    const token = generateToken(user, req.ip || '', req.headers['user-agent'] as string || '');
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -136,7 +140,7 @@ export const login = async (
     }
     logger.info(`User logged in successfully: ${user.email} (Role: ${user.role})`);
     await logAction('USER_LOGIN', `User ${user.email} logged in successfully`, 'INFO', user.id, undefined, req.ip, req.headers['user-agent'] as string);
-    const token = generateToken(user);
+    const token = generateToken(user, req.ip || '', req.headers['user-agent'] as string || '');
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -190,7 +194,7 @@ export const restoreAccount = async (
       where: { id: user.id },
       data: { deletedAt: null, failedLoginAttempts: 0, lockedUntil: null }
     });
-    const token = generateToken(updatedUser);
+    const token = generateToken(updatedUser, req.ip || '', req.headers['user-agent'] as string || '');
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -308,7 +312,7 @@ export const googleLogin = async (
       return res.status(403).json({ message: 'Your account has been suspended' });
     }
     await logAction('USER_LOGIN', `User ${user.email} logged in via Google`, 'INFO', user.id, undefined, req.ip, req.headers['user-agent'] as string);
-    const token = generateToken(user);
+    const token = generateToken(user, req.ip || '', req.headers['user-agent'] as string || '');
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -471,7 +475,7 @@ export const facebookLogin = async (
       return res.status(403).json({ message: 'Your account has been suspended' });
     }
     
-    const token = generateToken(user);
+    const token = generateToken(user, req.ip || '', req.headers['user-agent'] as string || '');
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -678,7 +682,7 @@ export const passkeyLoginFinish = async (
         return res.status(403).json({ message: 'Your account has been suspended' });
       }
       
-      const token = generateToken(credential.user);
+      const token = generateToken(credential.user, req.ip || '', req.headers['user-agent'] as string || '');
       res.cookie('token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

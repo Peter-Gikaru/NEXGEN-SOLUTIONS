@@ -5,7 +5,7 @@ import { Key, Eye, EyeOff, ArrowRight, ArrowLeft, AlertCircle, Lock, Mail } from
 import toast from 'react-hot-toast';
 import api from '../services/api';
 import { GoogleLogin } from '@react-oauth/google';
-import { startAuthentication } from '@simplewebauthn/browser';
+import { startAuthentication, WebAuthnAbortService } from '@simplewebauthn/browser';
 
 const isGoogleEnabled = import.meta.env.VITE_GOOGLE_CLIENT_ID && import.meta.env.VITE_GOOGLE_CLIENT_ID !== 'your_google_client_id.apps.googleusercontent.com';
 
@@ -24,8 +24,6 @@ export const LoginPage: React.FC = () => {
   const [step, setStep] = useState<'email' | 'password'>('email');
 
   React.useEffect(() => {
-    const abortController = new AbortController();
-
     const initConditionalUI = async () => {
       try {
         if (window.PublicKeyCredential && PublicKeyCredential.isConditionalMediationAvailable) {
@@ -33,14 +31,10 @@ export const LoginPage: React.FC = () => {
           if (isAvailable) {
             const resp = await api.post('/auth/passkey/login/start');
             const options = resp.data;
-            // Typecast to any to safely pass AbortSignal depending on library version
             const asseResp = await startAuthentication({ 
               optionsJSON: options, 
-              mediation: 'conditional',
-              // @ts-ignore
-              signal: abortController.signal,
-              abortSignal: abortController.signal
-            } as any);
+              useBrowserAutofill: true
+            });
             
             const verificationResp = await api.post('/auth/passkey/login/finish', asseResp);
             passkeyLoginAction(verificationResp.data);
@@ -56,7 +50,7 @@ export const LoginPage: React.FC = () => {
           }
         }
       } catch (err: any) {
-        if (err.name === 'AbortError') {
+        if (err.code === 'ERROR_CEREMONY_ABORTED' || err.name === 'AbortError') {
           console.log('Conditional UI gracefully aborted');
         } else {
           console.log('Conditional UI failed', err);
@@ -66,7 +60,7 @@ export const LoginPage: React.FC = () => {
     initConditionalUI();
 
     return () => {
-      abortController.abort();
+      WebAuthnAbortService.cancel();
     };
   }, [passkeyLoginAction, navigate, redirect]);
 

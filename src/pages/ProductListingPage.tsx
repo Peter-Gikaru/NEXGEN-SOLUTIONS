@@ -104,7 +104,7 @@ export const ProductListingPage: React.FC = () => {
           originalPrice: p.compareAtPrice || p.price,
           rating: p.rating || 5.0,
           reviewCount: p.reviewCount || 0,
-          image: p.imageUrls[0] || '/favicon.png',
+          image: p.imageUrls[0] || '',
           discount: p.compareAtPrice ? Math.round(((p.compareAtPrice - p.price) / p.compareAtPrice) * 100) : 0,
           stockStatus: p.stock > 5 ? 'in_stock' : p.stock > 0 ? 'low_stock' : 'out_of_stock',
           description: p.description,

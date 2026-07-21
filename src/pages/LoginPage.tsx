@@ -24,6 +24,8 @@ export const LoginPage: React.FC = () => {
   const [step, setStep] = useState<'email' | 'password'>('email');
 
   React.useEffect(() => {
+    const abortController = new AbortController();
+
     const initConditionalUI = async () => {
       try {
         if (window.PublicKeyCredential && PublicKeyCredential.isConditionalMediationAvailable) {
@@ -31,7 +33,14 @@ export const LoginPage: React.FC = () => {
           if (isAvailable) {
             const resp = await api.post('/auth/passkey/login/start');
             const options = resp.data;
-            const asseResp = await startAuthentication({ optionsJSON: options, mediation: 'conditional' });
+            // Typecast to any to safely pass AbortSignal depending on library version
+            const asseResp = await startAuthentication({ 
+              optionsJSON: options, 
+              mediation: 'conditional',
+              // @ts-ignore
+              signal: abortController.signal,
+              abortSignal: abortController.signal
+            } as any);
             
             const verificationResp = await api.post('/auth/passkey/login/finish', asseResp);
             passkeyLoginAction(verificationResp.data);
@@ -47,10 +56,18 @@ export const LoginPage: React.FC = () => {
           }
         }
       } catch (err: any) {
-        console.log('Conditional UI aborted or failed', err);
+        if (err.name === 'AbortError') {
+          console.log('Conditional UI gracefully aborted');
+        } else {
+          console.log('Conditional UI failed', err);
+        }
       }
     };
     initConditionalUI();
+
+    return () => {
+      abortController.abort();
+    };
   }, [passkeyLoginAction, navigate, redirect]);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {

@@ -120,14 +120,22 @@ export const listProducts = async (
       }
     }
     if (search) {
-      const searchStr = search as string;
-      whereClause.OR = [
-        { name: { contains: searchStr } },
-        { slug: { contains: searchStr } },
-        { description: { contains: searchStr } },
-        { brand: { contains: searchStr } },
-        { category: { name: { contains: searchStr } } },
-      ];
+      const searchStr = (search as string).trim();
+      const searchTerms = searchStr.split(/\s+/);
+      
+      if (!whereClause.AND) whereClause.AND = [];
+      
+      const searchConditions = searchTerms.map(term => ({
+        OR: [
+          { name: { contains: term, mode: 'insensitive' } },
+          { slug: { contains: term, mode: 'insensitive' } },
+          { description: { contains: term, mode: 'insensitive' } },
+          { brand: { contains: term, mode: 'insensitive' } },
+          { category: { name: { contains: term, mode: 'insensitive' } } },
+        ]
+      }));
+      
+      whereClause.AND.push(...searchConditions);
     }
     const standardQueries = ['category', 'search', 'minPrice', 'maxPrice', 'brand', 'sort', 'page', 'limit', 'includeInactive', 'stockStatus'];
     

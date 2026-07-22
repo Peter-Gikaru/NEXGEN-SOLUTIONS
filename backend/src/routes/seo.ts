@@ -26,14 +26,14 @@ router.get('/sitemap.xml', async (req, res) => {
 `;
     for (const category of categories) {
       sitemap += `  <url>
-    <loc>${FRONTEND_URL}/products?category=${category.slug}</loc>
+    <loc>${FRONTEND_URL}/products?category=${encodeURIComponent(category.slug)}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>\n`;
     }
     for (const product of products) {
       sitemap += `  <url>
-    <loc>${FRONTEND_URL}/product/${product.slug}</loc>
+    <loc>${FRONTEND_URL}/product/${encodeURIComponent(product.slug)}</loc>
     <lastmod>${product.updatedAt.toISOString()}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -49,7 +49,7 @@ router.get('/sitemap.xml', async (req, res) => {
     }
     sitemap += `</urlset>`;
     res.header('Content-Type', 'application/xml');
-    res.send(sitemap.replace(/&/g, '&amp;').replace(/'/g, '&apos;').replace(/"/g, '&quot;').replace(/>/g, '&gt;').replace(/<(?!\/?url|<loc|<\/loc|<lastmod|<\/lastmod|<changefreq|<\/changefreq|<priority|<\/priority|urlset|<\/urlset|\?xml)/g, '&lt;'));
+    res.send(sitemap);
   } catch (error) {
     console.error('Error generating sitemap:', error);
     res.status(500).send('Error generating sitemap');

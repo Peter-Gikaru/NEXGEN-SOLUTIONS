@@ -249,7 +249,7 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
               onClick={() => toggleSection(specKey)}
               className="w-full flex items-center justify-between text-sm font-bold uppercase tracking-wider text-slate-900 mb-4 select-none cursor-pointer focus:outline-none"
             >
-              <span>{specKey}</span>
+              <span>{specKey.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ')}</span>
               {expanded[specKey] ? <ChevronDown className="h-4 w-4 text-slate-500" /> : <ChevronRight className="h-4 w-4 text-slate-500" />}
             </button>
             {expanded[specKey] && (

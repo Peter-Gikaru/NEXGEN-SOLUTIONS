@@ -61,6 +61,8 @@ export const getFilterMetadata = async (req: Request, res: Response, next: NextF
 
     const dynamicSpecs: Record<string, string[]> = {};
     Object.entries(dynamicSpecsRaw).forEach(([key, valSet]) => {
+      const lowerKey = key.toLowerCase();
+      if (['brand', 'brands', '.brands'].includes(lowerKey)) return;
       dynamicSpecs[key] = Array.from(valSet).sort();
     });
 

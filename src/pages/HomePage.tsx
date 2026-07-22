@@ -187,14 +187,14 @@ export const HomePage: React.FC = () => {
         schema={[organizationSchema, websiteSchema]}
       />
       {}
-      <div className="max-w-[1600px] mx-auto px-4 w-full pt-4 relative z-20">
+      <div className="w-full mx-auto px-4 lg:px-8 xl:px-12 pt-4 relative z-20">
         {}
         <div className="w-full rounded overflow-hidden shadow-sm h-[250px] md:h-[350px]">
           <Carousel />
         </div>
       </div>
       {}
-      <div className="max-w-[1600px] mx-auto px-4 w-full pt-6 flex flex-col gap-6">
+      <div className="w-full mx-auto px-4 lg:px-8 xl:px-12 pt-6 flex flex-col gap-6">
         {}
         <TrustBadges />
         {}

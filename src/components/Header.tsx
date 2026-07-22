@@ -124,7 +124,7 @@ export const Header: React.FC = () => {
     <header className="sticky top-0 z-40 w-full select-none shadow-md border-b border-gray-200">
       {}
       <div className="w-full bg-[#1a1a2e] text-white py-4 px-4">
-        <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="w-full mx-auto px-4 lg:px-8 xl:px-12 flex flex-col md:flex-row items-center justify-between gap-4">
           {}
           <div className="flex items-center justify-between w-full md:w-auto">
             <div className="flex items-center gap-2">

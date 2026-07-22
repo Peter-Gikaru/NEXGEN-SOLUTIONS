@@ -191,7 +191,7 @@ export const ProductListingPage: React.FC = () => {
       />
       {}
       <div className="bg-white border-b border-gray-200 select-none shadow-sm py-6 mb-6 text-left">
-        <div className="max-w-[1600px] mx-auto px-4">
+        <div className="w-full mx-auto px-4 lg:px-8 xl:px-12">
           <h1 className="text-3xl font-semibold text-[#1a1a2e] font-sans leading-none tracking-tight">
             {activeFilters.category || 'Laptops & Accessories'}
           </h1>
@@ -204,7 +204,7 @@ export const ProductListingPage: React.FC = () => {
         </div>
       </div>
       {/* Main Content Area */}
-      <div className="max-w-[1600px] mx-auto px-4 flex-1 w-full mb-12 relative flex flex-col gap-4">
+      <div className="w-full mx-auto px-4 lg:px-8 xl:px-12 flex-1 mb-12 relative flex flex-col gap-4">
         {}
         <div className="bg-white border border-gray-200 text-text-[#1a1a2e] rounded px-4 py-3 flex items-center justify-between shadow-sm select-none gap-2 relative z-30">
           {}

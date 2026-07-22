@@ -226,7 +226,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
           </span>
         )}
 
-        <h3 className="text-[clamp(1rem,1.5vw+0.5rem,1.125rem)] font-semibold font-sans text-dark-primary line-clamp-2 leading-snug hover:text-secondary transition-colors duration-100 min-h-[3.25rem]">
+        <h3 className="text-sm md:text-base font-semibold font-sans text-dark-primary line-clamp-2 leading-snug hover:text-secondary transition-colors duration-100 min-h-[3.25rem]">
           {title}
         </h3>
 
@@ -235,10 +235,10 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
           <span className="text-text-secondary">({reviewCount} reviews)</span>
         </div>
 
-        <div className="flex items-baseline gap-2.5 mt-1.5 flex-wrap">
-          <span className="text-[clamp(1.25rem,2vw+0.5rem,1.5rem)] font-semibold text-dark-primary">{formatPrice(price)}</span>
+        <div className="flex items-baseline gap-2 mt-1 flex-wrap">
+          <span className="text-base md:text-lg font-bold text-dark-primary">{formatPrice(price)}</span>
           {originalPrice > price && (
-            <span className="text-[clamp(0.875rem,1vw+0.5rem,1rem)] text-text-secondary line-through">{formatPrice(originalPrice)}</span>
+            <span className="text-xs md:text-sm text-text-secondary line-through">{formatPrice(originalPrice)}</span>
           )}
         </div>
 

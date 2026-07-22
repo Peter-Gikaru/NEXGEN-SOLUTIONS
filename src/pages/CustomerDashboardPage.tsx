@@ -201,7 +201,7 @@ export const CustomerDashboardPage: React.FC = () => {
   }
   return (
     <div className="flex-1 bg-slate-50 min-h-screen text-[#1a1a2e] font-sans py-10 px-4 md:px-8">
-      <div className="max-w-[1600px] mx-auto flex flex-col gap-8">
+      <div className="w-full mx-auto px-4 lg:px-8 xl:px-12 flex flex-col gap-8">
         <div className="flex items-center justify-between border-b border-gray-200 pb-5">
           <div className="text-left">
             <h1 className="text-3xl font-bold text-[#1a1a2e]">My Orders</h1>

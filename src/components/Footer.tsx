@@ -44,7 +44,7 @@ export const Footer: React.FC = () => {
     <footer className="w-full bg-[#1a1a2e] text-white border-t border-slate-800 mt-12 pb-20 md:pb-8 select-none">
       {}
       <div className="border-b border-slate-800 bg-slate-900/50 py-8">
-        <div className="max-w-[1600px] mx-auto px-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="w-full mx-auto px-4 lg:px-8 xl:px-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h3 className="text-[18px] font-semibold font-sans text-[#F59E0B] uppercase tracking-wider">New to NexGen Gadgets?</h3>
             <p className="text-[16px] text-gray-300 mt-1">Subscribe to our newsletter to get updates on our latest premium laptop deals!</p>
@@ -71,7 +71,7 @@ export const Footer: React.FC = () => {
         </div>
       </div>
       {}
-      <div className="max-w-[1600px] mx-auto px-4 py-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-left">
+      <div className="w-full mx-auto px-4 lg:px-8 xl:px-12 py-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-left">
         {}
         <div>
           <h4 className="text-[18px] font-semibold font-sans text-[#F59E0B] mb-4">Customer Service</h4>
@@ -142,7 +142,7 @@ export const Footer: React.FC = () => {
       </div>
       {}
       <div className="border-t border-slate-850 bg-slate-950 py-8 text-center">
-        <div className="max-w-[1600px] mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="w-full mx-auto px-4 lg:px-8 xl:px-12 flex flex-col md:flex-row items-center justify-between gap-6">
           {}
           <div className="flex items-center flex-wrap gap-3">
             <span className="text-[14px] uppercase font-semibold text-gray-400 tracking-wider">Accepted Payments:</span>

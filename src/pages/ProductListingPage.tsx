@@ -133,7 +133,6 @@ export const ProductListingPage: React.FC = () => {
   const handleApplyFilters = (newFilters: FilterState) => {
     setIsLoading(true);
     setActiveFilters(newFilters);
-    setIsMobileFiltersOpen(false);
     const params = new URLSearchParams();
     const searchVal = searchParams.get('search');
     if (searchVal) params.append('search', searchVal);

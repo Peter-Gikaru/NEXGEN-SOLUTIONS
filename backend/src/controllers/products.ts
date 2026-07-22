@@ -64,6 +64,26 @@ export const getFilterMetadata = async (req: Request, res: Response, next: NextF
       dynamicSpecs[key] = Array.from(valSet).sort();
     });
 
+    const distinctConditions = await prisma.product.findMany({
+      select: { condition: true },
+      distinct: ['condition'],
+      where: { isActive: true }
+    });
+
+    const conditionSet = new Set<string>();
+    if (dynamicSpecs['Condition']) {
+      dynamicSpecs['Condition'].forEach(c => conditionSet.add(c));
+    }
+    distinctConditions.forEach(c => {
+      if (c.condition && c.condition.trim() !== '') {
+        conditionSet.add(c.condition.trim());
+      }
+    });
+
+    if (conditionSet.size > 0) {
+      dynamicSpecs['Condition'] = Array.from(conditionSet).sort();
+    }
+
     return res.json({ brands: uniqueBrands, dynamicSpecs });
   } catch (error) {
     return next(error);
@@ -137,7 +157,7 @@ export const listProducts = async (
       
       whereClause.AND.push(...searchConditions);
     }
-    const standardQueries = ['category', 'search', 'minPrice', 'maxPrice', 'brand', 'sort', 'page', 'limit', 'includeInactive', 'stockStatus'];
+    const standardQueries = ['category', 'search', 'minPrice', 'maxPrice', 'brand', 'sort', 'page', 'limit', 'includeInactive', 'stockStatus', 'condition', 'Condition'];
     
     if (stockStatus) {
       if (stockStatus === 'inStock') {
@@ -147,6 +167,32 @@ export const listProducts = async (
       } else if (stockStatus === 'lowStock') {
         whereClause.stock = { gt: 0, lte: 5 };
       }
+    }
+
+    // Handle top-level condition (e.g., NEW, EX UK, REFURBISHED) and specs.Condition
+    const conditionParam = req.query.condition || req.query.Condition;
+    if (conditionParam) {
+      const conditions = Array.isArray(conditionParam) ? conditionParam : [conditionParam];
+      const conditionStrings = conditions.map(c => String(c));
+      const conditionUpper = conditions.map(c => String(c).toUpperCase());
+
+      const topLevelCondition = { condition: { in: conditionUpper, mode: 'insensitive' } };
+      
+      const specsConditions = conditionStrings.map(c => ({
+        specs: { path: ['Condition'], equals: c }
+      }));
+      const specsConditionsLower = conditionStrings.map(c => ({
+        specs: { path: ['condition'], equals: c }
+      }));
+
+      if (!whereClause.AND) whereClause.AND = [];
+      whereClause.AND.push({
+        OR: [
+          topLevelCondition,
+          ...specsConditions,
+          ...specsConditionsLower
+        ]
+      });
     }
     
     const buildSpecsOr = (field: string, value: any) => {

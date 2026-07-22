@@ -139,7 +139,7 @@ export const Header: React.FC = () => {
               <Link to="/" className="hover:opacity-90 transition-opacity flex items-center" aria-label="NexGen Gadgets Home">
                 <img src="/favicon.png" alt="NexGen Logo" className="h-10 md:h-14 w-auto object-contain" />
               </Link>
-              <span className="font-sans text-2xl md:text-3xl font-semibold leading-none tracking-wide text-white">
+              <span className="font-sans text-3xl md:text-4xl font-semibold leading-none tracking-wide text-white">
                   NexGen <span className="text-[#F59E0B]">Gadgets</span>
                 </span>
             </div>
@@ -183,7 +183,7 @@ export const Header: React.FC = () => {
               onBlur={() => setTimeout(() => setIsSuggestionsOpen(false), 200)}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="w-full pl-4 pr-12 py-2.5 md:py-3 text-[16px] md:text-[18px] bg-white text-text-primary rounded-lg border border-gray-300 md:border-2 md:border-transparent focus:outline-none focus:border-[#d97706] placeholder-gray-400"
+              className="w-full pl-4 pr-12 py-2.5 md:py-3 text-sm md:text-base bg-white text-text-primary rounded-lg border border-gray-300 md:border-2 md:border-transparent focus:outline-none focus:border-[#d97706] placeholder-gray-400"
             />
             <button
               type="submit"
@@ -324,14 +324,14 @@ export const Header: React.FC = () => {
             <div className="relative group ml-4">
               <div className="flex items-center gap-2 cursor-pointer hover:text-[#F59E0B] transition-colors py-2">
                 <div className="relative border-2 border-white group-hover:border-[#F59E0B] rounded-full w-8 h-8 flex items-center justify-center transition-colors">
-                  <span className="font-bold text-[18px] text-white group-hover:text-[#F59E0B] block mt-[-2px]">?</span>
+                  <span className="font-bold text-lg text-white group-hover:text-[#F59E0B] block mt-[-2px]">?</span>
                 </div>
-                <span className="text-[16px] font-bold flex items-center gap-1 text-white group-hover:text-[#F59E0B]">Help <ChevronDown className="h-4 w-4" /></span>
+                <span className="text-sm font-bold flex items-center gap-1 text-white group-hover:text-[#F59E0B]">Help <ChevronDown className="h-4 w-4" /></span>
               </div>
               <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded shadow-2xl py-2 z-50 text-slate-800 border border-gray-100 hidden group-hover:block">
-                <a href="tel:+254717043408" className="block px-4 py-3 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px] border-b border-gray-100">Call Us</a>
-                <Link to="/how-to-shop" className="block px-4 py-3 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px] border-b border-gray-100">How to Shop</Link>
-                <a href="mailto:support@nexgen-gadgets.com" className="block px-4 py-3 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px]">Contact Support</a>
+                <a href="tel:+254717043408" className="block px-4 py-3 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-sm border-b border-gray-100">Call Us</a>
+                <Link to="/how-to-shop" className="block px-4 py-3 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-sm border-b border-gray-100">How to Shop</Link>
+                <a href="mailto:support@nexgen-gadgets.com" className="block px-4 py-3 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-sm">Contact Support</a>
               </div>
             </div>
 
@@ -344,7 +344,7 @@ export const Header: React.FC = () => {
               <div className="flex items-center gap-2 cursor-pointer hover:text-[#F59E0B] transition-colors py-2 group">
                 <User className="h-9 w-9 text-white group-hover:text-[#F59E0B]" />
                 <div className="flex flex-col text-left">
-                  <span className="text-[16px] font-bold flex items-center gap-1 text-white group-hover:text-[#F59E0B]">
+                  <span className="text-sm font-bold flex items-center gap-1 text-white group-hover:text-[#F59E0B]">
                     {isAuthenticated ? `Hi, ${user?.name?.split(' ')[0]}` : 'Account'} 
                     <ChevronDown className="h-4 w-4" />
                   </span>
@@ -355,32 +355,32 @@ export const Header: React.FC = () => {
                 <div className="absolute right-0 top-full mt-1 w-64 bg-white rounded shadow-2xl py-3 z-50 text-slate-800 border border-gray-100">
                   {!isAuthenticated ? (
                     <div className="px-4 pb-3 mb-2 border-b border-gray-100">
-                      <Link to="/login" className="block w-full text-center bg-[#F59E0B] text-slate-900 font-bold py-3 rounded hover:bg-amber-500 transition-colors shadow-sm text-[16px]">
+                      <Link to="/login" className="block w-full text-center bg-[#F59E0B] text-slate-900 font-bold py-3 rounded hover:bg-amber-500 transition-colors shadow-sm text-base">
                         Sign In
                       </Link>
                     </div>
                   ) : (
-                    <div className="px-4 pb-2 mb-2 border-b border-gray-100 text-[14px] font-medium text-slate-500 truncate">
+                    <div className="px-4 pb-2 mb-2 border-b border-gray-100 text-sm font-medium text-slate-500 truncate">
                       {user?.email}
                     </div>
                   )}
                   
-                  <Link to={isAuthenticated && user?.role === 'ADMIN' ? '/admin' : '/orders'} className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px]">
+                  <Link to={isAuthenticated && user?.role === 'ADMIN' ? '/admin' : '/orders'} className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-sm">
                     <User className="h-5 w-5 text-gray-400" />
                     {isAuthenticated && user?.role === 'ADMIN' ? 'Admin Dashboard' : 'My Account'}
                   </Link>
-                  <Link to="/orders" className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px]">
+                  <Link to="/orders" className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-sm">
                     <Package className="h-5 w-5 text-gray-400" />
                     Orders
                   </Link>
-                  <Link to="/wishlist" className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px] justify-between">
+                  <Link to="/wishlist" className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-sm justify-between">
                     <div className="flex items-center gap-3">
                       <Heart className="h-5 w-5 text-gray-400" />
                       Saved Items
                     </div>
                     {wishlistItems.length > 0 && <span className="bg-[#F59E0B] text-white text-[12px] font-bold px-2 py-0.5 rounded-full">{wishlistItems.length}</span>}
                   </Link>
-                  <Link to="/compare" className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-[15px] justify-between">
+                  <Link to="/compare" className="flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 hover:text-[#F59E0B] transition-colors font-semibold text-sm justify-between">
                     <div className="flex items-center gap-3">
                       <Scale className="h-5 w-5 text-gray-400" />
                       Compare
@@ -391,7 +391,7 @@ export const Header: React.FC = () => {
                   {isAuthenticated && (
                     <>
                       <div className="h-px bg-gray-100 my-2"></div>
-                      <button onClick={async () => { await logout(); navigate('/login'); }} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-red-500 hover:text-red-600 transition-colors font-semibold text-left text-[15px]">
+                      <button onClick={async () => { await logout(); navigate('/login'); }} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 text-red-500 hover:text-red-600 transition-colors font-semibold text-left text-sm">
                         <Logout className="h-5 w-5" />
                         Logout
                       </button>
@@ -406,12 +406,12 @@ export const Header: React.FC = () => {
               <div className="relative">
                 <ShoppingCart className="h-9 w-9 text-white group-hover:text-[#F59E0B]" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-[#F59E0B] text-[#1a1a2e] text-[14px] font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#1a1a2e]">
+                  <span className="absolute -top-2 -right-2 bg-[#F59E0B] text-[#1a1a2e] text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center border-2 border-[#1a1a2e]">
                     {totalItems}
                   </span>
                 )}
               </div>
-              <span className="text-[16px] font-bold text-white group-hover:text-[#F59E0B]">Cart</span>
+              <span className="text-sm font-bold text-white group-hover:text-[#F59E0B]">Cart</span>
             </button>
           </div>
         </div>
@@ -437,12 +437,12 @@ export const Header: React.FC = () => {
               placeholder="Search laptops..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className="flex-1 pl-4 pr-4 py-3 border border-gray-700 rounded bg-[#1a1a2e] text-white text-[18px] focus:outline-none focus:border-[#F59E0B]"
+              className="flex-1 pl-4 pr-4 py-3 border border-gray-700 rounded bg-[#1a1a2e] text-white text-base focus:outline-none focus:border-[#F59E0B]"
               autoFocus
             />
             <button
               type="submit"
-              className="bg-[#F59E0B] text-primary px-5 py-3 rounded font-semibold text-[16px] cursor-pointer hover:bg-amber-500"
+              className="bg-[#F59E0B] text-primary px-5 py-3 rounded font-semibold text-sm cursor-pointer hover:bg-amber-500"
             >
               Search
             </button>

@@ -226,7 +226,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
           </span>
         )}
 
-        <h3 className="text-sm md:text-base font-semibold font-sans text-dark-primary line-clamp-2 leading-snug hover:text-secondary transition-colors duration-100 min-h-[3.25rem]">
+        <h3 className="text-base font-semibold font-sans text-dark-primary line-clamp-2 leading-snug hover:text-secondary transition-colors duration-100 min-h-[3.25rem]">
           {title}
         </h3>
 
@@ -236,9 +236,9 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
         </div>
 
         <div className="flex items-baseline gap-2 mt-1 flex-wrap">
-          <span className="text-base md:text-lg font-bold text-dark-primary">{formatPrice(price)}</span>
+          <span className="text-lg md:text-xl font-bold text-dark-primary">{formatPrice(price)}</span>
           {originalPrice > price && (
-            <span className="text-xs md:text-sm text-text-secondary line-through">{formatPrice(originalPrice)}</span>
+            <span className="text-sm text-text-secondary line-through">{formatPrice(originalPrice)}</span>
           )}
         </div>
 
@@ -250,21 +250,21 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
       <div className="p-3.5 border-t border-border-gray bg-bg-gray mt-auto z-10 select-none flex flex-col gap-2">
         <button
           onClick={handleBuyNow}
-          className="w-full bg-[#1a1a2e] text-white py-2.5 lg:py-2 rounded text-base lg:text-sm font-bold flex items-center justify-center gap-2 shadow hover:bg-slate-800 transition-all"
+          className="w-full bg-[#1a1a2e] text-white py-2 rounded text-sm font-medium flex items-center justify-center gap-2 shadow hover:bg-slate-800 transition-all"
         >
           Buy Now
         </button>
 
         <button
           onClick={handleWhatsAppOrder}
-          className="w-full bg-[#25D366] text-white py-2.5 lg:py-2 rounded text-base lg:text-sm font-bold flex items-center justify-center gap-2 shadow hover:bg-[#1ebd59] transition-all"
+          className="w-full bg-[#25D366] text-white py-2 rounded text-sm font-medium flex items-center justify-center gap-2 shadow hover:bg-[#1ebd59] transition-all"
         >
           <WhatsAppIcon size={18} /> Quick Order
         </button>
 
         <button
           onClick={handleAddToCart}
-          className="w-full bg-secondary text-dark-primary py-2.5 rounded text-base font-semibold uppercase tracking-wider hover:bg-amber-500 hover:text-white transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+          className="w-full bg-secondary text-dark-primary py-2 rounded text-sm font-semibold uppercase tracking-wider hover:bg-amber-500 hover:text-white transition-all duration-150 flex items-center justify-center gap-2 cursor-pointer shadow-sm"
         >
           <ShoppingCart className="h-5 w-5" /> Add to Cart
         </button>

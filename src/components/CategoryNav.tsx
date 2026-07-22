@@ -101,7 +101,7 @@ export const CategoryNav: React.FC = () => {
             )}
           </div>
 
-          <nav className="flex items-center gap-4 xl:gap-6 font-sans font-bold text-[13px] text-slate-700 h-full overflow-x-auto no-scrollbar">
+          <nav className="flex items-center gap-4 xl:gap-6 font-sans font-bold text-sm text-slate-700 h-full overflow-x-auto no-scrollbar">
             <Link to="/" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase whitespace-nowrap">HOME</Link>
             <Link to="/products" className="hover:text-[#F59E0B] transition-colors flex items-center h-full uppercase whitespace-nowrap">ALL PRODUCTS</Link>
             

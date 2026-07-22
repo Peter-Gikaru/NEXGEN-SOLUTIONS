@@ -66,7 +66,7 @@ export const AnnouncementBar: React.FC = () => {
   const current = announcements[currentIndex] || announcements[0];
 
   return (
-    <div className="bg-[#F59E0B] text-[#1a1a2e] px-4 py-3 md:py-4 relative text-[16px] md:text-xl font-black flex items-center justify-center transition-all h-12 md:h-16 overflow-hidden">
+    <div className="bg-[#F59E0B] text-[#1a1a2e] px-4 py-2 md:py-2.5 relative text-sm md:text-base font-bold flex items-center justify-center transition-all min-h-10 overflow-hidden">
       {current.link.startsWith('tel:') ? (
         <a href={current.link} className="flex items-center gap-2 md:gap-3 hover:scale-105 transition-transform duration-300">
           <span className="animate-fade-in tracking-wide">{current.text}</span>

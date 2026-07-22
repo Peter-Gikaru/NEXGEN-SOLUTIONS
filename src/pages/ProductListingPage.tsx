@@ -218,24 +218,24 @@ export const ProductListingPage: React.FC = () => {
                   setIsFilterOpen(!isFilterOpen);
                 }
               }}
-              className="flex items-center gap-1.5 border border-gray-305 rounded px-4 py-2 text-[14px] font-semibold bg-gray-50 hover:bg-gray-100 cursor-pointer"
+              className="flex items-center gap-1.5 border border-gray-305 rounded px-4 py-2 text-sm font-semibold bg-gray-50 hover:bg-gray-100 cursor-pointer"
             >
               <SlidersHorizontal className="h-5 w-5 text-secondary" />
               <span>Filter</span>
             </button>
           </div>
           {}
-          <span className="hidden lg:inline text-[16px] font-medium text-text-secondary">
+          <span className="hidden lg:inline text-sm font-medium text-text-secondary">
             Displaying {totalCount} products
           </span>
           {}
-          <div className="flex items-center gap-2 text-[16px] ml-auto">
+          <div className="flex items-center gap-2 text-sm ml-auto">
             <span className="text-text-secondary font-medium shrink-0">Sort by:</span>
             <div className="relative">
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="appearance-none bg-white border border-gray-300 rounded pl-3 pr-8 py-1.5 font-semibold text-text-[#1a1a2e] focus:outline-none focus:border-secondary cursor-pointer text-[14px]"
+                className="appearance-none bg-white border border-gray-300 rounded pl-3 pr-8 py-1.5 font-semibold text-text-[#1a1a2e] focus:outline-none focus:border-secondary cursor-pointer text-sm"
               >
                 <option value="recommended">Recommended</option>
                 <option value="newest">Newest</option>
@@ -253,7 +253,7 @@ export const ProductListingPage: React.FC = () => {
           if (Array.isArray(val)) return val.length > 0;
           return false;
         })) && (
-          <div className="flex flex-wrap gap-2 items-center text-[14px] select-none text-left">
+          <div className="flex flex-wrap gap-2 items-center text-sm select-none text-left">
             <span className="text-text-secondary font-medium">Active:</span>
             {activeFilters.category && (
               <span className="bg-emerald-50 text-accent border border-emerald-100 px-2 py-0.5 rounded flex items-center gap-1.5 font-semibold">
@@ -364,7 +364,7 @@ export const ProductListingPage: React.FC = () => {
                 )}
                 <button
                   onClick={handleClearFilters}
-                  className="bg-[#F59E0B] text-[#1a1a2e] font-semibold text-[16px] px-6 py-2.5 rounded hover:bg-amber-500 hover:text-white transition-colors cursor-pointer shadow-sm"
+                  className="bg-[#F59E0B] text-[#1a1a2e] font-semibold text-sm px-6 py-2.5 rounded hover:bg-amber-500 hover:text-white transition-colors cursor-pointer shadow-sm"
                 >
                   Reset All Filters
                 </button>
@@ -411,7 +411,7 @@ export const ProductListingPage: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-black/60 overflow-hidden flex justify-end lg:hidden">
           <div className="w-full max-w-xs bg-white h-full flex flex-col shadow-xl">
             <div className="bg-[#1a1a2e] text-white px-4 py-4 flex items-center justify-between">
-              <span className="text-[18px] font-semibold font-sans">Filter Laptops</span>
+              <span className="text-base font-semibold font-sans">Filter Laptops</span>
               <button
                 onClick={() => setIsMobileFiltersOpen(false)}
                 className="text-gray-400 hover:text-white p-1 rounded-full cursor-pointer"

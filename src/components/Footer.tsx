@@ -47,7 +47,7 @@ export const Footer: React.FC = () => {
         <div className="w-full mx-auto px-4 lg:px-8 xl:px-12 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <h3 className="text-[18px] font-semibold font-sans text-[#F59E0B] uppercase tracking-wider">New to NexGen Gadgets?</h3>
-            <p className="text-[16px] text-gray-300 mt-1">Subscribe to our newsletter to get updates on our latest premium laptop deals!</p>
+            <p className="text-sm text-gray-300 mt-1">Subscribe to our newsletter to get updates on our latest premium laptop deals!</p>
           </div>
           <form onSubmit={handleSubscribe} className="flex w-full md:w-auto max-w-md shrink-0 gap-2 font-sans">
             <div className="relative flex-1">
@@ -58,12 +58,12 @@ export const Footer: React.FC = () => {
                 placeholder="Enter E-mail Address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 text-[16px] bg-white text-text-primary rounded border border-gray-600 focus:outline-none focus:border-[#F59E0B]"
+                className="w-full pl-10 pr-4 py-2.5 text-sm bg-white text-text-primary rounded border border-gray-600 focus:outline-none focus:border-[#F59E0B]"
               />
             </div>
             <button
               type="submit"
-              className="bg-[#F59E0B] text-primary font-semibold text-[16px] px-6 py-2.5 rounded hover:bg-amber-500 hover:text-white transition-colors duration-150 cursor-pointer"
+              className="bg-[#F59E0B] text-primary font-semibold text-sm px-6 py-2.5 rounded hover:bg-amber-500 hover:text-white transition-colors duration-150 cursor-pointer"
             >
               Subscribe
             </button>
@@ -75,7 +75,7 @@ export const Footer: React.FC = () => {
         {}
         <div>
           <h4 className="text-[18px] font-semibold font-sans text-[#F59E0B] mb-4">Customer Service</h4>
-          <ul className="space-y-2.5 text-[16px] text-gray-300">
+          <ul className="space-y-2.5 text-sm text-gray-300">
             <li><Link to="/faq" className="hover:text-[#F59E0B] transition-colors">Help Center & FAQs</Link></li>
             <li><Link to="/shipping" className="hover:text-[#F59E0B] transition-colors">Delivery Timelines</Link></li>
             <li><Link to="/returns" className="hover:text-[#F59E0B] transition-colors">Return Policy & Refunds</Link></li>
@@ -86,7 +86,7 @@ export const Footer: React.FC = () => {
         {}
         <div>
           <h4 className="text-[18px] font-semibold font-sans text-[#F59E0B] mb-4">Information</h4>
-          <ul className="space-y-2.5 text-[16px] text-gray-300">
+          <ul className="space-y-2.5 text-sm text-gray-300">
               <li><a href="mailto:support@nexgen-gadgets.com" className="hover:text-[#F59E0B] transition-colors flex items-center gap-2"><ArrowRight className="h-3 w-3" /> Contact Us</a></li>
               <li><Link to="/track" className="hover:text-[#F59E0B] transition-colors flex items-center gap-2"><ArrowRight className="h-3 w-3" /> Track Order</Link></li>
               <li><Link to="/faq" className="hover:text-[#F59E0B] transition-colors flex items-center gap-2"><ArrowRight className="h-3 w-3" /> FAQs</Link></li>
@@ -98,7 +98,7 @@ export const Footer: React.FC = () => {
         {}
         <div>
           <h4 className="text-[18px] font-semibold font-sans text-[#F59E0B] mb-4">My Account</h4>
-          <ul className="space-y-2.5 text-[16px] text-gray-300">
+          <ul className="space-y-2.5 text-sm text-gray-300">
             <li><Link to="/orders" className="hover:text-[#F59E0B] transition-colors">My Profile Details</Link></li>
             <li><Link to="/track" className="hover:text-[#F59E0B] transition-colors">Track My Order</Link></li>
             <li><Link to="/orders" className="hover:text-[#F59E0B] transition-colors">Order History</Link></li>
@@ -134,7 +134,7 @@ export const Footer: React.FC = () => {
               </svg>
             </a>
           </div>
-          <div className="flex items-center gap-2 text-[14px] text-gray-400">
+          <div className="flex items-center gap-2 text-xs text-gray-400">
             <CheckCircle2 className="h-5 w-5 text-[#10B981] shrink-0" />
             <span>100% Verified Genuine Products</span>
           </div>
@@ -145,7 +145,7 @@ export const Footer: React.FC = () => {
         <div className="w-full mx-auto px-4 lg:px-8 xl:px-12 flex flex-col md:flex-row items-center justify-between gap-6">
           {}
           <div className="flex items-center flex-wrap gap-3">
-            <span className="text-[14px] uppercase font-semibold text-gray-400 tracking-wider">Accepted Payments:</span>
+            <span className="text-xs uppercase font-semibold text-gray-400 tracking-wider">Accepted Payments:</span>
             <div className="flex gap-2.5 items-center">
               {}
               <span className="flex items-center shadow-md shrink-0" title="M-PESA">
@@ -174,7 +174,7 @@ export const Footer: React.FC = () => {
             </div>
           </div>
           {}
-          <p className="text-[14px] text-gray-400">
+          <p className="text-xs text-gray-400">
             © 2026 NexGen Gadgets. All Rights Reserved.
           </p>
         </div>

@@ -178,7 +178,7 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                     value={brand}
                     checked={selectedBrand === brand}
                     onChange={() => handleBrandSelect(brand)}
-                    className="hidden"
+                    className="sr-only"
                   />
                   <span className={`text-sm ${selectedBrand === brand ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>{brand}</span>
                 </label>
@@ -193,7 +193,7 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                   value=""
                   checked={!selectedBrand}
                   onChange={() => handleBrandSelect('')}
-                  className="hidden"
+                  className="sr-only"
                 />
                 <span className={`text-sm ${!selectedBrand ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>All Brands</span>
               </label>
@@ -261,7 +261,7 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => handleStringArrayToggle(specKey, val)}
-                        className="hidden"
+                        className="sr-only"
                       />
                       <span className={`text-sm ${isSelected ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>{val}</span>
                     </label>

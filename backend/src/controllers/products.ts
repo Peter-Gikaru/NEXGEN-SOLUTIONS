@@ -53,8 +53,13 @@ export const getFilterMetadata = async (req: Request, res: Response, next: NextF
       if (p.specs && typeof p.specs === 'object' && !Array.isArray(p.specs)) {
         Object.entries(p.specs as Record<string, any>).forEach(([key, value]) => {
           if (value === undefined || value === null || String(value).trim() === '') return;
-          if (!dynamicSpecsRaw[key]) dynamicSpecsRaw[key] = new Set();
-          dynamicSpecsRaw[key].add(String(value).trim());
+          
+          let cleanKey = key.trim().replace(/^\.+/, '');
+          if (!cleanKey) return;
+          cleanKey = cleanKey.charAt(0).toUpperCase() + cleanKey.slice(1);
+          
+          if (!dynamicSpecsRaw[cleanKey]) dynamicSpecsRaw[cleanKey] = new Set();
+          dynamicSpecsRaw[cleanKey].add(String(value).trim());
         });
       }
     });

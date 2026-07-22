@@ -346,7 +346,7 @@ export const HomePage: React.FC = () => {
             </div>
             <div className="flex-1 min-w-0">
               {isLoading ? (
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-4 w-full">
+                <div className="grid gap-2 md:gap-4 w-full" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
                   {Array.from({ length: 8 }).map((_, i) => (
                     <div key={i} className="animate-pulse bg-white border border-gray-200 rounded p-4 h-[350px] flex flex-col gap-4">
                       <div className="w-full bg-gray-200 aspect-square rounded"></div>
@@ -372,7 +372,7 @@ export const HomePage: React.FC = () => {
                 </div>
               ) : (
                 <div className="w-full flex flex-col items-center">
-                  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-4 w-full">
+                  <div className="grid gap-2 md:gap-4 w-full" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
                     {visibleProducts.map((product) => (
                       <ProductCard
                         key={product.id}

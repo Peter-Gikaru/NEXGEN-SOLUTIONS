@@ -235,7 +235,9 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
           )}
         </div>
         
-        {Object.entries(dynamicSpecs).map(([specKey, specValues]) => (
+        {Object.entries(dynamicSpecs)
+          .filter(([specKey]) => !['brand', 'brands', '.brands'].includes(specKey.toLowerCase()))
+          .map(([specKey, specValues]) => (
           <div key={specKey} className="pt-6">
             <button 
               type="button"

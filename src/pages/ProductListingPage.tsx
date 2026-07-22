@@ -371,7 +371,7 @@ export const ProductListingPage: React.FC = () => {
               </div>
             ) : (
               <div className="w-full flex flex-col items-center">
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-4 w-full">
+                <div className="grid gap-2 md:gap-4 w-full" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))' }}>
                   {visibleProducts.map((product) => (
                     <ProductCard
                       key={product.id}

@@ -83,7 +83,8 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
   }, []);
 
   const handleStringArrayToggle = (key: string, value: string) => {
-    const current = (filters[key as keyof FilterState] as string[]) || [];
+    const filterVal = filters[key as keyof FilterState];
+    const current = Array.isArray(filterVal) ? filterVal : (filterVal ? [String(filterVal)] : []);
     const isSelected = current.includes(value);
     onChange({
       ...filters,
@@ -236,7 +237,11 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
         </div>
         
         {Object.entries(dynamicSpecs)
-          .filter(([specKey]) => !['brand', 'brands', '.brands'].includes(specKey.toLowerCase()))
+          .filter(([specKey]) => {
+             const lowerKey = specKey.toLowerCase();
+             const standardKeys = ['category', 'search', 'brand', 'brands', '.brands', 'sort', 'page', 'limit', 'minprice', 'maxprice', 'rating', 'instockonly'];
+             return !standardKeys.includes(lowerKey);
+          })
           .map(([specKey, specValues]) => (
           <div key={specKey} className="pt-6">
             <button 
@@ -250,7 +255,8 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
             {expanded[specKey] && (
               <div className="space-y-3 max-h-48 overflow-y-auto scrollbar-thin">
                 {specValues.map((val) => {
-                  const currentFilters = (filters[specKey as keyof FilterState] as string[]) || [];
+                  const filterVal = filters[specKey as keyof FilterState];
+                  const currentFilters = Array.isArray(filterVal) ? filterVal : (filterVal ? [String(filterVal)] : []);
                   const isSelected = currentFilters.includes(val);
                   return (
                     <label key={val} className="flex items-center gap-3 cursor-pointer group">

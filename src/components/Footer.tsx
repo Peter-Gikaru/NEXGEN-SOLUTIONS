@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { Link } from 'react-router-dom';
-import { Mail, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Mail, CheckCircle2, ArrowRight, MapPin } from 'lucide-react';
 export const Footer: React.FC = () => {
   const { addToast } = useCart();
   const [email, setEmail] = useState('');
+  const [storeLocation, setStoreLocation] = useState('Loading location...');
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     if (email.trim()) {
@@ -40,6 +41,23 @@ export const Footer: React.FC = () => {
       }
     }
   };
+
+  useEffect(() => {
+    const fetchLocation = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL;
+        const res = await fetch(`${apiUrl}/settings`);
+        if (res.ok) {
+          const data = await res.json();
+          setStoreLocation(data.storeLocation || 'Not set');
+        }
+      } catch (err) {
+        console.error('Failed to fetch store location', err);
+      }
+    };
+    fetchLocation();
+  }, []);
+
   return (
     <footer className="w-full bg-[#1a1a2e] text-white border-t border-slate-800 mt-12 pb-20 md:pb-8 select-none">
       {}
@@ -94,6 +112,14 @@ export const Footer: React.FC = () => {
             <li><Link to="/privacy" className="hover:text-[#F59E0B] transition-colors flex items-center gap-2"><ArrowRight className="h-3 w-3" /> Privacy & Cookie Notice</Link></li>
             <li><Link to="/" className="hover:text-[#F59E0B] transition-colors flex items-center gap-2"><ArrowRight className="h-3 w-3" /> Official Laptop Stores</Link></li>
           </ul>
+        </div>
+        {}
+        <div>
+          <h4 className="text-[18px] font-semibold font-sans text-[#F59E0B] mb-4">Our Location</h4>
+          <p className="text-sm text-gray-300 flex items-start gap-2">
+            <MapPin className="h-4 w-4 mt-1 shrink-0 text-[#F59E0B]" />
+            <span>{storeLocation}</span>
+          </p>
         </div>
         {}
         <div>

@@ -27,6 +27,7 @@ import newsletterRoutes from './routes/newsletter';
 import returnRoutes from './routes/returns';
 import warrantyRoutes from './routes/warranty';
 import livechatRoutes from './routes/livechat';
+import settingsRoutes from './routes/settings';
 import { initCronJobs } from './services/cron';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
@@ -150,6 +151,7 @@ app.use('/api/newsletter', newsletterRoutes);
 app.use('/api/returns', returnRoutes);
 app.use('/api/warranty', warrantyRoutes);
 app.use('/api/livechat', livechatRoutes);
+app.use('/api/settings', settingsRoutes);
 
 import { createServer } from 'http';
 import { Server } from 'socket.io';

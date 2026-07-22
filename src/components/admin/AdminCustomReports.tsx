@@ -32,12 +32,16 @@ export const AdminCustomReports = () => {
   const [filters, setFilters] = useState<FilterRule[]>([]);
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
   const handleTableChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const table = e.target.value;
     setSelectedTable(table);
     setSelectedFields(ALLOWED_TABLES[table]); // Select all by default
     setFilters([]); // Reset filters
+    setStartDate('');
+    setEndDate('');
     setResults([]);
   };
 
@@ -73,10 +77,18 @@ export const AdminCustomReports = () => {
     }
     setLoading(true);
     try {
+      const payloadFilters = filters.filter(f => f.value.trim() !== ''); // ignore empty filters
+      if (startDate) {
+        payloadFilters.push({ id: 'start-date-filter', field: 'createdAt', operator: '>=', value: startDate + 'T00:00:00.000Z' });
+      }
+      if (endDate) {
+        payloadFilters.push({ id: 'end-date-filter', field: 'createdAt', operator: '<=', value: endDate + 'T23:59:59.999Z' });
+      }
+
       const payload = {
         table: selectedTable,
         fields: selectedFields,
-        filters: filters.filter(f => f.value.trim() !== '') // ignore empty filters
+        filters: payloadFilters
       };
       const res = await api.post('/admin/reports/dynamic', payload);
       setResults(res.data);
@@ -160,9 +172,29 @@ export const AdminCustomReports = () => {
           <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wider">3. Filter Rules</h3>
-              <button onClick={addFilter} className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors">
-                <Plus className="w-3 h-3" /> Add Rule
-              </button>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-500 font-medium">Time Frame:</span>
+                  <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="border border-slate-200 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    title="Start Date"
+                  />
+                  <span className="text-slate-400">-</span>
+                  <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="border border-slate-200 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    title="End Date"
+                  />
+                </div>
+                <button onClick={addFilter} className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors">
+                  <Plus className="w-3 h-3" /> Add Rule
+                </button>
+              </div>
             </div>
             
             {filters.length === 0 ? (

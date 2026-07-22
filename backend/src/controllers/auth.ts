@@ -6,7 +6,7 @@ import { AuthenticatedRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import { OAuth2Client } from 'google-auth-library';
 import crypto from 'crypto';
-import { sendPasswordResetEmail, sendWelcomeEmail, sendPasswordChangedAlertEmail, sendAdminAlertEmail } from '../services/emailService';
+import { sendPasswordResetEmail, sendWelcomeEmail, sendPasswordChangedAlertEmail, sendAdminAlertEmail, send2FAEmail } from '../services/emailService';
 import { logAction } from '../services/audit';
 import axios from 'axios';
 import { generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse } from '@simplewebauthn/server';
@@ -138,6 +138,20 @@ export const login = async (
         data: { failedLoginAttempts: 0, lockedUntil: null }
       });
     }
+
+    if (user.role === 'ADMIN') {
+      const twoFactorCode = Math.floor(100000 + Math.random() * 900000).toString();
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          twoFactorCode,
+          twoFactorExpires: new Date(Date.now() + 10 * 60 * 1000) // 10 mins
+        }
+      });
+      send2FAEmail(user.email, twoFactorCode).catch(console.error);
+      return res.json({ requires2FA: true, email: user.email });
+    }
+
     logger.info(`User logged in successfully: ${user.email} (Role: ${user.role})`);
     await logAction('USER_LOGIN', `User ${user.email} logged in successfully`, 'INFO', user.id, undefined, req.ip, req.headers['user-agent'] as string);
     const token = generateToken(user, req.ip || '', req.headers['user-agent'] as string || '');
@@ -158,6 +172,51 @@ export const login = async (
     return next(error);
   }
 };
+
+export const verify2FA = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { email, code } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user || user.role !== 'ADMIN') {
+      return res.status(401).json({ message: 'Invalid request' });
+    }
+    
+    if (user.twoFactorCode !== code || !user.twoFactorExpires || user.twoFactorExpires < new Date()) {
+      logger.warn(`SECURITY ALERT: Invalid or expired 2FA code for email: ${email} from IP: ${req.ip}`);
+      await logAction('LOGIN_FAILED', `Invalid 2FA code for email: ${email}`, 'WARNING', user.id, undefined, req.ip, req.headers['user-agent'] as string);
+      return res.status(401).json({ message: 'Invalid or expired code' });
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { twoFactorCode: null, twoFactorExpires: null }
+    });
+
+    logger.info(`Admin logged in successfully with 2FA: ${user.email}`);
+    await logAction('USER_LOGIN', `Admin ${user.email} logged in successfully via 2FA`, 'INFO', user.id, undefined, req.ip, req.headers['user-agent'] as string);
+    const token = generateToken(user, req.ip || '', req.headers['user-agent'] as string || '');
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+    return res.json({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      requiresPasswordChange: user.requiresPasswordChange,
+      defaultAddress: user.defaultAddress ? JSON.parse(user.defaultAddress) : null,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export const deactivateAccount = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -246,6 +305,77 @@ export const getProfile = async (
       ...user,
       defaultAddress: user.defaultAddress ? JSON.parse(user.defaultAddress) : null,
     });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const updateProfile = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+    const { name, email, password } = req.body;
+    
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const updates: any = {};
+    if (name) updates.name = name;
+
+    if (email && email !== user.email) {
+      if (!password) {
+        return res.status(400).json({ message: 'Password is required to change email' });
+      }
+      if (!user.passwordHash) {
+        return res.status(400).json({ message: 'Cannot change email for accounts using third-party login' });
+      }
+      const isMatch = await bcrypt.compare(password, user.passwordHash);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Incorrect password' });
+      }
+      
+      const existingEmail = await prisma.user.findUnique({ where: { email } });
+      if (existingEmail) {
+        return res.status(400).json({ message: 'Email is already taken' });
+      }
+
+      updates.email = email;
+      updates.isVerified = false; // Require re-verification
+      
+      // Log the email change
+      await logAction('USER_EMAIL_UPDATE', `User changed email from ${user.email} to ${email}`, 'WARNING', user.id, undefined, req.ip, req.headers['user-agent'] as string);
+      
+      if (user.role === 'ADMIN') {
+         await prisma.securityAlert.create({
+           data: {
+             type: 'ADMIN_EMAIL_CHANGE',
+             description: `Admin ${user.name} changed email to ${email}`,
+             severity: 'CRITICAL',
+             userId: user.id,
+             ipAddress: req.ip || 'Unknown'
+           }
+         });
+      }
+    }
+
+    if (Object.keys(updates).length > 0) {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: updates
+      });
+      if (name && name !== user.name) {
+         await logAction('USER_PROFILE_UPDATE', `User updated profile name to ${name}`, 'INFO', user.id, undefined, req.ip, req.headers['user-agent'] as string);
+      }
+    }
+
+    return res.json({ message: 'Profile updated successfully' });
   } catch (error) {
     return next(error);
   }

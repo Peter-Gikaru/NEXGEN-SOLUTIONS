@@ -12,7 +12,8 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<User>;
+  login: (email: string, password: string) => Promise<any>;
+  verify2FA: (email: string, code: string) => Promise<User>;
   googleLogin: (credential: string) => Promise<User>;
   facebookLogin: (accessToken: string) => Promise<User>;
   passkeyLoginAction: (userData: any) => void;
@@ -42,10 +43,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     checkAuth();
   }, []);
-  const login = async (email: string, password: string): Promise<User> => {
+  const login = async (email: string, password: string): Promise<any> => {
     setIsLoading(true);
     try {
       const response = await api.post('/auth/login', { email, password });
+      if (response.data.requires2FA) {
+        return response.data;
+      }
       setUser(response.data);
       localStorage.setItem('nexgen_was_logged_in', 'true');
       return response.data;
@@ -75,6 +79,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
   
+  const verify2FA = async (email: string, code: string): Promise<User> => {
+    setIsLoading(true);
+    try {
+      const response = await api.post('/auth/login/verify-2fa', { email, code });
+      setUser(response.data);
+      localStorage.setItem('nexgen_was_logged_in', 'true');
+      return response.data;
+    } catch (error: any) {
+      setUser(null);
+      throw new Error(error.response?.data?.message || '2FA verification failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const facebookLogin = async (accessToken: string): Promise<User> => {
     setIsLoading(true);
     try {
@@ -128,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, googleLogin, facebookLogin, passkeyLoginAction, register, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, verify2FA, googleLogin, facebookLogin, passkeyLoginAction, register, logout }}>
       {children}
     </AuthContext.Provider>
   );

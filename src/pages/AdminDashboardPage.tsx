@@ -51,6 +51,7 @@ import AdminShippingQueue from '../components/admin/AdminShippingQueue';
 import AdminSecurity from '../components/admin/AdminSecurity';
 import { AdminAnalytics } from '../components/admin/AdminAnalytics';
 import { AdminCustomReports } from '../components/admin/AdminCustomReports';
+import { AdminSiteSettings } from '../components/admin/AdminSiteSettings';
 
 const RecursiveCategoryItem = ({ 
   category, 
@@ -2585,8 +2586,9 @@ export const AdminDashboardPage: React.FC = () => {
                       <thead>
                         <tr className="border-b border-slate-200 text-slate-500">
                           <th className="pb-3 px-2 font-semibold">Time</th>
-                          <th className="pb-3 px-2 font-semibold">Admin</th>
+                          <th className="pb-3 px-2 font-semibold">User</th>
                           <th className="pb-3 px-2 font-semibold">Action</th>
+                          <th className="pb-3 px-2 font-semibold">Severity</th>
                           <th className="pb-3 px-2 font-semibold">Details</th>
                           <th className="pb-3 px-2 font-semibold">IP Address</th>
                         </tr>
@@ -2595,15 +2597,29 @@ export const AdminDashboardPage: React.FC = () => {
                         {adminLogs.map((log) => (
                           <tr key={log.id} className="border-b border-slate-100 hover:bg-slate-50">
                             <td className="py-3 px-2 text-slate-600 whitespace-nowrap">{new Date(log.createdAt).toLocaleString()}</td>
-                            <td className="py-3 px-2 font-medium text-slate-900">{log.admin?.name} ({log.admin?.email})</td>
+                            <td className="py-3 px-2 font-medium text-slate-900">
+                              {log.user ? (
+                                <div>
+                                  <div>{log.user.name}</div>
+                                  <div className="text-xs text-slate-500">{log.user.email} ({log.user.role})</div>
+                                </div>
+                              ) : (
+                                <span className="text-slate-400 italic">System / Guest</span>
+                              )}
+                            </td>
                             <td className="py-3 px-2 font-bold text-[#F59E0B]">{log.action}</td>
-                            <td className="py-3 px-2 text-slate-600">{log.details}</td>
-                            <td className="py-3 px-2 text-slate-500 font-mono text-xs">{log.ipAddress}</td>
+                            <td className="py-3 px-2">
+                              <span className={`px-2 py-1 rounded text-xs font-bold ${log.severity === 'CRITICAL' ? 'bg-red-100 text-red-700' : log.severity === 'WARNING' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}`}>
+                                {log.severity || 'INFO'}
+                              </span>
+                            </td>
+                            <td className="py-3 px-2 text-slate-600 max-w-xs truncate" title={log.details}>{log.details}</td>
+                            <td className="py-3 px-2 text-slate-500 font-mono text-xs">{log.ipAddress || 'N/A'}</td>
                           </tr>
                         ))}
                         {adminLogs.length === 0 && (
                           <tr>
-                            <td colSpan={5} className="py-8 text-center text-slate-500">No logs found.</td>
+                            <td colSpan={6} className="py-8 text-center text-slate-500">No logs found.</td>
                           </tr>
                         )}
                       </tbody>

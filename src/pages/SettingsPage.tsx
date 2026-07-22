@@ -22,6 +22,8 @@ export const SettingsPage: React.FC = () => {
 
   
   const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [passwordForEmail, setPasswordForEmail] = useState('');
   
   // Security Form
   const [currentPassword, setCurrentPassword] = useState('');
@@ -34,10 +36,22 @@ export const SettingsPage: React.FC = () => {
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (email !== user?.email && !passwordForEmail) {
+      addToast('Password is required to confirm email change.');
+      return;
+    }
     setLoading(true);
     try {
-      await api.put('/auth/profile', { name });
+      await api.put('/auth/profile', { 
+        name, 
+        email: email !== user?.email ? email : undefined,
+        password: passwordForEmail ? passwordForEmail : undefined
+      });
       addToast('Profile updated successfully.');
+      if (email !== user?.email) {
+        addToast('Please verify your new email address.');
+        setPasswordForEmail('');
+      }
     } catch (err: any) {
       addToast(err.response?.data?.message || 'Failed to update profile');
     } finally {
@@ -137,9 +151,32 @@ export const SettingsPage: React.FC = () => {
               <form onSubmit={handleProfileUpdate} className="space-y-4 max-w-lg">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email Address</label>
-                  <input type="email" value={user?.email || ''} disabled className="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-500 cursor-not-allowed" />
-                  <p className="text-xs text-gray-400 mt-1">Email addresses cannot be changed for security reasons.</p>
+                  <input 
+                    type="email" 
+                    value={email} 
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" 
+                  />
                 </div>
+                {email !== user?.email && (
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                    <label className="block text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-1">
+                      Confirm Password to change email
+                    </label>
+                    <input 
+                      type="password" 
+                      value={passwordForEmail} 
+                      onChange={(e) => setPasswordForEmail(e.target.value)}
+                      required
+                      placeholder="Current Password"
+                      className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-yellow-300 dark:border-yellow-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-yellow-500 outline-none" 
+                    />
+                    <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-2">
+                      You will need to verify your new email address after saving.
+                    </p>
+                  </div>
+                )}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
                   <input type="text" value={name} onChange={(e) => setName(e.target.value)} required className="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />

@@ -10,7 +10,7 @@ import { startAuthentication, WebAuthnAbortService } from '@simplewebauthn/brows
 const isGoogleEnabled = import.meta.env.VITE_GOOGLE_CLIENT_ID && import.meta.env.VITE_GOOGLE_CLIENT_ID !== 'your_google_client_id.apps.googleusercontent.com';
 
 export const LoginPage: React.FC = () => {
-  const { login, googleLogin, facebookLogin, passkeyLoginAction } = useAuth();
+  const { login, verify2FA, googleLogin, facebookLogin, passkeyLoginAction } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get('redirect');
@@ -21,7 +21,8 @@ export const LoginPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
-  const [step, setStep] = useState<'email' | 'password'>('email');
+  const [step, setStep] = useState<'email' | 'password' | '2fa'>('email');
+  const [twoFactorCode, setTwoFactorCode] = useState('');
 
   React.useEffect(() => {
     const initConditionalUI = async () => {
@@ -95,6 +96,12 @@ export const LoginPage: React.FC = () => {
     setIsSubmitting(true);
     try {
       const userData = await login(email, password);
+      if (userData.requires2FA) {
+        setStep('2fa');
+        toast.success('2FA code sent to your email');
+        setIsSubmitting(false);
+        return;
+      }
       toast.success('Successfully logged in');
       if (userData.requiresPasswordChange) {
         navigate('/force-change-password');
@@ -109,6 +116,26 @@ export const LoginPage: React.FC = () => {
       } else {
         toast.error(err.response?.data?.message || 'Login failed. Please try again.');
       }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handle2FASubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const userData = await verify2FA(email, twoFactorCode);
+      toast.success('Successfully logged in');
+      if (userData.requiresPasswordChange) {
+        navigate('/force-change-password');
+      } else if (redirect) {
+        navigate(`/${redirect}`);
+      } else {
+        navigate('/');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Invalid 2FA code');
     } finally {
       setIsSubmitting(false);
     }
@@ -236,7 +263,7 @@ export const LoginPage: React.FC = () => {
 
         
 
-        <form onSubmit={step === 'email' ? handleEmailSubmit : handlePasswordSubmit} className="space-y-6">
+        <form onSubmit={step === 'email' ? handleEmailSubmit : step === 'password' ? handlePasswordSubmit : handle2FASubmit} className="space-y-6">
           {step === 'email' ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
               <label className="block text-slate-700 text-sm font-bold mb-2" htmlFor="email">
@@ -256,7 +283,7 @@ export const LoginPage: React.FC = () => {
                 />
               </div>
             </div>
-          ) : (
+          ) : step === 'password' ? (
             <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-4">
               <div className="flex items-center gap-2 mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
                 <Mail className="h-4 w-4 text-slate-500" />
@@ -293,6 +320,31 @@ export const LoginPage: React.FC = () => {
                 </div>
               </div>
             </div>
+          ) : (
+            <div className="animate-in fade-in slide-in-from-right-4 duration-300 space-y-4">
+              <div className="flex items-center gap-2 mb-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                <Mail className="h-4 w-4 text-slate-500" />
+                <span className="text-sm text-slate-700 font-medium">Verify Login</span>
+                <button type="button" onClick={() => setStep('password')} className="ml-auto text-xs text-[#F59E0B] font-bold hover:underline">Back</button>
+              </div>
+              <div>
+                <label className="block text-slate-700 text-sm font-bold mb-2" htmlFor="twoFactorCode">
+                  6-Digit Admin Code
+                </label>
+                <div className="relative">
+                  <Key className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-500" />
+                  <input
+                    id="twoFactorCode"
+                    type="text"
+                    required
+                    value={twoFactorCode}
+                    onChange={(e) => setTwoFactorCode(e.target.value)}
+                    placeholder="123456"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-sm focus:outline-none focus:bg-white focus:border-[#F59E0B] focus:ring-2 focus:ring-[#F59E0B]/20 transition-all placeholder-slate-400 text-slate-900 font-medium tracking-widest"
+                  />
+                </div>
+              </div>
+            </div>
           )}
 
           <button
@@ -300,7 +352,7 @@ export const LoginPage: React.FC = () => {
             disabled={isSubmitting}
             className="w-full bg-[#F59E0B] text-white font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 hover:bg-amber-600 transition-colors disabled:opacity-50 cursor-pointer shadow-lg shadow-amber-500/30"
           >
-            <span>{isSubmitting ? 'Please wait...' : step === 'email' ? 'Continue' : 'Secure Sign In'}</span>
+            <span>{isSubmitting ? 'Please wait...' : step === 'email' ? 'Continue' : step === 'password' ? 'Secure Sign In' : 'Verify Code'}</span>
             {!isSubmitting && <ArrowRight className="h-5 w-5" />}
           </button>
         </form>

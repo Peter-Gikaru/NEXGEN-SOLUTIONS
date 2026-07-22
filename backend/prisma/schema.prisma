@@ -27,6 +27,8 @@ model User {
   resetPasswordExpires   DateTime?
   googleId               String?              @unique
   facebookId             String?              @unique
+  twoFactorCode          String?
+  twoFactorExpires       DateTime?
   defaultAddress         String?
   addresses              Address[]
   cart                   Cart?
@@ -386,4 +388,10 @@ model NewsletterSubscriber {
   id        String   @id @default(uuid())
   email     String   @unique
   createdAt DateTime @default(now())
+}
+
+model SiteSettings {
+  id            String   @id @default("global") // We only want one row
+  storeLocation String   @default("Not set")
+  updatedAt     DateTime @updatedAt
 }

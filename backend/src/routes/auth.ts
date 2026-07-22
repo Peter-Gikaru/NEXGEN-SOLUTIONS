@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, logout, getProfile, updateAddress, deactivateAccount, restoreAccount, googleLogin, forgotPassword, resetPassword, forceChangePassword, facebookLogin, passkeyRegisterStart, passkeyRegisterFinish, passkeyLoginStart, passkeyLoginFinish, checkPasskey } from '../controllers/auth';
+import { register, login, logout, getProfile, updateProfile, updateAddress, deactivateAccount, restoreAccount, googleLogin, forgotPassword, resetPassword, forceChangePassword, facebookLogin, passkeyRegisterStart, passkeyRegisterFinish, passkeyLoginStart, passkeyLoginFinish, checkPasskey, verify2FA } from '../controllers/auth';
 import { authenticateJWT } from '../middleware/auth';
 import { validateBody, registerSchema, loginSchema } from '../utils/validation';
 import { authLimiter, emailLimiter, passkeyLimiter } from '../middleware/rateLimiter';
@@ -8,8 +8,10 @@ const router = Router();
 
 router.post('/register', authLimiter, validateBody(registerSchema), register);
 router.post('/login', authLimiter, validateBody(loginSchema), login);
+router.post('/login/verify-2fa', authLimiter, verify2FA);
 router.post('/logout', logout);
 router.get('/profile', authenticateJWT, getProfile);
+router.put('/profile', authenticateJWT, updateProfile);
 router.put('/profile/address', authenticateJWT, updateAddress);
 router.delete('/deactivate', authenticateJWT, deactivateAccount);
 router.post('/restore', authLimiter, restoreAccount);

@@ -425,3 +425,30 @@ export const sendAbandonedCartEmail = async (email: string, cartItems: any[], pr
     console.error('Error sending abandoned cart email:', error);
   }
 };
+
+export const send2FAEmail = async (email: string, code: string) => {
+  const content = `
+    <h2>Admin Login Verification Code</h2>
+    <p>Please use the following 6-digit code to complete your login.</p>
+    <div style="background-color: #f8fafc; border: 1px dashed #f59e0b; padding: 20px; border-radius: 12px; margin: 25px 0; text-align: center;">
+      <span style="font-size: 32px; font-weight: 900; letter-spacing: 5px; color: #0f172a;">${code}</span>
+    </div>
+    <p>This code will expire in 10 minutes.</p>
+    <p>If you did not attempt to log in, please secure your account immediately.</p>
+  `;
+  const mailOptions = {
+    from: `"NexGen Security" <${fromEmail}>`,
+    to: email,
+    subject: 'Your Admin Login Verification Code',
+    html: generateEmailLayout(content),
+  };
+  try {
+    if (process.env.SMTP_USER && process.env.SMTP_USER !== 'mock_user') {
+      await transporter.sendMail(mailOptions);
+    } else {
+      console.log(`[MOCK EMAIL] 2FA Code for ${email}: ${code}`);
+    }
+  } catch (error) {
+    console.error('Error sending 2FA email:', error);
+  }
+};

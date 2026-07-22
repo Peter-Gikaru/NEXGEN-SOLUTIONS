@@ -6,12 +6,12 @@ export const getAdminLogs = async (
   next: NextFunction
 ) => {
   try {
-    const logs = await prisma.adminLog.findMany({
+    const logs = await prisma.auditLog.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 100, 
+      take: 200,
       include: {
-        admin: {
-          select: { name: true, email: true },
+        user: {
+          select: { name: true, email: true, role: true },
         },
       },
     });

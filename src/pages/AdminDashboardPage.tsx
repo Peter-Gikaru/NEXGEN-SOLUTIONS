@@ -40,7 +40,8 @@ import {
   Download,
   Search,
   Table,
-  RefreshCw
+  RefreshCw,
+  Settings
 } from 'lucide-react';
 import AdminNewsletter from '../components/admin/AdminNewsletter';
 import AdminReturns from '../components/admin/AdminReturns';
@@ -143,8 +144,10 @@ interface AdminCategory {
 }
 interface AdminLog {
   id: string;
-  admin: { name: string; email: string };
+  admin?: { name: string; email: string };
+  user?: { name: string; email: string; role: string };
   action: string;
+  severity?: string;
   details: string;
   ipAddress: string | null;
   createdAt: string;
@@ -963,7 +966,8 @@ export const AdminDashboardPage: React.FC = () => {
     returns: 'Product Returns',
     securityCenter: 'Security Center',
     shippingQueue: 'Shipping Queue',
-    warranties: 'Warranties & Claims'
+    warranties: 'Warranties & Claims',
+    siteSettings: 'Site Settings'
   };
   const currentTitle = activeTabTitle[activeTab] || 'Dashboard';
   return (
@@ -1252,6 +1256,19 @@ export const AdminDashboardPage: React.FC = () => {
                 <ShieldCheck className="h-5 w-5 shrink-0" />
                 <span>Security Center</span>
               </button>
+              {user?.role === 'ADMIN' && (
+                <button
+                  onClick={() => { setActiveTab('siteSettings'); setIsSidebarOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all cursor-pointer text-sm ${
+                    activeTab === 'siteSettings'
+                      ? 'bg-[#F59E0B] text-slate-950 font-bold shadow-md shadow-amber-500/10'
+                      : 'text-slate-400 hover:bg-slate-800 hover:text-white font-semibold'
+                  }`}
+                >
+                  <Settings className="h-5 w-5 shrink-0" />
+                  <span>Site Settings</span>
+                </button>
+              )}
             </div>
           </div>
         </nav>
@@ -1293,6 +1310,9 @@ export const AdminDashboardPage: React.FC = () => {
             )}
             {activeTab === 'newsletter' && (
               <AdminNewsletter />
+            )}
+            {activeTab === 'siteSettings' && (
+              <AdminSiteSettings />
             )}
             {activeTab === 'returns' && (
               <AdminReturns />

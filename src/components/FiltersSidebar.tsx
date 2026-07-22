@@ -73,10 +73,21 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
     api.get('/products/meta/filters')
       .then(res => {
         if (res.data?.brands?.length > 0) {
-          setBrands(res.data.brands);
+          // Ensure brands are strings (API might return objects)
+          const formattedBrands = res.data.brands.map((b: any) => typeof b === 'string' ? b : (b.name || b._id || String(b)));
+          setBrands(formattedBrands);
         }
         if (res.data?.dynamicSpecs) {
-          setDynamicSpecs(res.data.dynamicSpecs);
+          // Ensure dynamic specs values are strings
+          const formattedSpecs: Record<string, string[]> = {};
+          Object.entries(res.data.dynamicSpecs).forEach(([key, values]: [string, any]) => {
+            if (Array.isArray(values)) {
+              formattedSpecs[key] = values.map((v: any) => typeof v === 'string' ? v : (v.name || v.value || String(v)));
+            } else {
+              formattedSpecs[key] = [];
+            }
+          });
+          setDynamicSpecs(formattedSpecs);
         }
       })
       .catch(err => console.error('Failed to load dynamic filters:', err));
@@ -92,9 +103,7 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
     });
   };
 
-  const handleBrandSelect = (brand: string) => {
-    onChange({ ...filters, brand: brand ? [brand] : [] });
-  };
+
   
   const [expanded, setExpanded] = useState<Record<string, boolean>>({
     categories: true,
@@ -106,15 +115,14 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
     setExpanded(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const selectedCategory = filters.category;
-  const selectedBrand = filters.brand[0] || '';
+  const selectedCategory = filters.category || '';
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden sticky top-24">
-      <div className="p-5 border-b border-slate-200 bg-slate-50 flex items-center gap-2">
+    <div className="flex flex-col h-full w-full">
+      <div className="pb-4 mb-4 border-b border-slate-200 flex items-center gap-2">
         <Filter className="h-5 w-5 text-slate-700" />
         <h2 className="font-sans font-bold text-lg text-slate-800">Filters</h2>
       </div>
-      <div className="p-6 space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin divide-y divide-slate-100">
+      <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto scrollbar-thin divide-y divide-slate-100 pr-2">
         {/* Categories */}
         <div className="pt-0">
           <button 
@@ -168,36 +176,25 @@ export const FiltersSidebar: React.FC<FiltersSidebarProps> = ({
           </button>
           {expanded.brands && (
             <div className="space-y-3">
-              {brands.map((brand) => (
+              {brands.map((brand) => {
+                const currentBrands = Array.isArray(filters.brand) ? filters.brand : (filters.brand ? [String(filters.brand)] : []);
+                const isSelected = currentBrands.includes(brand);
+                return (
                 <label key={brand} className="flex items-center gap-3 cursor-pointer group">
-                  <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${selectedBrand === brand ? 'bg-[#F59E0B] border-[#F59E0B]' : 'border-slate-300 bg-white group-hover:border-[#F59E0B]'}`}>
-                    {selectedBrand === brand && <Check className="h-3.5 w-3.5 text-white" />}
+                  <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${isSelected ? 'bg-[#F59E0B] border-[#F59E0B]' : 'border-slate-300 bg-white group-hover:border-[#F59E0B]'}`}>
+                    {isSelected && <Check className="h-3.5 w-3.5 text-white" />}
                   </div>
                   <input
-                    type="radio"
+                    type="checkbox"
                     name="brand"
                     value={brand}
-                    checked={selectedBrand === brand}
-                    onChange={() => handleBrandSelect(brand)}
+                    checked={isSelected}
+                    onChange={() => handleStringArrayToggle('brand', brand)}
                     className="sr-only"
                   />
-                  <span className={`text-sm ${selectedBrand === brand ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>{brand}</span>
+                  <span className={`text-sm ${isSelected ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>{brand}</span>
                 </label>
-              ))}
-              <label className="flex items-center gap-3 cursor-pointer group">
-                <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${!selectedBrand ? 'bg-slate-200 border-slate-300' : 'border-slate-300 bg-white group-hover:border-[#F59E0B]'}`}>
-                  {!selectedBrand && <Check className="h-3.5 w-3.5 text-slate-500" />}
-                </div>
-                <input
-                  type="radio"
-                  name="brand"
-                  value=""
-                  checked={!selectedBrand}
-                  onChange={() => handleBrandSelect('')}
-                  className="sr-only"
-                />
-                <span className={`text-sm ${!selectedBrand ? 'font-semibold text-slate-900' : 'text-slate-600'}`}>All Brands</span>
-              </label>
+              )})}
             </div>
           )}
         </div>

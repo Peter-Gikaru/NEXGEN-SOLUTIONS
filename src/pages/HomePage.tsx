@@ -9,6 +9,7 @@ import { RecentlyViewed } from '../components/RecentlyViewed';
 import { ProductCard } from '../components/ProductCard';
 import { FiltersSidebar } from '../components/FiltersSidebar';
 import { SlidersHorizontal, X, ChevronDown } from 'lucide-react';
+import type { FilterState } from '../types';
 import { SEO } from '../components/SEO';
 export const HomePage: React.FC = () => {
   const organizationSchema = {
@@ -40,10 +41,14 @@ export const HomePage: React.FC = () => {
     }
   };
   const [searchParams, setSearchParams] = useSearchParams();
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [minPrice, setMinPrice] = useState<string>('');
-  const [maxPrice, setMaxPrice] = useState<string>('');
+  const [activeFilters, setActiveFilters] = useState<FilterState>({
+    category: '',
+    brand: [],
+    minPrice: '',
+    maxPrice: '',
+    rating: '',
+    inStockOnly: false
+  });
   const [sortBy, setSortBy] = useState<string>('recommended');
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -54,7 +59,7 @@ export const HomePage: React.FC = () => {
     const searchVal = searchParams.get('search');
     const catVal = searchParams.get('category');
     if (catVal) {
-      setSelectedCategory(catVal);
+      setActiveFilters(prev => ({ ...prev, category: catVal }));
     }
     if (searchVal || catVal) {
       const catalogEl = document.getElementById('main-catalog');
@@ -89,7 +94,8 @@ export const HomePage: React.FC = () => {
           stockStatus: 'in_stock',
           stockCount: p.stock,
           isVerified: true,
-          description: p.description
+          description: p.description,
+          specs: p.specs
         }));
         setProducts(mapped);
       } catch (err) {
@@ -112,18 +118,29 @@ export const HomePage: React.FC = () => {
           p.description.toLowerCase().includes(q)
       );
     }
-    if (selectedCategory) {
-      result = result.filter((p) => p.category === selectedCategory);
+    if (activeFilters.category) {
+      result = result.filter((p) => p.category === activeFilters.category);
     }
-    if (selectedBrands.length > 0) {
-      result = result.filter((p) => selectedBrands.includes(p.brand));
+    if (activeFilters.brand && activeFilters.brand.length > 0) {
+      result = result.filter((p) => activeFilters.brand.includes(p.brand));
     }
-    if (minPrice) {
-      result = result.filter((p) => p.price >= parseFloat(minPrice));
+    if (activeFilters.minPrice) {
+      result = result.filter((p) => p.price >= parseFloat(activeFilters.minPrice));
     }
-    if (maxPrice) {
-      result = result.filter((p) => p.price <= parseFloat(maxPrice));
+    if (activeFilters.maxPrice) {
+      result = result.filter((p) => p.price <= parseFloat(activeFilters.maxPrice));
     }
+    const standardKeys = ['category', 'search', 'brand', 'sort', 'page', 'limit', 'minPrice', 'maxPrice', 'rating', 'inStockOnly'];
+    Object.entries(activeFilters).forEach(([key, values]) => {
+      if (!standardKeys.includes(key) && Array.isArray(values) && values.length > 0) {
+        result = result.filter(p => {
+          if (!p.specs || !p.specs[key]) return false;
+          const specVals = Array.isArray(p.specs[key]) ? p.specs[key] : [p.specs[key]];
+          return (values as string[]).some(v => specVals.includes(v));
+        });
+      }
+    });
+
     if (sortBy === 'price-asc') {
       result.sort((a, b) => a.price - b.price);
     } else if (sortBy === 'price-desc') {
@@ -134,21 +151,14 @@ export const HomePage: React.FC = () => {
       result.sort((a, b) => b.reviewCount - a.reviewCount);
     }
     return result;
-  }, [selectedCategory, selectedBrands, minPrice, maxPrice, sortBy, searchParams, products]);
+  }, [activeFilters, sortBy, searchParams, products]);
   useEffect(() => {
     setDisplayedCount(20);
-  }, [selectedCategory, selectedBrands, minPrice, maxPrice, sortBy, searchParams]);
+  }, [activeFilters, sortBy, searchParams]);
   const visibleProducts = filteredProducts.slice(0, displayedCount);
-  const handleBrandCheckboxChange = (brandName: string) => {
-    setSelectedBrands((prev) =>
-      prev.includes(brandName) ? prev.filter((b) => b !== brandName) : [...prev, brandName]
-    );
-  };
+
   const handleClearFilters = () => {
-    setSelectedCategory('');
-    setSelectedBrands([]);
-    setMinPrice('');
-    setMaxPrice('');
+    setActiveFilters({ category: '', brand: [], minPrice: '', maxPrice: '', rating: '', inStockOnly: false });
     setSortBy('recommended');
     setSearchParams({});
   };
@@ -201,14 +211,13 @@ export const HomePage: React.FC = () => {
         <FlashDeals />
         {}
         <ProductGrid products={products} onShopNowClick={(category, brand, search) => {
-          setSelectedCategory(category);
-          if (brand) {
-            setSelectedBrands([brand]);
-          } else {
-            setSelectedBrands([]);
-          }
-          setMinPrice('');
-          setMaxPrice('');
+          setActiveFilters(prev => ({
+            ...prev,
+            category: category || '',
+            brand: brand ? [brand] : [],
+            minPrice: '',
+            maxPrice: ''
+          }));
           const params: Record<string, string> = { category };
           if (brand) params.brand = brand;
           if (search) params.search = search;
@@ -223,7 +232,7 @@ export const HomePage: React.FC = () => {
           {}
           <div className="text-left mb-6">
             <h2 className="text-3xl font-semibold text-primary font-sans leading-none tracking-tight">
-              {searchQuery ? `Search Results for "${searchQuery}"` : selectedCategory || 'Browse All Products'}
+              {searchQuery ? `Search Results for "${searchQuery}"` : activeFilters.category || 'Browse All Products'}
             </h2>
             <p className="text-[16px] text-text-secondary mt-2">
               Found {filteredProducts.length} premium laptops match in our catalog
@@ -271,25 +280,44 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
             {}
-            {(selectedCategory || selectedBrands.length > 0 || minPrice || maxPrice) && (
+            {(Object.entries(activeFilters).some(([key, val]) => {
+              if (['category', 'minPrice', 'maxPrice', 'rating'].includes(key)) return !!val;
+              if (Array.isArray(val)) return val.length > 0;
+              return false;
+            })) && (
               <div className="flex flex-wrap gap-2 items-center text-[14px] select-none text-left">
                 <span className="text-text-secondary font-medium">Active:</span>
-                {selectedCategory && (
+                {activeFilters.category && (
                   <span className="bg-emerald-50 text-accent border border-emerald-100 px-2 py-0.5 rounded flex items-center gap-1 font-semibold">
-                    {selectedCategory}
-                    <button onClick={() => setSelectedCategory('')} className="hover:text-red-500 cursor-pointer">×</button>
+                    {activeFilters.category}
+                    <button onClick={() => setActiveFilters(prev => ({ ...prev, category: '' }))} className="hover:text-red-500 cursor-pointer">×</button>
                   </span>
                 )}
-                {selectedBrands.map((b) => (
-                  <span key={b} className="bg-emerald-50 text-accent border border-emerald-100 px-2 py-0.5 rounded flex items-center gap-1 font-semibold">
+                {activeFilters.brand && activeFilters.brand.map((b) => (
+                  <span key={`brand-${b}`} className="bg-emerald-50 text-accent border border-emerald-100 px-2 py-0.5 rounded flex items-center gap-1 font-semibold">
                     {b}
-                    <button onClick={() => handleBrandCheckboxChange(b)} className="hover:text-red-500 cursor-pointer">×</button>
+                    <button onClick={() => setActiveFilters(prev => ({ ...prev, brand: prev.brand.filter(x => x !== b) }))} className="hover:text-red-500 cursor-pointer">×</button>
                   </span>
                 ))}
-                {(minPrice || maxPrice) && (
+                {Object.entries(activeFilters)
+                  .filter(([key, val]) => !['category', 'brand', 'minPrice', 'maxPrice', 'rating', 'inStockOnly'].includes(key) && Array.isArray(val) && val.length > 0)
+                  .map(([key, valArray]) => 
+                    (valArray as string[]).map((val: string) => (
+                      <span key={`${key}-${val}`} className="bg-emerald-50 text-accent border border-emerald-100 px-2 py-0.5 rounded flex items-center gap-1.5 font-semibold">
+                        {val}
+                        <button 
+                          onClick={() => setActiveFilters(prev => ({ ...prev, [key]: (prev[key as keyof FilterState] as string[]).filter(x => x !== val) }))} 
+                          className="hover:text-red-500 cursor-pointer"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))
+                )}
+                {(activeFilters.minPrice || activeFilters.maxPrice) && (
                   <span className="bg-emerald-50 text-accent border border-emerald-100 px-2 py-0.5 rounded flex items-center gap-1 font-semibold">
-                    Price: {minPrice || '0'} - {maxPrice || 'Any'}
-                    <button onClick={() => { setMinPrice(''); setMaxPrice(''); }} className="hover:text-red-500 cursor-pointer">×</button>
+                    Price: {activeFilters.minPrice || '0'} - {activeFilters.maxPrice || 'Any'}
+                    <button onClick={() => setActiveFilters(prev => ({ ...prev, minPrice: '', maxPrice: '' }))} className="hover:text-red-500 cursor-pointer">×</button>
                   </span>
                 )}
               </div>
@@ -303,45 +331,8 @@ export const HomePage: React.FC = () => {
               }`}
             >
               <FiltersSidebar
-                filters={{
-                  category: selectedCategory,
-
-                  minPrice: minPrice,
-                  maxPrice: maxPrice,
-                  brand: selectedBrands,
-                  cpu: [],
-                  ram: [],
-                  storage: [],
-                  condition: [],
-                  generation: [],
-                  rating: '',
-                  inStockOnly: false
-
-
-                }}
-                onChange={(newFilters: any) => {
-                  const f = typeof newFilters === 'function' ? newFilters({
-                    category: selectedCategory,
-  
-                    minPrice: minPrice,
-                    maxPrice: maxPrice,
-                    brand: selectedBrands,
-                    cpu: [],
-                    ram: [],
-                    storage: [],
-                    condition: [],
-                  generation: [],
-                  rating: '',
-                  inStockOnly: false
-  
-  
-                  }) : newFilters;
-                  if (f.category !== selectedCategory) setSelectedCategory(f.category || '');
-                  if (f.minPrice !== minPrice) setMinPrice(f.minPrice);
-                  if (f.maxPrice !== maxPrice) setMaxPrice(f.maxPrice);
-                  if (f.brand !== selectedBrands) setSelectedBrands(f.brand || []);
-                }}
-
+                filters={activeFilters}
+                onChange={(newFilters: FilterState) => setActiveFilters(newFilters)}
               />
             </div>
             <div className="flex-1 min-w-0">
@@ -425,44 +416,8 @@ export const HomePage: React.FC = () => {
             </div>
             <div className="flex-1 overflow-y-auto p-4 bg-white">
               <FiltersSidebar
-                filters={{
-                  category: selectedCategory,
-
-                  minPrice: minPrice,
-                  maxPrice: maxPrice,
-                  brand: selectedBrands,
-                  cpu: [],
-                  ram: [],
-                  storage: [],
-                  condition: [],
-                  generation: [],
-                  rating: '',
-                  inStockOnly: false
-
-
-                }}
-                onChange={(newFilters: any) => {
-                  const f = typeof newFilters === 'function' ? newFilters({
-                    category: selectedCategory,
-  
-                    minPrice: minPrice,
-                    maxPrice: maxPrice,
-                    brand: selectedBrands,
-                    cpu: [],
-                    ram: [],
-                    storage: [],
-                    condition: [],
-                  generation: [],
-                  rating: '',
-                  inStockOnly: false
-  
-  
-                  }) : newFilters;
-                  if (f.category !== selectedCategory) setSelectedCategory(f.category || '');
-                  if (f.minPrice !== minPrice) setMinPrice(f.minPrice);
-                  if (f.maxPrice !== maxPrice) setMaxPrice(f.maxPrice);
-                  if (f.brand !== selectedBrands) setSelectedBrands(f.brand || []);
-                }}
+                filters={activeFilters}
+                onChange={(newFilters: FilterState) => setActiveFilters(newFilters)}
               />
             </div>
           </div>

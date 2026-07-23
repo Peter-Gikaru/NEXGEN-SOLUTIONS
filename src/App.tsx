@@ -6,7 +6,7 @@ import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Header } from './components/Header';
 import { CartDrawer } from './components/CartDrawer';
-const HomePage = lazy(() => import('./pages/HomePage').then((m: any) => ({ default: m.HomePage || m.default })));
+import { HomePage } from './pages/HomePage';
 const ProductListingPage = lazy(() => import('./pages/ProductListingPage').then((m: any) => ({ default: m.ProductListingPage || m.default })));
 const LoginPage = lazy(() => import('./pages/LoginPage').then((m: any) => ({ default: m.LoginPage || m.default })));
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then((m: any) => ({ default: m.RegisterPage || m.default })));

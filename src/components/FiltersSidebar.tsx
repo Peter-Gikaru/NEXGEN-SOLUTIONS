@@ -35,6 +35,7 @@ const RecursiveCategoryFilter: React.FC<{
         </span>
         {hasChildren && (
           <button 
+            aria-label={isExpanded ? "Collapse category" : "Expand category"}
             onClick={(e) => {
               e.stopPropagation();
               setIsExpanded(!isExpanded);

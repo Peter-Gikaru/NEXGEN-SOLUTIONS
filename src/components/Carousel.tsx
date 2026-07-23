@@ -77,7 +77,7 @@ export const Carousel: React.FC = () => {
             {}
             <div className="absolute inset-0 bg-black/20"></div>
             {}
-            <div className="relative z-20 max-w-5xl mx-auto px-6 text-center text-white flex flex-col items-center gap-3">
+            <div className="relative z-20 max-w-5xl mx-auto px-6 text-center text-white flex flex-col items-center justify-center gap-3 min-h-[200px] md:min-h-[250px]">
               <span className="bg-secondary text-[#1a1a2e] text-[14px] font-semibold px-3 py-1 rounded shadow-sm">
                 {slide.title}
               </span>

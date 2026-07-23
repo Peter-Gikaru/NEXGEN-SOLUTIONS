@@ -73,7 +73,7 @@ export const CategoryNav: React.FC = () => {
             <button className={`flex items-center gap-3 px-6 h-12 font-bold uppercase tracking-wide text-sm transition-colors rounded-t-lg ${
               isDropdownOpen 
                 ? 'bg-white border-t border-l border-r border-slate-200 text-[#1a1a2e]' 
-                : 'bg-[#F59E0B] text-white hover:bg-amber-500'
+                : 'bg-[#F59E0B] text-[#1a1a2e] hover:bg-amber-500'
             }`}>
               <Menu className="h-5 w-5" />
               <span>All Categories</span>

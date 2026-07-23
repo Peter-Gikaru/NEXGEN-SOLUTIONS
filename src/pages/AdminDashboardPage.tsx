@@ -77,7 +77,7 @@ const RecursiveCategoryItem = ({
       >
         <div className="flex items-center gap-2">
           {hasChildren ? (
-            <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 hover:bg-slate-200 rounded text-slate-500">
+            <button aria-label={isExpanded ? "Collapse category" : "Expand category"} onClick={() => setIsExpanded(!isExpanded)} className="p-1 hover:bg-slate-200 rounded text-slate-500">
               {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
             </button>
           ) : (

@@ -39,8 +39,10 @@ import { LiveChatWidget } from './components/LiveChatWidget';
 import { MobileBottomNav } from './components/MobileBottomNav';
 
 import { Link } from 'react-router-dom';
+import { GoogleOneTapPrompt } from './components/GoogleOneTapPrompt';
 
-
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+const isGoogleEnabled = GOOGLE_CLIENT_ID && GOOGLE_CLIENT_ID !== 'your_google_client_id.apps.googleusercontent.com';
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-white">
     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -147,22 +149,25 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <Suspense fallback={<PageLoader />}><Routes>
-      <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
-      <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
-      <Route path="/forgot-password" element={<AuthLayout><ForgotPasswordPage /></AuthLayout>} />
-      <Route path="/reset-password/:token" element={<AuthLayout><ResetPasswordPage /></AuthLayout>} />
-      <Route path="/force-change-password" element={<AuthLayout><ForceChangePasswordPage /></AuthLayout>} />
+    <>
+      {isGoogleEnabled && !user && <GoogleOneTapPrompt />}
+      <Suspense fallback={<PageLoader />}><Routes>
+        <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
+        <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
+        <Route path="/forgot-password" element={<AuthLayout><ForgotPasswordPage /></AuthLayout>} />
+        <Route path="/reset-password/:token" element={<AuthLayout><ResetPasswordPage /></AuthLayout>} />
+        <Route path="/force-change-password" element={<AuthLayout><ForceChangePasswordPage /></AuthLayout>} />
 
-      <Route 
-        path="/admin/*" 
-        element={user?.role === 'ADMIN' ? <AdminLayout /> : <Navigate to="/login" replace />} 
-      />
-      <Route 
-        path="/*" 
-        element={user?.role === 'ADMIN' ? <Navigate to="/admin" replace /> : <CustomerLayout />} 
-      />
-    </Routes></Suspense>
+        <Route 
+          path="/admin/*" 
+          element={user?.role === 'ADMIN' ? <AdminLayout /> : <Navigate to="/login" replace />} 
+        />
+        <Route 
+          path="/*" 
+          element={user?.role === 'ADMIN' ? <Navigate to="/admin" replace /> : <CustomerLayout />} 
+        />
+      </Routes></Suspense>
+    </>
   );
 };
 

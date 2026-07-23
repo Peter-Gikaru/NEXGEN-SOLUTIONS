@@ -255,9 +255,9 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
           Buy Now
         </button>
 
-        <button
+        <button 
           onClick={handleWhatsAppOrder}
-          className="w-full bg-[#25D366] text-white py-2 rounded text-sm font-medium flex items-center justify-center gap-2 shadow hover:bg-[#1ebd59] transition-all"
+          className="w-full bg-[#25D366] text-[#064e3b] py-2 rounded text-sm font-medium flex items-center justify-center gap-2 shadow hover:bg-[#1ebd59] transition-all"
         >
           <WhatsAppIcon size={18} /> Quick Order
         </button>

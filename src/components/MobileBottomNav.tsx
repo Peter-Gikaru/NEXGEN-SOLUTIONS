@@ -59,7 +59,7 @@ export const MobileBottomNav: React.FC = () => {
               onClick={item.action}
               className="flex flex-col items-center justify-center flex-1 h-full py-1 text-slate-500 hover:text-slate-900 transition-all active:scale-90 cursor-pointer relative"
             >
-              <div className={`p-1.5 rounded-full transition-colors relative ${isActive ? 'text-[#F59E0B]' : 'text-slate-500'}`}>
+              <div className={`p-1.5 rounded-full transition-colors relative ${isActive ? 'text-[#d97706]' : 'text-slate-500'}`}>
                 <Icon className="w-5.5 h-5.5 transition-transform duration-250 hover:scale-105" />
                 
                 {}
@@ -69,7 +69,7 @@ export const MobileBottomNav: React.FC = () => {
                   </span>
                 )}
               </div>
-              <span className={`text-[10px] font-sans font-extrabold tracking-wider leading-none mt-0.5 ${isActive ? 'text-[#F59E0B]' : 'text-slate-400'}`}>
+              <span className={`text-[10px] font-sans font-extrabold tracking-wider leading-none mt-0.5 ${isActive ? 'text-[#d97706]' : 'text-slate-400'}`}>
                 {item.label}
               </span>
             </button>

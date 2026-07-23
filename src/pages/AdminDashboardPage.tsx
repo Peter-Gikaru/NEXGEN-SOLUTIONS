@@ -744,7 +744,10 @@ export const AdminDashboardPage: React.FC = () => {
       await api.put(`/products/${editingProduct.id}`, {
         name: editingProduct.name,
         description: editingProduct.description,
+        brand: editingProduct.brand,
+        price: Number(editingProduct.price),
         compareAtPrice: editingProduct.compareAtPrice ? Number(editingProduct.compareAtPrice) : null,
+        stock: Number(editingProduct.stock || 0),
         condition: editingProduct.condition,
         imageUrls: editingProduct.imageUrls,
         threeDModelUrl: editingProduct.threeDModelUrl,
@@ -1982,14 +1985,24 @@ export const AdminDashboardPage: React.FC = () => {
                           <label className="block text-xs font-bold mb-1 uppercase text-slate-600">Description</label>
                           <textarea value={editingProduct.description} onChange={(e) => setEditingProduct({...editingProduct, description: e.target.value})} className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" rows={3} required />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-bold mb-1 uppercase text-slate-600">Price (KES)</label>
-                            <input type="number" value={editingProduct.price} onChange={(e) => setEditingProduct({...editingProduct, price: Number(e.target.value)})} className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
-                          </div>
-                                           <div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-bold mb-1 uppercase text-slate-600">Price (KES)</label>
+                              <input type="number" value={editingProduct.price} onChange={(e) => setEditingProduct({...editingProduct, price: Number(e.target.value)})} className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
+                            </div>
+                            <div>
                               <label className="block text-xs font-bold mb-1 uppercase text-slate-600">Compare Price (KES)</label>
                               <input type="number" value={editingProduct.compareAtPrice || ''} onChange={(e) => setEditingProduct({...editingProduct, compareAtPrice: Number(e.target.value)})} className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-bold mb-1 uppercase text-slate-600">Brand</label>
+                              <input type="text" value={editingProduct.brand || ''} onChange={(e) => setEditingProduct({...editingProduct, brand: e.target.value})} className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-bold mb-1 uppercase text-slate-600">Stock Total</label>
+                              <input type="number" value={editingProduct.stock ?? 10} onChange={(e) => setEditingProduct({...editingProduct, stock: Number(e.target.value)})} className="w-full border border-slate-300 rounded p-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" required />
                             </div>
                           </div>
                           <div>

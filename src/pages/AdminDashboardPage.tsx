@@ -2627,7 +2627,7 @@ export const AdminDashboardPage: React.FC = () => {
                                 <span className="text-slate-400 italic">System / Guest</span>
                               )}
                             </td>
-                            <td className="py-3 px-2 font-bold text-[#F59E0B]">{log.action}</td>
+                            <td className="py-3 px-2 font-bold text-[#b45309]">{log.action}</td>
                             <td className="py-3 px-2">
                               <span className={`px-2 py-1 rounded text-xs font-bold ${log.severity === 'CRITICAL' ? 'bg-red-100 text-red-700' : log.severity === 'WARNING' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700'}`}>
                                 {log.severity || 'INFO'}

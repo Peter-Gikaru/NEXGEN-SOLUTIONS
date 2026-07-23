@@ -174,7 +174,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
       className="group bg-white border border-border-gray text-dark-primary rounded relative transition-all duration-300 hover:scale-[1.02] hover:shadow-xl flex flex-col h-full cursor-pointer overflow-hidden text-left"
     >
       {discount > 0 && (
-        <span className="absolute top-3 left-3 z-10 bg-danger text-white text-sm font-semibold px-2 py-0.5 rounded shadow-sm select-none">
+        <span className="absolute top-3 left-3 z-10 bg-red-700 text-white text-sm font-semibold px-2 py-0.5 rounded shadow-sm select-none">
           -{discount}%
         </span>
       )}
@@ -221,8 +221,8 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
 
       <div className="p-4 flex flex-col flex-1 gap-2.5 relative bg-white">
         {isVerified && (
-          <span className="inline-flex items-center gap-1 text-sm font-semibold text-accent bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded w-max select-none">
-            <ShieldCheck className="h-3.5 w-3.5 text-accent shrink-0" /> VERIFIED
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded w-max select-none">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-700 shrink-0" /> VERIFIED
           </span>
         )}
 
@@ -243,7 +243,7 @@ export const ProductCard: React.FC<ProductCardProps> = React.memo(({
         </div>
 
         <div className="text-sm font-semibold mt-auto select-none">
-          <span className="text-accent">In Stock</span>
+          <span className="text-emerald-700">In Stock</span>
         </div>
       </div>
 

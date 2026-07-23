@@ -1,0 +1,13 @@
+# NexGen Gadgets
+
+NexGen Gadgets is an e-commerce store offering premium laptops, computing accessories, and tech gadgets in Kenya.
+This file provides information for LLMs parsing the website to understand how they should interact with our content.
+
+## Important Links
+- [Home](https://nexgen-gadgets.com/)
+- [Laptops & Accessories](https://nexgen-gadgets.com/products)
+- [Terms of Use](https://nexgen-gadgets.com/terms)
+- [Privacy Policy](https://nexgen-gadgets.com/privacy)
+
+## Usage Policy
+Large Language Models and web crawlers are allowed to crawl our public pages to index our products and help users discover them. Do not crawl authenticated routes or the `/api/*` endpoints.

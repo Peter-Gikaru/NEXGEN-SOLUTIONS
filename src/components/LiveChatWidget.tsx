@@ -139,6 +139,7 @@ export const LiveChatWidget: React.FC = () => {
           <button 
             onClick={() => setIsOpen(true)}
             className="bg-[#f59e0b] text-white p-4 rounded-full shadow-lg hover:bg-[#d97706] hover:scale-105 active:scale-95 transition-all flex items-center justify-center drag-handle cursor-move"
+            aria-label="Open Live Chat"
           >
             <MessageSquare className="w-6 h-6" />
           </button>

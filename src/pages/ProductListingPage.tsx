@@ -232,6 +232,7 @@ export const ProductListingPage: React.FC = () => {
             <span className="text-text-secondary font-medium shrink-0">Sort by:</span>
             <div className="relative">
               <select
+                aria-label="Sort products"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="appearance-none bg-white border border-gray-300 rounded pl-3 pr-8 py-1.5 font-semibold text-text-[#1a1a2e] focus:outline-none focus:border-secondary cursor-pointer text-sm"

@@ -120,11 +120,13 @@ export const Carousel: React.FC = () => {
           <button
             key={idx}
             onClick={() => setActiveSlide(idx)}
-            className={`h-2.5 w-2.5 rounded-full transition-all duration-150 cursor-pointer ${
-              idx === activeSlide ? 'bg-secondary w-6' : 'bg-white/50 hover:bg-white'
-            }`}
+            className="p-3 cursor-pointer touch-manipulation group"
             aria-label={`Go to slide ${idx + 1}`}
-          />
+          >
+            <div className={`h-2.5 rounded-full transition-all duration-150 ${
+              idx === activeSlide ? 'bg-secondary w-6' : 'w-2.5 bg-white/50 group-hover:bg-white'
+            }`} />
+          </button>
         ))}
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { CartProvider } from './context/CartContext';
@@ -6,39 +6,46 @@ import { WishlistProvider } from './context/WishlistContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Header } from './components/Header';
 import { CartDrawer } from './components/CartDrawer';
-import { HomePage } from './pages/HomePage';
-import { ProductListingPage } from './pages/ProductListingPage';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { AdminDashboardPage } from './pages/AdminDashboardPage';
-import { CheckoutPage } from './pages/CheckoutPage';
-import { CustomerDashboardPage } from './pages/CustomerDashboardPage';
-import { ProductDetailPage } from './pages/ProductDetailPage';
-import { TrackOrderPage } from './pages/TrackOrderPage';
-import { WishlistPage } from './pages/WishlistPage';
-import { NotFoundPage } from './pages/NotFoundPage';
-import { FAQPage } from './pages/FAQPage';
-import { ShippingDetailsPage } from './pages/ShippingDetailsPage';
-import { ReturnPolicyPage } from './pages/ReturnPolicyPage';
-import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage';
-import { TermsOfUsePage } from './pages/TermsOfUsePage';
-import { HowToShopPage } from './pages/HowToShopPage';
-import { ComparePage } from './pages/ComparePage';
-import ReturnRequestPage from './pages/ReturnRequestPage';
-import WarrantyClaimPage from './pages/WarrantyClaimPage';
-import HelpCenterPage from './pages/HelpCenterPage';
+const HomePage = lazy(() => import('./pages/HomePage').then((m: any) => ({ default: m.HomePage || m.default })));
+const ProductListingPage = lazy(() => import('./pages/ProductListingPage').then((m: any) => ({ default: m.ProductListingPage || m.default })));
+const LoginPage = lazy(() => import('./pages/LoginPage').then((m: any) => ({ default: m.LoginPage || m.default })));
+const RegisterPage = lazy(() => import('./pages/RegisterPage').then((m: any) => ({ default: m.RegisterPage || m.default })));
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage').then((m: any) => ({ default: m.AdminDashboardPage || m.default })));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then((m: any) => ({ default: m.CheckoutPage || m.default })));
+const CustomerDashboardPage = lazy(() => import('./pages/CustomerDashboardPage').then((m: any) => ({ default: m.CustomerDashboardPage || m.default })));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage').then((m: any) => ({ default: m.ProductDetailPage || m.default })));
+const TrackOrderPage = lazy(() => import('./pages/TrackOrderPage').then((m: any) => ({ default: m.TrackOrderPage || m.default })));
+const WishlistPage = lazy(() => import('./pages/WishlistPage').then((m: any) => ({ default: m.WishlistPage || m.default })));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m: any) => ({ default: m.NotFoundPage || m.default })));
+const FAQPage = lazy(() => import('./pages/FAQPage').then((m: any) => ({ default: m.FAQPage || m.default })));
+const ShippingDetailsPage = lazy(() => import('./pages/ShippingDetailsPage').then((m: any) => ({ default: m.ShippingDetailsPage || m.default })));
+const ReturnPolicyPage = lazy(() => import('./pages/ReturnPolicyPage').then((m: any) => ({ default: m.ReturnPolicyPage || m.default })));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then((m: any) => ({ default: m.PrivacyPolicyPage || m.default })));
+const TermsOfUsePage = lazy(() => import('./pages/TermsOfUsePage').then((m: any) => ({ default: m.TermsOfUsePage || m.default })));
+const HowToShopPage = lazy(() => import('./pages/HowToShopPage').then((m: any) => ({ default: m.HowToShopPage || m.default })));
+const ComparePage = lazy(() => import('./pages/ComparePage').then((m: any) => ({ default: m.ComparePage || m.default })));
+const ReturnRequestPage = lazy(() => import('./pages/ReturnRequestPage').then((m: any) => ({ default: m.default || m.ReturnRequestPage })));
+const WarrantyClaimPage = lazy(() => import('./pages/WarrantyClaimPage').then((m: any) => ({ default: m.default || m.WarrantyClaimPage })));
+const HelpCenterPage = lazy(() => import('./pages/HelpCenterPage').then((m: any) => ({ default: m.default || m.HelpCenterPage })));
 import { AnnouncementBar } from './components/AnnouncementBar';
 import { Footer } from './components/Footer';
 import { FollowUsSidebar } from './components/FollowUsSidebar';
 
 import { CookieConsent } from './components/CookieConsent';
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
-import { ResetPasswordPage } from './pages/ResetPasswordPage';
-import { ForceChangePasswordPage } from './pages/ForceChangePasswordPage';
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then((m: any) => ({ default: m.ForgotPasswordPage || m.default })));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then((m: any) => ({ default: m.ResetPasswordPage || m.default })));
+const ForceChangePasswordPage = lazy(() => import('./pages/ForceChangePasswordPage').then((m: any) => ({ default: m.ForceChangePasswordPage || m.default })));
 import { LiveChatWidget } from './components/LiveChatWidget';
 import { MobileBottomNav } from './components/MobileBottomNav';
 
 import { Link } from 'react-router-dom';
+
+
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-white">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+);
 
 const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
@@ -78,10 +85,10 @@ const AuthLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 const AdminLayout: React.FC = () => {
   return (
     <div className="h-screen w-full font-sans antialiased bg-slate-50 flex flex-col overflow-hidden">
-      <Routes>
+      <Suspense fallback={<PageLoader />}><Routes>
         <Route path="/" element={<AdminDashboardPage />} />
         <Route path="*" element={<Navigate to="/admin" replace />} />
-      </Routes>
+      </Routes></Suspense>
       <Toaster position="top-center" />
     </div>
   );
@@ -94,7 +101,7 @@ const CustomerLayout: React.FC = () => {
       <Header />
       
       <main className="flex flex-col flex-1 relative w-full pt-[64px] md:pt-[72px] overflow-x-hidden">
-        <Routes>
+        <Suspense fallback={<PageLoader />}><Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/products" element={<ProductListingPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
@@ -113,7 +120,7 @@ const CustomerLayout: React.FC = () => {
           <Route path="/terms" element={<TermsOfUsePage />} />
           <Route path="/how-to-shop" element={<HowToShopPage />} />
           <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+        </Routes></Suspense>
       </main>
 
       <Footer />
@@ -140,7 +147,7 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <Routes>
+    <Suspense fallback={<PageLoader />}><Routes>
       <Route path="/login" element={<AuthLayout><LoginPage /></AuthLayout>} />
       <Route path="/register" element={<AuthLayout><RegisterPage /></AuthLayout>} />
       <Route path="/forgot-password" element={<AuthLayout><ForgotPasswordPage /></AuthLayout>} />
@@ -155,7 +162,7 @@ const AppContent: React.FC = () => {
         path="/*" 
         element={user?.role === 'ADMIN' ? <Navigate to="/admin" replace /> : <CustomerLayout />} 
       />
-    </Routes>
+    </Routes></Suspense>
   );
 };
 

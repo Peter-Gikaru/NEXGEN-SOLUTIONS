@@ -41,9 +41,9 @@ export const TrustBadges: React.FC = () => {
               {badge.icon}
             </div>
             <div>
-              <h4 className="text-[16px] font-semibold text-[#1a1a2e] font-sans">
+              <h3 className="text-[16px] font-semibold text-[#1a1a2e] font-sans">
                 {badge.title}
-              </h4>
+              </h3>
               <p className="text-[14px] text-text-secondary mt-0.5 leading-snug">
                 {badge.description}
               </p>

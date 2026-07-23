@@ -49,5 +49,8 @@ export default defineConfig({
         changeOrigin: true,
       }
     }
+  },
+  build: {
+    sourcemap: true
   }
 })
